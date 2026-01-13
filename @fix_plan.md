@@ -14,7 +14,7 @@
 ## Phase 3: Web3Auth Integration
 - [x] Task 8: Configure app.json for Web3Auth (Android permissions, plugin)
 - [ ] Task 9: Get Web3Auth credentials (create project, get Client ID)
-- [ ] Task 10: Create Web3Auth context and Solana utilities
+- [x] Task 10: Create Web3Auth context and Solana utilities
 
 ## Phase 4: UI - Login Screen
 - [ ] Task 11: Create LoginScreen component with Google login button
@@ -41,14 +41,16 @@
 ## Completed
 - [x] Project initialization (planning, documentation structure)
 - [x] Expo app initialization (Tasks 5-8)
+- [x] Web3Auth integration setup (Task 10)
 
 ## Notes
 - **BLOCKERS**: Tasks 1-4 require manual Solana CLI commands (see SETUP.md)
 - **BLOCKER**: Task 9 requires user to create Web3Auth project and get Client ID
+- **NOTE**: Task 6 dependencies need to be installed via `npm install` in event-wallet/
 - Token address from Task 4 is CRITICAL - save it immediately
 - All blockchain operations use Devnet only (never mainnet)
 - Custom dev client required - Expo Go is incompatible with crypto libraries
 - Update this file after each completed task
 
 ## Current Focus
-Continue with Task 10: Create Web3Auth context and Solana utilities (can proceed without Task 9).
+Continue with Task 11: Create LoginScreen component with Google login button.
