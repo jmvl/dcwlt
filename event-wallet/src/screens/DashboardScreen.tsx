@@ -6,6 +6,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TOKEN_ADDRESS, SOLANA_DEVNET_RPC } from '../config/constants';
+import { topUpWallet, TopUpResponse } from '../services/api';
 
 type DashboardScreenProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
@@ -14,6 +15,7 @@ export function DashboardScreen() {
   const { walletAddress, logout } = useWeb3Auth();
   const [balance, setBalance] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isToppingUp, setIsToppingUp] = useState(false);
 
   useEffect(() => {
     if (walletAddress) {
@@ -54,11 +56,54 @@ export function DashboardScreen() {
   };
 
   const handleSimulateTopUp = async () => {
-    Alert.alert(
-      'Top-Up Simulation',
-      'Backend API not yet connected (Task 15-16). This will transfer 50 Event Tokens from the bank wallet.',
-      [{ text: 'OK' }]
-    );
+    if (!walletAddress) {
+      Alert.alert('Error', 'Wallet not available. Please login again.');
+      return;
+    }
+
+    if (TOKEN_ADDRESS === 'YOUR_TOKEN_ADDRESS_HERE') {
+      Alert.alert(
+        'Configuration Required',
+        'Token address not configured. Please update src/config/constants.ts with your token address.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setIsToppingUp(true);
+
+    try {
+      const result: TopUpResponse = await topUpWallet(walletAddress, 50);
+
+      if (result.success) {
+        Alert.alert(
+          'Top-Up Successful!',
+          `Sent 50 Event Tokens to your wallet.\n\nSignature: ${result.signature?.slice(0, 8)}...`,
+          [
+            { text: 'View Transaction', onPress: () => {
+                if (result.explorerUrl) {
+                  console.log('Transaction:', result.explorerUrl);
+                }
+              }},
+            { text: 'OK', onPress: () => fetchBalance() }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Top-Up Failed',
+          result.error || 'Failed to transfer tokens. Please check backend connection.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        'Top-Up Error',
+        'Failed to connect to backend. Ensure backend is running on localhost:3000',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsToppingUp(false);
+    }
   };
 
   const handleScanToPay = () => {
@@ -97,9 +142,19 @@ export function DashboardScreen() {
         )}
       </View>
 
-      <TouchableOpacity style={styles.topUpButton} onPress={handleSimulateTopUp}>
-        <Text style={styles.topUpButtonText}>💰 Simulate Top Up</Text>
-        <Text style={styles.topUpButtonSubtext}>Get 50 Event Tokens</Text>
+      <TouchableOpacity
+        style={styles.topUpButton}
+        onPress={handleSimulateTopUp}
+        disabled={isToppingUp}
+      >
+        {isToppingUp ? (
+          <ActivityIndicator size="large" color="#000" />
+        ) : (
+          <>
+            <Text style={styles.topUpButtonText}>💰 Simulate Top Up</Text>
+            <Text style={styles.topUpButtonSubtext}>Get 50 Event Tokens</Text>
+          </>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.scanButton} onPress={handleScanToPay}>
