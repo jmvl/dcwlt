@@ -1,0 +1,182 @@
+# Patches for Tasks 15 and 16 Completion
+
+## 1. Fix Backend Transaction Import (Task 15)
+
+**File**: `backend/src/server.ts`
+**Line**: 4
+
+**Change**:
+```diff
+- import { Connection, Keypair, PublicKey } from '@solana/web3.js';
++ import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+```
+
+---
+
+## 2. Integrate Top-Up API in Dashboard Screen (Task 16)
+
+**File**: `event-wallet/src/screens/DashboardScreen.tsx`
+
+### Step 1: Add API import
+**Line**: 8
+
+**Change**:
+```diff
+  import { TOKEN_ADDRESS, SOLANA_DEVNET_RPC } from '../config/constants';
++ import { topUpWallet, TopUpResponse } from '../services/api';
+```
+
+### Step 2: Add state for top-up loading
+**Line**: 16 (after `isLoading` state)
+
+**Change**:
+```diff
+  const [balance, setBalance] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
++ const [isToppingUp, setIsToppingUp] = useState(false);
+```
+
+### Step 3: Replace handleSimulateTopUp function
+**Lines**: 56-62 (replace entire function)
+
+**Change**:
+```diff
+- const handleSimulateTopUp = async () => {
+-   Alert.alert(
+-     'Top-Up Simulation',
+-     'Backend API not yet connected (Task 15-16). This will transfer 50 Event Tokens from the bank wallet.',
+-     [{ text: 'OK' }]
+-   );
+- };
++ const handleSimulateTopUp = async () => {
++   if (!walletAddress) {
++     Alert.alert('Error', 'Wallet not available. Please login again.');
++     return;
++   }
++
++   if (TOKEN_ADDRESS === 'YOUR_TOKEN_ADDRESS_HERE') {
++     Alert.alert(
++       'Configuration Required',
++       'Token address not configured. Please update src/config/constants.ts with your token address.',
++       [{ text: 'OK' }]
++     );
++     return;
++   }
++
++   setIsToppingUp(true);
++
++   try {
++     const result: TopUpResponse = await topUpWallet(walletAddress, 50);
++
++     if (result.success) {
++       Alert.alert(
++         'Top-Up Successful!',
++         `Sent 50 Event Tokens to your wallet.\n\nSignature: ${result.signature?.slice(0, 8)}...`,
++         [
++           { text: 'View Transaction', onPress: () => {
++               if (result.explorerUrl) {
++                 // Could open in browser here
++                 console.log('Transaction:', result.explorerUrl);
++               }
++             }},
++           { text: 'OK', onPress: () => fetchBalance() }
++         ]
++       );
++     } else {
++       Alert.alert(
++         'Top-Up Failed',
++         result.error || 'Failed to transfer tokens. Please check backend connection.',
++         [{ text: 'OK' }]
++       );
++     }
++   } catch (error) {
++     Alert.alert(
++       'Top-Up Error',
++       'Failed to connect to backend. Ensure backend is running on localhost:3000',
++       [{ text: 'OK' }]
++     );
++   } finally {
++     setIsToppingUp(false);
++   }
++ };
+```
+
+### Step 4: Update top-up button with loading state
+**Lines**: 100-103 (replace button)
+
+**Change**:
+```diff
+- <TouchableOpacity style={styles.topUpButton} onPress={handleSimulateTopUp}>
+-   <Text style={styles.topUpButtonText}>💰 Simulate Top Up</Text>
+-   <Text style={styles.topUpButtonSubtext}>Get 50 Event Tokens</Text>
+- </TouchableOpacity>
++ <TouchableOpacity
++   style={styles.topUpButton}
++   onPress={handleSimulateTopUp}
++   disabled={isToppingUp}
++ >
++   {isToppingUp ? (
++     <ActivityIndicator size="large" color="#000" />
++   ) : (
++     <>
++       <Text style={styles.topUpButtonText}>💰 Simulate Top Up</Text>
++       <Text style={styles.topUpButtonSubtext}>Get 50 Event Tokens</Text>
++     </>
++   )}
++ </TouchableOpacity>
+```
+
+---
+
+## Application Instructions
+
+### For Backend (Task 15):
+1. Edit `backend/src/server.ts` line 4
+2. Add `Transaction` to the import
+3. Run: `cd backend && npm install && npm run dev`
+
+### For Mobile App (Task 16):
+1. Edit `event-wallet/src/screens/DashboardScreen.tsx`
+2. Apply all four changes above
+3. The app will now:
+   - Call `topUpWallet()` API when user taps "Simulate Top Up"
+   - Show loading spinner during transaction
+   - Display success/failure alerts
+   - Refresh balance after successful top-up
+   - Show transaction signature
+
+---
+
+## Testing
+
+After applying patches:
+
+1. **Start Backend**:
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Edit .env with BANK_WALLET_PATH and TOKEN_ADDRESS
+   npm run dev
+   ```
+
+2. **Test Top-Up API**:
+   ```bash
+   curl -X POST http://localhost:3000/api/topup \
+     -H "Content-Type: application/json" \
+     -d '{"walletAddress":"<your_wallet>","amount":50}'
+   ```
+
+3. **Test Mobile App**:
+   - Run app with `npx expo run:android`
+   - Login with Gmail
+   - Tap "Simulate Top Up"
+   - Should show success alert and update balance
+
+---
+
+## Notes
+
+- Backend requires bank wallet with tokens to be configured first
+- Token address must match across all services
+- Backend runs on port 3000, merchant on 3001
+- All transactions use Solana Devnet (no real money)
