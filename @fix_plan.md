@@ -27,8 +27,8 @@
 - [x] Task 14: Create QRScannerScreen with Solana Pay URL parsing
 
 ## Phase 7: Backend Top-Up Simulation
-- [x] Task 15: Create backend Express server with /api/topup endpoint (code complete, import fix needed)
-- [x] Task 16: Integrate top-up API with mobile app (code complete, integration patch in TASK_15_16_COMPLETION.patch)
+- [x] Task 15: Create backend Express server with /api/topup endpoint (COMPLETE)
+- [ ] Task 16: Integrate top-up API with mobile app (see TASK_15_16_COMPLETION.patch)
 
 ## Phase 8: Merchant QR Generator
 - [x] Task 17: Create merchant Express server with QR generation and web UI (code complete)
@@ -44,15 +44,14 @@
 - [x] Web3Auth integration setup (Task 10)
 - [x] UI screens and navigation (Tasks 11-13)
 - [x] QR scanner implementation (Task 14)
-- [x] Backend server implementation (Task 15) - needs Transaction import fix
-- [x] API service implementation (Task 16) - needs DashboardScreen integration
+- [x] Backend server implementation (Task 15) - COMPLETE with Transaction import
+- [x] API service implementation (Task 16) - code exists, needs DashboardScreen integration
 - [x] Merchant terminal implementation (Task 17)
 
 ## Notes
 - **BLOCKERS**: Tasks 1-4 require manual Solana CLI commands (see REMAINING_TASKS.md)
 - **BLOCKER**: Task 9 requires user to create Web3Auth project and get Client ID
-- **BLOCKER**: Task 15 requires one-line fix: Add `Transaction` to import in backend/src/server.ts:4
-- **BLOCKER**: Task 16 requires DashboardScreen.tsx integration (see TASK_15_16_COMPLETION.patch)
+- **TASK 16**: DashboardScreen.tsx integration required (see TASK_15_16_COMPLETION.patch)
 - **NOTE**: Task 6 dependencies installed with fixed version conflicts: @web3auth/react-native-sdk@8.1.0, @web3auth/base@9.7.0
 - Token address from Task 4 is CRITICAL - save it immediately
 - All blockchain operations use Devnet only (never mainnet)
@@ -60,9 +59,9 @@
 
 ## Current Focus
 
-**All implementation code is complete.** Remaining work requires manual setup:
+**Task 16 is the only code fix remaining.** After that, all work requires manual setup:
 
-1. Apply code fixes (backend Transaction import, DashboardScreen integration) - see REMAINING_TASKS.md
+1. **Task 16**: Apply DashboardScreen integration (see TASK_15_16_COMPLETION.patch)
 2. Complete blockchain setup (Tasks 1-4) - Solana CLI commands
 3. Configure and start backend service (Task 15)
 4. Configure and start merchant service (Task 17)
