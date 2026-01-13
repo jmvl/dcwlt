@@ -1,27 +1,52 @@
-# Ralph Fix Plan
+# Ralph Fix Plan - Android Wallet POC
 
-## High Priority
-- [ ] Set up basic project structure and build system
-- [ ] Define core data structures and types
-- [ ] Implement basic input/output handling
-- [ ] Create test framework and initial tests
+## Phase 1: Blockchain Setup (Solana Devnet)
+- [ ] Task 1: Verify prerequisites (Node.js, Solana CLI, Android Studio)
+- [ ] Task 2: Configure Solana for Devnet
+- [ ] Task 3: Create bank wallet and get devnet SOL
+- [ ] Task 4: Create Event Token (save token address to blockchain-notes.md)
 
-## Medium Priority
-- [ ] Add error handling and validation
-- [ ] Implement core business logic
-- [ ] Add configuration management
-- [ ] Create user documentation
+## Phase 2: Expo App Initialization
+- [ ] Task 5: Create Expo project with TypeScript
+- [ ] Task 6: Install dependencies (Solana, Web3Auth, camera, polyfills)
+- [ ] Task 7: Create crypto polyfills file
 
-## Low Priority
-- [ ] Performance optimization
-- [ ] Extended feature set
-- [ ] Integration with external services
-- [ ] Advanced error recovery
+## Phase 3: Web3Auth Integration
+- [ ] Task 8: Configure app.json for Web3Auth (Android permissions, plugin)
+- [ ] Task 9: Get Web3Auth credentials (create project, get Client ID)
+- [ ] Task 10: Create Web3Auth context and Solana utilities
+
+## Phase 4: UI - Login Screen
+- [ ] Task 11: Create LoginScreen component with Google login button
+
+## Phase 5: UI - Wallet Dashboard
+- [ ] Task 12: Create DashboardScreen with balance display and top-up button
+- [ ] Task 13: Create navigation structure (AppNavigator, integrate screens)
+
+## Phase 6: QR Scanner
+- [ ] Task 14: Create QRScannerScreen with Solana Pay URL parsing
+
+## Phase 7: Backend Top-Up Simulation
+- [ ] Task 15: Create backend Express server with /api/topup endpoint
+- [ ] Task 16: Integrate top-up API with mobile app
+
+## Phase 8: Merchant QR Generator
+- [ ] Task 17: Create merchant Express server with QR generation and web UI
+
+## Phase 9: Build, Test & Documentation
+- [ ] Task 18: Build development client and run on Android
+- [ ] Task 19: Test complete flow (login → top-up → payment)
+- [ ] Task 20: Create project README and final documentation
 
 ## Completed
-- [x] Project initialization
+- [x] Project initialization (planning, documentation structure)
 
 ## Notes
-- Focus on MVP functionality first
-- Ensure each feature is properly tested
-- Update this file after each major milestone
+- Focus on POC functionality - this is a proof of concept, not production
+- Token address from Task 4 is CRITICAL - save it immediately
+- All blockchain operations use Devnet only (never mainnet)
+- Custom dev client required - Expo Go is incompatible with crypto libraries
+- Update this file after each completed task
+
+## Current Focus
+Start with Phase 1 (Blockchain Setup) - prerequisites and Solana configuration.
