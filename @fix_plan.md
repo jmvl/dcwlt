@@ -17,11 +17,11 @@
 - [x] Task 10: Create Web3Auth context and Solana utilities
 
 ## Phase 4: UI - Login Screen
-- [ ] Task 11: Create LoginScreen component with Google login button
+- [x] Task 11: Create LoginScreen component with Google login button
 
 ## Phase 5: UI - Wallet Dashboard
-- [ ] Task 12: Create DashboardScreen with balance display and top-up button
-- [ ] Task 13: Create navigation structure (AppNavigator, integrate screens)
+- [x] Task 12: Create DashboardScreen with balance display and top-up button
+- [x] Task 13: Create navigation structure (AppNavigator, integrate screens)
 
 ## Phase 6: QR Scanner
 - [ ] Task 14: Create QRScannerScreen with Solana Pay URL parsing
@@ -42,6 +42,7 @@
 - [x] Project initialization (planning, documentation structure)
 - [x] Expo app initialization (Tasks 5-8)
 - [x] Web3Auth integration setup (Task 10)
+- [x] UI screens and navigation (Tasks 11-13)
 
 ## Notes
 - **BLOCKERS**: Tasks 1-4 require manual Solana CLI commands (see SETUP.md)
@@ -53,4 +54,4 @@
 - Update this file after each completed task
 
 ## Current Focus
-Continue with Task 11: Create LoginScreen component with Google login button.
+Continue with Task 14: Create QRScannerScreen with Solana Pay URL parsing.
