@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useWeb3Auth } from '../contexts/Web3AuthContext';
 import { LoginScreen } from '../screens/LoginScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
+import { QRScannerScreen } from '../screens/QRScannerScreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -17,7 +18,6 @@ export function AppNavigator() {
   const { isLoggedIn, isLoading } = useWeb3Auth();
 
   if (isLoading) {
-    // Web3Auth is initializing, show loading screen
     return null;
   }
 
@@ -33,7 +33,7 @@ export function AppNavigator() {
         ) : (
           <>
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
-            {/* QRScanner will be added in Task 14 */}
+            <Stack.Screen name="QRScanner" component={QRScannerScreen} />
           </>
         )}
       </Stack.Navigator>

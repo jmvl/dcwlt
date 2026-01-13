@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useWeb3Auth } from '../contexts/Web3AuthContext';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TOKEN_ADDRESS, SOLANA_DEVNET_RPC } from '../config/constants';
 
+type DashboardScreenProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
+
 export function DashboardScreen() {
+  const navigation = useNavigation<DashboardScreenProp>();
   const { walletAddress, logout } = useWeb3Auth();
   const [balance, setBalance] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +25,6 @@ export function DashboardScreen() {
     try {
       const connection = new Connection(SOLANA_DEVNET_RPC);
 
-      // TODO: Update TOKEN_ADDRESS from Task 4
       if (TOKEN_ADDRESS === 'YOUR_TOKEN_ADDRESS_HERE') {
         console.warn('Token address not configured. Update src/config/constants.ts');
         setBalance(0);
@@ -29,7 +34,6 @@ export function DashboardScreen() {
 
       const tokenMint = new PublicKey(TOKEN_ADDRESS);
 
-      // Get token accounts for the wallet
       const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
         new PublicKey(walletAddress!),
         { mint: tokenMint }
@@ -38,7 +42,7 @@ export function DashboardScreen() {
       if (tokenAccounts.value.length > 0) {
         const accountData = tokenAccounts.value[0].account.data.parsed;
         const balanceAmount = accountData.info.tokenAmount.amount;
-        setBalance(parseFloat(balanceAmount) / 1e9); // Assuming 9 decimals
+        setBalance(parseFloat(balanceAmount) / 1e9);
       } else {
         setBalance(0);
       }
@@ -50,22 +54,15 @@ export function DashboardScreen() {
   };
 
   const handleSimulateTopUp = async () => {
-    // This will call the backend API (Task 16)
-    // For now, show a placeholder message
     Alert.alert(
       'Top-Up Simulation',
-      'Backend API not yet connected. This will transfer 50 Event Tokens from the bank wallet.',
+      'Backend API not yet connected (Task 15-16). This will transfer 50 Event Tokens from the bank wallet.',
       [{ text: 'OK' }]
     );
   };
 
   const handleScanToPay = () => {
-    // Navigation will be added in Task 13
-    Alert.alert(
-      'QR Scanner',
-      'QR scanner will be implemented in Task 14.',
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('QRScanner' as never);
   };
 
   const formatAddress = (address: string) => {
