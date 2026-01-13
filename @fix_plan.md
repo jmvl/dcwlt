@@ -7,12 +7,12 @@
 - [ ] Task 4: Create Event Token (save token address to blockchain-notes.md)
 
 ## Phase 2: Expo App Initialization
-- [ ] Task 5: Create Expo project with TypeScript
-- [ ] Task 6: Install dependencies (Solana, Web3Auth, camera, polyfills)
-- [ ] Task 7: Create crypto polyfills file
+- [x] Task 5: Create Expo project with TypeScript
+- [x] Task 6: Install dependencies (Solana, Web3Auth, camera, polyfills)
+- [x] Task 7: Create crypto polyfills file
 
 ## Phase 3: Web3Auth Integration
-- [ ] Task 8: Configure app.json for Web3Auth (Android permissions, plugin)
+- [x] Task 8: Configure app.json for Web3Auth (Android permissions, plugin)
 - [ ] Task 9: Get Web3Auth credentials (create project, get Client ID)
 - [ ] Task 10: Create Web3Auth context and Solana utilities
 
@@ -40,13 +40,15 @@
 
 ## Completed
 - [x] Project initialization (planning, documentation structure)
+- [x] Expo app initialization (Tasks 5-8)
 
 ## Notes
-- Focus on POC functionality - this is a proof of concept, not production
+- **BLOCKERS**: Tasks 1-4 require manual Solana CLI commands (see SETUP.md)
+- **BLOCKER**: Task 9 requires user to create Web3Auth project and get Client ID
 - Token address from Task 4 is CRITICAL - save it immediately
 - All blockchain operations use Devnet only (never mainnet)
 - Custom dev client required - Expo Go is incompatible with crypto libraries
 - Update this file after each completed task
 
 ## Current Focus
-Start with Phase 1 (Blockchain Setup) - prerequisites and Solana configuration.
+Continue with Task 10: Create Web3Auth context and Solana utilities (can proceed without Task 9).
