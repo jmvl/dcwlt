@@ -1,0 +1,27 @@
+{
+  "name": "event-wallet-merchant",
+  "version": "1.0.0",
+  "description": "Merchant QR generator for Event Wallet POC",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "watch": "ts-node --watch src/server.ts"
+  },
+  "keywords": ["solana", "event-wallet", "merchant", "qr"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.20",
+    "@types/node": "^20.9.0",
+    "@types/qrcode": "^1.5.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

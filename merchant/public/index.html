@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Wallet - Merchant Terminal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .product-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .product-button {
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .product-button:hover {
+      border-color: #9945FF;
+      background: #f8f5ff;
+      transform: translateY(-2px);
+    }
+
+    .product-button.active {
+      border-color: #9945FF;
+      background: #9945FF;
+      color: white;
+    }
+
+    .product-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .product-price {
+      font-size: 18px;
+      color: #9945FF;
+      font-weight: 600;
+    }
+
+    .product-button.active .product-price {
+      color: white;
+    }
+
+    .qr-container {
+      text-align: center;
+      display: none;
+    }
+
+    .qr-container.show {
+      display: block;
+    }
+
+    .qr-image {
+      margin: 20px auto;
+      border-radius: 10px;
+      border: 3px solid #9945FF;
+      padding: 10px;
+      background: white;
+    }
+
+    .amount-display {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .product-display {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .status {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .reset-button {
+      width: 100%;
+      padding: 15px;
+      background: #f0f0f0;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    .reset-button:hover {
+      background: #e0e0e0;
+    }
+
+    .info-text {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎪 Event Terminal</h1>
+    <p class="subtitle">Select item to generate payment QR code</p>
+
+    <div id="error-container"></div>
+
+    <div class="product-buttons">
+      <div class="product-button" data-amount="5" data-product="🍺 Beer">
+        <div class="product-name">🍺 Beer</div>
+        <div class="product-price">5 EVT</div>
+      </div>
+      <div class="product-button" data-amount="3" data-product="🍕 Pizza Slice">
+        <div class="product-name">🍕 Pizza Slice</div>
+        <div class="product-price">3 EVT</div>
+      </div>
+      <div class="product-button" data-amount="10" data-product="🍔 Burger">
+        <div class="product-name">🍔 Burger</div>
+        <div class="product-price">10 EVT</div>
+      </div>
+      <div class="product-button" data-amount="20" data-product="🎟️ Event Ticket">
+        <div class="product-name">🎟️ Event Ticket</div>
+        <div class="product-price">20 EVT</div>
+      </div>
+    </div>
+
+    <div class="qr-container" id="qrContainer">
+      <div class="amount-display" id="amountDisplay">0 EVT</div>
+      <div class="product-display" id="productDisplay"></div>
+      <div id="qrWrapper">
+        <div class="loading">Loading QR code...</div>
+      </div>
+      <p class="status">Scan with Event Wallet app to pay</p>
+    </div>
+
+    <button class="reset-button" id="resetButton" style="display: none;">New Transaction</button>
+
+    <p class="info-text">
+      Powered by Solana Pay • Devnet only • No real value
+    </p>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll('.product-button');
+    const qrContainer = document.getElementById('qrContainer');
+    const qrWrapper = document.getElementById('qrWrapper');
+    const amountDisplay = document.getElementById('amountDisplay');
+    const productDisplay = document.getElementById('productDisplay');
+    const resetButton = document.getElementById('resetButton');
+    const errorContainer = document.getElementById('error-container');
+    const productsContainer = document.querySelector('.product-buttons');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const amount = button.dataset.amount;
+        const productName = button.dataset.product;
+
+        // Clear previous errors
+        errorContainer.innerHTML = '';
+
+        // Update UI
+        buttons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+
+        // Show QR container with loading
+        qrContainer.classList.add('show');
+        qrWrapper.innerHTML = '<div class="loading">Generating QR code...</div>';
+        amountDisplay.textContent = `${amount} EVT`;
+        productDisplay.textContent = productName;
+
+        try {
+          const response = await fetch(`/api/qr/${amount}`);
+          const data = await response.json();
+
+          if (data.success && data.qrCode) {
+            // Display QR code
+            qrWrapper.innerHTML = `<img src="${data.qrCode}" class="qr-image" alt="Payment QR Code" width="250" height="250">`;
+            resetButton.style.display = 'block';
+
+            // Hide product buttons
+            productsContainer.style.display = 'none';
+          } else {
+            throw new Error(data.error || 'Failed to generate QR code');
+          }
+        } catch (error) {
+          console.error('Error generating QR:', error);
+          errorContainer.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+          qrContainer.classList.remove('show');
+        }
+      });
+    });
+
+    resetButton.addEventListener('click', () => {
+      // Reset UI
+      qrContainer.classList.remove('show');
+      resetButton.style.display = 'none';
+      productsContainer.style.display = 'grid';
+      buttons.forEach(b => b.classList.remove('active'));
+      errorContainer.innerHTML = '';
+    });
+  </script>
+</body>
+</html>
