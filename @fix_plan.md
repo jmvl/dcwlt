@@ -24,7 +24,7 @@
 - [x] Task 13: Create navigation structure (AppNavigator, integrate screens)
 
 ## Phase 6: QR Scanner
-- [ ] Task 14: Create QRScannerScreen with Solana Pay URL parsing
+- [x] Task 14: Create QRScannerScreen with Solana Pay URL parsing
 
 ## Phase 7: Backend Top-Up Simulation
 - [ ] Task 15: Create backend Express server with /api/topup endpoint
@@ -43,15 +43,16 @@
 - [x] Expo app initialization (Tasks 5-8)
 - [x] Web3Auth integration setup (Task 10)
 - [x] UI screens and navigation (Tasks 11-13)
+- [x] QR scanner implementation (Task 14)
 
 ## Notes
 - **BLOCKERS**: Tasks 1-4 require manual Solana CLI commands (see SETUP.md)
 - **BLOCKER**: Task 9 requires user to create Web3Auth project and get Client ID
-- **NOTE**: Task 6 dependencies need to be installed via `npm install` in event-wallet/
+- **NOTE**: Task 6 dependencies installed with fixed version conflicts: @web3auth/react-native-sdk@8.1.0, @web3auth/base@9.7.0
 - Token address from Task 4 is CRITICAL - save it immediately
 - All blockchain operations use Devnet only (never mainnet)
 - Custom dev client required - Expo Go is incompatible with crypto libraries
 - Update this file after each completed task
 
 ## Current Focus
-Continue with Task 14: Create QRScannerScreen with Solana Pay URL parsing.
+Continue with Task 15: Create backend Express server with /api/topup endpoint.
