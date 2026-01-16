@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** Frictionless payments at scale
-**Current focus:** Phase 2 Auth + Wallet - Plan 2 of 4
+**Current focus:** Phase 2 Auth + Wallet - Plan 3 of 4
 
 ## Current Position
 
 Phase: 2 of 4 (Auth and Wallet Core UI)
-Plan: 02 of 4 (Convex Backend Setup)
+Plan: 03 of 4 (Privy to Convex Auth Integration)
 Status: In progress, ready for next plan
-Last activity: 2026-01-16 — Completed Plan 2-02
+Last activity: 2026-01-16 — Completed Plan 2-03
 
-Progress: █████░░░░░░ 38%
+Progress: ██████░░░░ 46%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 13.4 min
-- Total execution time: 1.12 hours
+- Total plans completed: 6
+- Average duration: 11.5 min
+- Total execution time: 1.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
-| 2-auth-wallet-core-ui | 2 | 4 | 14.5 min |
+| 2-auth-wallet-core-ui | 3 | 6 | 11.3 min |
 
 **Recent Trend:**
-- Last 3 plans: 2.65 min (1-03), 17 min (2-01), 0 min (2-02 - already complete)
-- Trend: Stable
+- Last 3 plans: 17 min (2-01), 0 min (2-02 - already complete), 1 min (2-03)
+- Trend: Accelerating (Convex infrastructure streamlined remaining work)
 
 ## Accumulated Context
 
@@ -73,6 +73,12 @@ Recent decisions affecting current work:
 21. Auto-create wallet with zero balance - ensures wallet record exists on user creation
 22. Index on walletAddress in both tables - primary lookup pattern for all operations
 
+**From Plan 2-03:**
+23. Auth bridge via useEffect - usePrivyAuth hook listens to Privy auth state and triggers Convex user creation
+24. Idempotent user creation - createFromPrivy checks for existing user before inserting, preventing duplicates
+25. Nested providers: PrivyAuthProvider (outer) -> ConvexClientProvider (inner) - maintains SSR-safe pattern
+26. Auto-user creation on login - no separate registration step, user records created automatically on first auth
+
 ### Pending Todos
 
 None yet.
@@ -92,5 +98,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed Plan 2-02 (Convex Backend Setup) - Phase 2, Plan 2 of 4
+Stopped at: Completed Plan 2-03 (Privy to Convex Auth Integration) - Phase 2, Plan 3 of 4
 Resume file: None
