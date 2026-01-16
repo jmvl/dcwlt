@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 2 of 4 (Auth and Wallet Core UI)
-Plan: 03 of 4 (Privy to Convex Auth Integration)
-Status: In progress, ready for next plan
-Last activity: 2026-01-16 — Completed Plan 2-03
+Plan: 04 of 4 (Real-Time Balance Display)
+Status: Phase 2 complete
+Last activity: 2026-01-16 — Completed Plan 2-04
 
-Progress: ██████░░░░ 46%
+Progress: ████████░░ 62%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 11.5 min
-- Total execution time: 1.13 hours
+- Total plans completed: 7
+- Average duration: 11.9 min
+- Total execution time: 1.39 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
-| 2-auth-wallet-core-ui | 3 | 6 | 11.3 min |
+| 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 17 min (2-01), 0 min (2-02 - already complete), 1 min (2-03)
-- Trend: Accelerating (Convex infrastructure streamlined remaining work)
+- Last 3 plans: 17 min (2-01), 0 min (2-02 - already complete), 1 min (2-03), 17 min (2-04)
+- Trend: Steady pace, SSR build fixes added time to 2-04
 
 ## Accumulated Context
 
@@ -79,6 +79,12 @@ Recent decisions affecting current work:
 25. Nested providers: PrivyAuthProvider (outer) -> ConvexClientProvider (inner) - maintains SSR-safe pattern
 26. Auto-user creation on login - no separate registration step, user records created automatically on first auth
 
+**From Plan 2-04:**
+27. SSR-safe Convex provider with dummy client - provides dummy ConvexReactClient during build, real client in browser
+28. Stub function references with string identifiers - enables Convex functions to be referenced during build without real types
+29. force-dynamic export on real-time pages - prevents SSR pre-rendering issues with Convex hooks
+30. Module index re-exports - created convex/_generated/index.ts for cleaner imports and better module resolution
+
 ### Pending Todos
 
 None yet.
@@ -95,8 +101,10 @@ None yet.
 
 **Production QR code:** Current QR code points to local network URL (192.168.1.172:3000). Must regenerate with production domain before deployment.
 
+**Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing.
+
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed Plan 2-03 (Privy to Convex Auth Integration) - Phase 2, Plan 3 of 4
+Stopped at: Completed Plan 2-04 (Real-Time Balance Display) - Phase 2 complete
 Resume file: None
