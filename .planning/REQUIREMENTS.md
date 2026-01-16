@@ -138,15 +138,15 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PWA-01 | Phase 1 | Pending |
-| PWA-02 | Phase 1 | Pending |
-| PWA-03 | Phase 1 | Pending |
-| PWA-04 | Phase 1 | Pending |
-| PWA-05 | Phase 1 | Pending |
-| PWA-06 | Phase 1 | Pending |
-| PWA-07 | Phase 1 | Pending |
-| PWA-08 | Phase 1 | Pending |
-| PWA-09 | Phase 1 | Pending |
+| PWA-01 | Phase 1 | Complete |
+| PWA-02 | Phase 1 | Complete |
+| PWA-03 | Phase 1 | Complete |
+| PWA-04 | Phase 1 | Complete |
+| PWA-05 | Phase 1 | Complete |
+| PWA-06 | Phase 1 | Complete |
+| PWA-07 | Phase 1 | Complete |
+| PWA-08 | Phase 1 | Complete |
+| PWA-09 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
