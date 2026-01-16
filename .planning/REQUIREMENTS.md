@@ -138,58 +138,58 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PWA-01 | Phase TBD | Pending |
-| PWA-02 | Phase TBD | Pending |
-| PWA-03 | Phase TBD | Pending |
-| PWA-04 | Phase TBD | Pending |
-| PWA-05 | Phase TBD | Pending |
-| PWA-06 | Phase TBD | Pending |
-| PWA-07 | Phase TBD | Pending |
-| PWA-08 | Phase TBD | Pending |
-| PWA-09 | Phase TBD | Pending |
-| AUTH-01 | Phase TBD | Pending |
-| AUTH-02 | Phase TBD | Pending |
-| AUTH-03 | Phase TBD | Pending |
-| AUTH-04 | Phase TBD | Pending |
-| AUTH-05 | Phase TBD | Pending |
-| AUTH-06 | Phase TBD | Pending |
-| AUTH-07 | Phase TBD | Pending |
-| BAL-01 | Phase TBD | Pending |
-| BAL-02 | Phase TBD | Pending |
-| BAL-03 | Phase TBD | Pending |
-| BAL-04 | Phase TBD | Pending |
-| BAL-05 | Phase TBD | Pending |
-| BAL-06 | Phase TBD | Pending |
-| BAL-07 | Phase TBD | Pending |
-| BAL-08 | Phase TBD | Pending |
-| TOP-01 | Phase TBD | Pending |
-| TOP-02 | Phase TBD | Pending |
-| TOP-03 | Phase TBD | Pending |
-| TOP-04 | Phase TBD | Pending |
-| TOP-05 | Phase TBD | Pending |
-| PAY-01 | Phase TBD | Pending |
-| PAY-02 | Phase TBD | Pending |
-| PAY-03 | Phase TBD | Pending |
-| PAY-04 | Phase TBD | Pending |
-| PAY-05 | Phase TBD | Pending |
-| PAY-06 | Phase TBD | Pending |
-| PAY-07 | Phase TBD | Pending |
-| HIST-01 | Phase TBD | Pending |
-| HIST-02 | Phase TBD | Pending |
-| HIST-03 | Phase TBD | Pending |
-| HIST-04 | Phase TBD | Pending |
-| HIST-05 | Phase TBD | Pending |
-| HIST-06 | Phase TBD | Pending |
-| OFF-01 | Phase TBD | Pending |
-| OFF-02 | Phase TBD | Pending |
-| OFF-03 | Phase TBD | Pending |
-| OFF-04 | Phase TBD | Pending |
-| OFF-05 | Phase TBD | Pending |
-| OFF-06 | Phase TBD | Pending |
+| PWA-01 | Phase 1 | Pending |
+| PWA-02 | Phase 1 | Pending |
+| PWA-03 | Phase 1 | Pending |
+| PWA-04 | Phase 1 | Pending |
+| PWA-05 | Phase 1 | Pending |
+| PWA-06 | Phase 1 | Pending |
+| PWA-07 | Phase 1 | Pending |
+| PWA-08 | Phase 1 | Pending |
+| PWA-09 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Pending |
+| AUTH-07 | Phase 2 | Pending |
+| BAL-01 | Phase 3 | Pending |
+| BAL-02 | Phase 3 | Pending |
+| BAL-03 | Phase 3 | Pending |
+| BAL-04 | Phase 3 | Pending |
+| BAL-05 | Phase 3 | Pending |
+| BAL-06 | Phase 3 | Pending |
+| BAL-07 | Phase 3 | Pending |
+| BAL-08 | Phase 3 | Pending |
+| TOP-01 | Phase 3 | Pending |
+| TOP-02 | Phase 3 | Pending |
+| TOP-03 | Phase 3 | Pending |
+| TOP-04 | Phase 3 | Pending |
+| TOP-05 | Phase 3 | Pending |
+| PAY-01 | Phase 4 | Pending |
+| PAY-02 | Phase 4 | Pending |
+| PAY-03 | Phase 4 | Pending |
+| PAY-04 | Phase 4 | Pending |
+| PAY-05 | Phase 4 | Pending |
+| PAY-06 | Phase 4 | Pending |
+| PAY-07 | Phase 4 | Pending |
+| HIST-01 | Phase 4 | Pending |
+| HIST-02 | Phase 4 | Pending |
+| HIST-03 | Phase 4 | Pending |
+| HIST-04 | Phase 4 | Pending |
+| HIST-05 | Phase 4 | Pending |
+| HIST-06 | Phase 4 | Pending |
+| OFF-01 | Phase 5 | Pending |
+| OFF-02 | Phase 5 | Pending |
+| OFF-03 | Phase 5 | Pending |
+| OFF-04 | Phase 5 | Pending |
+| OFF-05 | Phase 5 | Pending |
+| OFF-06 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 43 total
-- Mapped to phases: TBD (run /gsd:create-roadmap)
+- v1 requirements: 48 total
+- Mapped to phases: 48
 - Unmapped: 0 ✓
 
 ---
