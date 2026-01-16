@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && serwist inject-manifest serwist.config.js",
     "start": "next start",
     "lint": "eslint"
   },
@@ -16,6 +16,7 @@
     "serwist": "^9.5.0"
   },
   "devDependencies": {
+    "@serwist/cli": "^9.5.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
