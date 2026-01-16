@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** Frictionless payments at scale
-**Current focus:** Phase 1 — PWA Foundation
+**Current focus:** Phase 1 Complete → Ready for Phase 2 (Auth + Wallet)
 
 ## Current Position
 
 Phase: 1 of 4 (PWA Foundation)
-Plan: 02 of 3 (Serwist Service Worker)
-Status: Plan complete, starting next plan
-Last activity: 2026-01-16 — Completed Plan 1-02
+Plan: 03 of 3 (Install Prompt)
+Status: Phase complete, ready for Phase 2
+Last activity: 2026-01-16 — Completed Plan 1-03
 
-Progress: ███░░░░░░░░ 67%
+Progress: █████░░░░░░ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 15.5 min
-- Total execution time: 0.52 hours
+- Total plans completed: 3
+- Average duration: 11.5 min
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1-pwa-foundation | 2 | 3 | 15.5 min |
+| 1-pwa-foundation | 3 | 3 | 11.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 8 min (1-01), 23 min (1-02)
-- Trend: — (insufficient data)
+- Last 3 plans: 8 min (1-01), 23 min (1-02), 2.65 min (1-03)
+- Trend: Improving (task familiarity)
 
 ## Accumulated Context
 
@@ -54,6 +54,12 @@ Recent decisions affecting current work:
 9. CLI-based SW generation - bypassed Turbopack compatibility issue with @serwist/next plugin
 10. Cache strategies: CacheFirst for Google Fonts, StaleWhileRevalidate for static assets, NetworkFirst for API calls
 
+**From Plan 1-03:**
+11. localStorage for visit tracking - prompts on 2nd visit (not aggressive)
+12. Separate iOS component - Safari doesn't support beforeinstallprompt
+13. Bottom banner placement - non-intrusive but visible
+14. QR code uses local network IP for testing - update for production
+
 ### Pending Todos
 
 None yet.
@@ -62,10 +68,12 @@ None yet.
 
 **Turbopack incompatibility:** @serwist/next plugin doesn't work with Turbopack in development mode. Service worker only generated in production builds. May need to revisit if SW debugging becomes difficult.
 
-**Registration verification:** Service worker registration added to layout but not yet tested in browser. Should verify SW activates correctly in Chrome DevTools.
+**Install prompt not yet tested:** Install prompt components created but not verified in browser. Should test on both Chrome/Edge (native prompt) and iOS Safari (manual instructions) before Phase 2.
+
+**Production QR code:** Current QR code points to local network URL (192.168.1.172:3000). Must regenerate with production domain before deployment.
 
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed Plan 1-02 (Serwist Service Worker)
+Stopped at: Completed Plan 1-03 (Install Prompt) - Phase 1 Complete
 Resume file: None
