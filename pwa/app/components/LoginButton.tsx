@@ -1,9 +1,9 @@
 'use client';
 
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivyAuth } from '../hooks/usePrivyAuth';
 
 export function LoginButton() {
-  const { ready, authenticated, login, user } = usePrivy();
+  const { ready, authenticated, user, login } = usePrivyAuth();
 
   // Show loading state while Privy initializes
   if (!ready) {

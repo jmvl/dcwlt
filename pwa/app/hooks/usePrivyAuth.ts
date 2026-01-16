@@ -6,7 +6,7 @@ import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated';
 
 export function usePrivyAuth() {
-  const { ready, authenticated, user } = usePrivy();
+  const { ready, authenticated, user, login } = usePrivy();
   const createUser = useMutation(api.users.createFromPrivy);
 
   useEffect(() => {
@@ -24,5 +24,5 @@ export function usePrivyAuth() {
     }
   }, [ready, authenticated, user, createUser]);
 
-  return { ready, authenticated, user };
+  return { ready, authenticated, user, login };
 }
