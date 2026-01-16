@@ -21,24 +21,24 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & Wallet
 
-- [ ] **AUTH-01**: User sees "Continue with Google" or "Sign in with Apple" button
-- [ ] **AUTH-02**: Embedded wallet provider (Privy) generates keypair silently from OAuth
-- [ ] **AUTH-03**: No seed phrase display or management (social auth only)
-- [ ] **AUTH-04**: Wallet address displayed immediately after login
-- [ ] **AUTH-05**: Email verification available for account recovery
-- [ ] **AUTH-06**: Private key stored in device secure enclave (not plaintext)
-- [ ] **AUTH-07**: Loading spinner shown during wallet generation (2-3 seconds)
+- [x] **AUTH-01**: User sees "Continue with Google" or "Sign in with Apple" button
+- [x] **AUTH-02**: Embedded wallet provider (Privy) generates keypair silently from OAuth
+- [x] **AUTH-03**: No seed phrase display or management (social auth only)
+- [x] **AUTH-04**: Wallet address displayed immediately after login
+- [x] **AUTH-05**: Email verification available for account recovery
+- [x] **AUTH-06**: Private key stored in device secure enclave (not plaintext)
+- [x] **AUTH-07**: Loading spinner shown during wallet generation (2-3 seconds)
 
 ### Real-Time Balance Display
 
-- [ ] **BAL-01**: Large, centered balance display on dashboard (primary UI element)
-- [ ] **BAL-02**: Balance updates via WebSocket/subscription (no polling)
-- [ ] **BAL-03**: Fiat currency equivalent shown alongside token amount
-- [ ] **BAL-04**: Balance masking toggle (show/hide for privacy)
-- [ ] **BAL-05**: Loading state shown during initial balance fetch
-- [ ] **BAL-06**: Error state displayed if RPC unavailable
-- [ ] **BAL-07**: Last updated timestamp shown
-- [ ] **BAL-08**: Refresh button available for manual update
+- [x] **BAL-01**: Large, centered balance display on dashboard (primary UI element)
+- [x] **BAL-02**: Balance updates via WebSocket/subscription (no polling)
+- [x] **BAL-03**: Fiat currency equivalent shown alongside token amount
+- [x] **BAL-04**: Balance masking toggle (show/hide for privacy)
+- [x] **BAL-05**: Loading state shown during initial balance fetch
+- [x] **BAL-06**: Error state displayed if RPC unavailable
+- [x] **BAL-07**: Last updated timestamp shown
+- [x] **BAL-08**: Refresh button available for manual update
 
 ### Top-Up Flow
 
@@ -147,21 +147,21 @@ Which phases cover which requirements. Updated by create-roadmap.
 | PWA-07 | Phase 1 | Complete |
 | PWA-08 | Phase 1 | Complete |
 | PWA-09 | Phase 1 | Complete |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| AUTH-06 | Phase 2 | Pending |
-| AUTH-07 | Phase 2 | Pending |
-| BAL-01 | Phase 2 | Pending |
-| BAL-02 | Phase 2 | Pending |
-| BAL-03 | Phase 2 | Pending |
-| BAL-04 | Phase 2 | Pending |
-| BAL-05 | Phase 2 | Pending |
-| BAL-06 | Phase 2 | Pending |
-| BAL-07 | Phase 2 | Pending |
-| BAL-08 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
+| AUTH-03 | Phase 2 | Complete |
+| AUTH-04 | Phase 2 | Complete |
+| AUTH-05 | Phase 2 | Complete |
+| AUTH-06 | Phase 2 | Complete |
+| AUTH-07 | Phase 2 | Complete |
+| BAL-01 | Phase 2 | Complete |
+| BAL-02 | Phase 2 | Complete |
+| BAL-03 | Phase 2 | Complete |
+| BAL-04 | Phase 2 | Complete |
+| BAL-05 | Phase 2 | Complete |
+| BAL-06 | Phase 2 | Complete |
+| BAL-07 | Phase 2 | Complete |
+| BAL-08 | Phase 2 | Complete |
 | TOP-01 | Phase 3 | Pending |
 | TOP-02 | Phase 3 | Pending |
 | TOP-03 | Phase 3 | Pending |

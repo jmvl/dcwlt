@@ -12,8 +12,8 @@ A Progressive Web App (PWA) for live event payments using Next.js 16, Convex, Pr
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: PWA Foundation** - Installable PWA with service worker caching
-- [ ] **Phase 2: Auth + Wallet + Core UI** - Social login, embedded wallet, real-time balance display
+- [x] **Phase 1: PWA Foundation** - Installable PWA with service worker caching
+- [x] **Phase 2: Auth + Wallet + Core UI** - Social login, embedded wallet, real-time balance display
 - [ ] **Phase 3: Top-Up + Payments** - Mock top-up flow, QR scanning, payment execution
 - [ ] **Phase 4: History + Offline** - Transaction history, offline support
 
@@ -50,10 +50,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Privy integration with social auth providers
-- [ ] 02-02: Convex setup with wallet schema
-- [ ] 02-03: Balance display component with real-time subscriptions
-- [ ] 02-04: Dashboard layout with Shadcn/UI
+- [x] 02-01: Privy integration with social auth providers
+- [x] 02-02: Convex setup with wallet schema
+- [x] 02-03: Balance display component with real-time subscriptions
+- [x] 02-04: Dashboard layout with Shadcn/UI
 
 ### Phase 3: Top-Up + Payments
 **Goal**: Mock top-up flow and QR code payment execution
@@ -97,7 +97,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. PWA Foundation | 0/3 | Not started | - |
-| 2. Auth + Wallet + Core UI | 0/4 | Not started | - |
+| 1. PWA Foundation | 3/3 | Complete | 2026-01-16 |
+| 2. Auth + Wallet + Core UI | 4/4 | Complete | 2026-01-16 |
 | 3. Top-Up + Payments | 0/4 | Not started | - |
 | 4. History + Offline | 0/3 | Not started | - |
