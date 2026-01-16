@@ -17,8 +17,9 @@ export function LoginButton() {
 
   // Show wallet address when authenticated
   if (authenticated && user) {
-    const solanaWallet = user.wallets.find((wallet) => wallet.chainType === 'solana');
-    const walletAddress = solanaWallet?.address || 'No wallet found';
+    // Get the embedded wallet (Solana)
+    const wallet = user.wallet;
+    const walletAddress = wallet?.address || 'No wallet found';
 
     // Truncate address: first 7 chars ... last 7 chars
     const truncatedAddress =
@@ -53,7 +54,7 @@ export function LoginButton() {
   return (
     <div className="flex flex-col items-center gap-3 w-full max-w-xs">
       <button
-        onClick={() => login('google')}
+        onClick={() => login({ provider: 'google' })}
         className="w-full bg-white hover:bg-gray-50 text-gray-900 font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-300"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -78,7 +79,7 @@ export function LoginButton() {
       </button>
 
       <button
-        onClick={() => login('apple')}
+        onClick={() => login({ provider: 'apple' })}
         className="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-800"
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
