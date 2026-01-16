@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Manrope } from 'next/font/google';
 import { PrivyAuthProvider } from './components/PrivyProvider';
+import { ConvexClientProvider } from './components/ConvexProvider';
 import ServiceWorkerRegister from './components/ServiceWorkerRegister';
 
 const manrope = Manrope({ subsets: ['latin'] });
@@ -36,8 +37,10 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={manrope.className}>
         <PrivyAuthProvider>
-          <ServiceWorkerRegister />
-          {children}
+          <ConvexClientProvider>
+            <ServiceWorkerRegister />
+            {children}
+          </ConvexClientProvider>
         </PrivyAuthProvider>
       </body>
     </html>
