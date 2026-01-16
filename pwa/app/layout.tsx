@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Manrope } from 'next/font/google';
+import ServiceWorkerRegister from './components/ServiceWorkerRegister';
 
 const manrope = Manrope({ subsets: ['latin'] });
 
@@ -32,7 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={manrope.className}>{children}</body>
+      <body className={manrope.className}>
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
