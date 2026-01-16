@@ -58,3 +58,38 @@ export const getUser = query({
     return user;
   },
 });
+
+// Create user from Privy authentication (called after login)
+export const createFromPrivy = mutation({
+  args: {
+    walletAddress: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (existing) {
+      return existing;
+    }
+
+    const now = Date.now();
+    const userId = await ctx.db.insert("users", {
+      walletAddress: args.walletAddress,
+      oauthProvider: "privy",
+      createdAt: now,
+      lastActiveAt: now,
+    });
+
+    // Initialize wallet with zero balance
+    await ctx.db.insert("wallets", {
+      userId,
+      walletAddress: args.walletAddress,
+      tokenBalance: 0,
+      updatedAt: now,
+    });
+
+    return await ctx.db.get(userId);
+  },
+});
