@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** Frictionless payments at scale
-**Current focus:** Phase 1 Complete → Ready for Phase 2 (Auth + Wallet)
+**Current focus:** Phase 2 Auth + Wallet - Plan 1 of 4
 
 ## Current Position
 
-Phase: 1 of 4 (PWA Foundation)
-Plan: 03 of 3 (Install Prompt)
-Status: Phase complete, ready for Phase 2
-Last activity: 2026-01-16 — Completed Plan 1-03
+Phase: 2 of 4 (Auth and Wallet Core UI)
+Plan: 01 of 4 (Privy Social Auth)
+Status: In progress, ready for next plan
+Last activity: 2026-01-16 — Completed Plan 2-01
 
-Progress: █████░░░░░░ 100%
+Progress: ████░░░░░░░ 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 11.5 min
-- Total execution time: 0.57 hours
+- Total plans completed: 4
+- Average duration: 12.75 min
+- Total execution time: 0.85 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
+| 2-auth-wallet-core-ui | 1 | 4 | 17 min |
 
 **Recent Trend:**
-- Last 3 plans: 8 min (1-01), 23 min (1-02), 2.65 min (1-03)
-- Trend: Improving (task familiarity)
+- Last 3 plans: 23 min (1-02), 2.65 min (1-03), 17 min (2-01)
+- Trend: Stable
 
 ## Accumulated Context
 
@@ -60,20 +61,30 @@ Recent decisions affecting current work:
 13. Bottom banner placement - non-intrusive but visible
 14. QR code uses local network IP for testing - update for production
 
+**From Plan 2-01:**
+15. Modal-based Privy auth - single login button shows Google/Apple in Privy UI (cleaner UX)
+16. SSR-safe PrivyProvider - useState + useEffect pattern for client-side only initialization
+17. Embedded Solana wallet auto-creation on login - users-without-wallets setting
+18. Convex stub types with any annotations - enables build without full Convex dev setup
+
 ### Pending Todos
 
 None yet.
 
 ### Blockers/Concerns
 
+**Privy app ID required:** Need to create Privy app and configure NEXT_PUBLIC_PRIVY_APP_ID before testing OAuth flow. See .planning/phases/2-auth-wallet-core-ui/2-01-SUMMARY.md for setup instructions.
+
+**Convex any types:** Current Convex handlers use explicit `any` types for ctx/args parameters. Should regenerate proper types with `npx convex dev` when project is fully configured.
+
 **Turbopack incompatibility:** @serwist/next plugin doesn't work with Turbopack in development mode. Service worker only generated in production builds. May need to revisit if SW debugging becomes difficult.
 
-**Install prompt not yet tested:** Install prompt components created but not verified in browser. Should test on both Chrome/Edge (native prompt) and iOS Safari (manual instructions) before Phase 2.
+**Install prompt not yet tested:** Install prompt components created but not verified in browser. Should test on both Chrome/Edge (native prompt) and iOS Safari (manual instructions).
 
 **Production QR code:** Current QR code points to local network URL (192.168.1.172:3000). Must regenerate with production domain before deployment.
 
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed Plan 1-03 (Install Prompt) - Phase 1 Complete
+Stopped at: Completed Plan 2-01 (Privy Social Auth) - Phase 2, Plan 1 of 4
 Resume file: None
