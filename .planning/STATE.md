@@ -4,15 +4,15 @@
 
 See: .planning/PROJECT.md (updated 2026-01-16)
 
-**Core value:** Frictionless payments at scale — attendees spend tokens instantly (<200ms UI feedback) even when cellular networks are saturated, while maintaining blockchain security for settlement.
-**Current focus:** Phase 1 — Foundation & PWA Installation
+**Core value:** Frictionless payments at scale
+**Current focus:** Phase 1 — PWA Foundation
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation & PWA Installation)
+Phase: 1 of 4 (PWA Foundation)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-01-16 — Project initialized with roadmap
+Last activity: 2026-01-16 — Project initialized
 
 Progress: ░░░░░░░░░░ 0%
 
@@ -53,5 +53,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Roadmap created with 5 phases covering 48 requirements
+Stopped at: Project initialization complete
 Resume file: None
