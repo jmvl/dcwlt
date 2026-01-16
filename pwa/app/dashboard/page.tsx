@@ -1,6 +1,8 @@
-import { BalanceDisplay } from '../../components/BalanceDisplay';
-import { LoginButton } from '../../components/LoginButton';
-import { usePrivyAuth } from '../../hooks/usePrivyAuth';
+'use client';
+
+import { BalanceDisplay } from '../components/BalanceDisplay';
+import { LoginButton } from '../components/LoginButton';
+import { usePrivyAuth } from '../hooks/usePrivyAuth';
 
 export default function DashboardPage() {
   const { authenticated } = usePrivyAuth();
@@ -31,3 +33,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+// Prevent static generation and SSR for this page
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';

@@ -22,4 +22,14 @@ import type { FunctionReference } from "convex/server";
  *
  * This file is a stub - run `npx convex dev` to generate the real types.
  */
-export const api = {} as any;
+
+// Stub structure for build compatibility
+// Use string identifiers for function references
+export const api = {
+  users: {
+    createFromPrivy: 'users:createFromPrivy' as any,
+  },
+  wallets: {
+    getBalance: 'wallets:getBalance' as any,
+  },
+} as any;

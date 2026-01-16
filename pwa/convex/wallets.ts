@@ -57,10 +57,10 @@ export const setMockBalance = mutation({
     walletAddress: v.string(),
     tokenBalance: v.number(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     const wallet = await ctx.db
       .query("wallets")
-      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .withIndex("by_wallet", (q: any) => q.eq("walletAddress", args.walletAddress))
       .first();
 
     if (!wallet) {
