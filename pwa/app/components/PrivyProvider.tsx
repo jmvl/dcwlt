@@ -1,13 +1,24 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 export function PrivyAuthProvider({ children }: { children: ReactNode }) {
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';
+
+  if (!isClient) {
+    // Skip PrivyProvider during SSR
+    return <>{children}</>;
+  }
 
   if (!appId) {
-    throw new Error('Missing NEXT_PUBLIC_PRIVY_APP_ID environment variable');
+    console.warn('NEXT_PUBLIC_PRIVY_APP_ID not set - Privy auth will not work');
   }
 
   return (
