@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** Frictionless payments at scale
-**Current focus:** Phase 2 Auth + Wallet - Plan 1 of 4
+**Current focus:** Phase 2 Auth + Wallet - Plan 2 of 4
 
 ## Current Position
 
 Phase: 2 of 4 (Auth and Wallet Core UI)
-Plan: 01 of 4 (Privy Social Auth)
+Plan: 02 of 4 (Convex Backend Setup)
 Status: In progress, ready for next plan
-Last activity: 2026-01-16 — Completed Plan 2-01
+Last activity: 2026-01-16 — Completed Plan 2-02
 
-Progress: ████░░░░░░░ 25%
+Progress: █████░░░░░░ 38%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 12.75 min
-- Total execution time: 0.85 hours
+- Total plans completed: 5
+- Average duration: 13.4 min
+- Total execution time: 1.12 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
-| 2-auth-wallet-core-ui | 1 | 4 | 17 min |
+| 2-auth-wallet-core-ui | 2 | 4 | 14.5 min |
 
 **Recent Trend:**
-- Last 3 plans: 23 min (1-02), 2.65 min (1-03), 17 min (2-01)
+- Last 3 plans: 2.65 min (1-03), 17 min (2-01), 0 min (2-02 - already complete)
 - Trend: Stable
 
 ## Accumulated Context
@@ -65,7 +65,13 @@ Recent decisions affecting current work:
 15. Modal-based Privy auth - single login button shows Google/Apple in Privy UI (cleaner UX)
 16. SSR-safe PrivyProvider - useState + useEffect pattern for client-side only initialization
 17. Embedded Solana wallet auto-creation on login - users-without-wallets setting
-18. Convex stub types with any annotations - enables build without full Convex dev setup
+
+**From Plan 2-02:**
+18. Convex stub types with any annotations - enables build without deployment configuration
+19. Denormalized walletAddress in wallets table - avoids join for balance queries
+20. Separate users/wallets tables - user profile independent from balance data
+21. Auto-create wallet with zero balance - ensures wallet record exists on user creation
+22. Index on walletAddress in both tables - primary lookup pattern for all operations
 
 ### Pending Todos
 
@@ -75,7 +81,7 @@ None yet.
 
 **Privy app ID required:** Need to create Privy app and configure NEXT_PUBLIC_PRIVY_APP_ID before testing OAuth flow. See .planning/phases/2-auth-wallet-core-ui/2-01-SUMMARY.md for setup instructions.
 
-**Convex any types:** Current Convex handlers use explicit `any` types for ctx/args parameters. Should regenerate proper types with `npx convex dev` when project is fully configured.
+**Convex deployment not configured:** Convex backend initialized but deployment requires interactive authentication (npx convex dev). Stub types allow build to proceed. Full type generation and deployment setup needed before production. See .planning/phases/2-auth-wallet-core-ui/2-02-SUMMARY.md for details.
 
 **Turbopack incompatibility:** @serwist/next plugin doesn't work with Turbopack in development mode. Service worker only generated in production builds. May need to revisit if SW debugging becomes difficult.
 
@@ -86,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed Plan 2-01 (Privy Social Auth) - Phase 2, Plan 1 of 4
+Stopped at: Completed Plan 2-02 (Convex Backend Setup) - Phase 2, Plan 2 of 4
 Resume file: None
