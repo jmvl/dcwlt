@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:webpack": "next dev --webpack",
     "build": "next build && serwist inject-manifest serwist.config.js",
     "start": "next start",
     "lint": "eslint"
@@ -12,6 +13,7 @@
     "@privy-io/react-auth": "^3.10.2",
     "@serwist/next": "^9.5.0",
     "convex": "^1.31.5",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.562.0",
     "next": "16.1.2",
     "react": "19.2.3",
