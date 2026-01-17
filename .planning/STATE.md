@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3 of 4 (Top-Up + Payments)
-Plan: 01 of 3 (Mock Top-Up Flow)
-Status: In progress, Plan 01 complete
-Last activity: 2026-01-17 — Completed Plan 03-01 (Mock Top-Up Flow)
+Plan: 02 of 3 (QR Scanner)
+Status: In progress, Plan 02 complete
+Last activity: 2026-01-17 — Completed Plan 03-02 (QR Scanner with Solana Pay URL Parsing)
 
-Progress: █████████░ 69%
+Progress: ██████████ 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 10.8 min
-- Total execution time: 1.46 hours
+- Total plans completed: 9
+- Average duration: 13.2 min
+- Total execution time: 1.99 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: █████████░ 69%
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
-| 3-topup-payments | 1 | 1 | 4.0 min |
+| 3-topup-payments | 2 | 2 | 24.5 min |
 
 **Recent Trend:**
-- Last 3 plans: 1 min (2-03), 17 min (2-04), 4 min (3-01)
-- Trend: Fast execution on top-up flow, build fix required in scan page
+- Last 3 plans: 17 min (2-04), 4 min (3-01), 45 min (3-02)
+- Trend: QR scanner required mobile testing and React 18 compatibility fixes
 
 ## Accumulated Context
 
@@ -93,6 +93,13 @@ Recent decisions affecting current work:
 34. TopUpBundle component state management - maintains own loading/purchased state for clean separation
 35. Next.js 16 router API - use URL string syntax, not object with pathname/query (fixed bug in scan page)
 
+**From Plan 3-02:**
+36. html5-qrcode library for QR scanning - cross-platform PWA compatibility with iOS Safari
+37. 100ms DOM render delay - prevents React 18 Strict Mode race condition with element initialization
+38. Always-render scanner element - never conditionally render to maintain stable DOM reference
+39. Separate parse/validate functions - isValidSolanaPayURL() returns boolean, parseSolanaPayURL() throws errors
+40. Camera permission handling with retry UI - user-friendly error states for permission denial
+
 ### Pending Todos
 
 None yet.
@@ -114,5 +121,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed Plan 03-01 (Mock Top-Up Flow) - Phase 3 in progress
+Stopped at: Completed Plan 03-02 (QR Scanner) - Phase 3 in progress
 Resume file: None
