@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, QrCode } from 'lucide-react';
 import { BalanceDisplay } from '../components/BalanceDisplay';
 import { LoginButton } from '../components/LoginButton';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
@@ -26,13 +26,20 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="w-full max-w-md">
-            <div className="mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <Link
                 href="/topup"
-                className="w-full bg-[#13a4ec] hover:bg-[#0d8ac4] text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="bg-[#13a4ec] hover:bg-[#0d8ac4] text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Top Up
+              </Link>
+              <Link
+                href="/scan"
+                className="bg-[#1a2f38] hover:bg-[#243b47] text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 border border-[#2a4049]"
+              >
+                <QrCode className="w-5 h-5" />
+                Scan QR
               </Link>
             </div>
             <BalanceDisplay />
