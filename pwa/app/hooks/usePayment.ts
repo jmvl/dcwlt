@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useMutation } from 'convex/react';
 import { Connection } from '@solana/web3.js';
-import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions';
+import { buildSPLTokenTransfer, DEVNET_RPC, formatTokenAmount } from '../../src/utils/transactions';
 import { api } from '../../convex/_generated';
 
 /**
@@ -37,7 +38,8 @@ export interface PaymentResult {
  * 1. Builds a Solana transaction for SPL token transfer
  * 2. Signs the transaction with Privy wallet
  * 3. Submits the transaction to Solana Devnet
- * 4. Returns the transaction signature or error
+ * 4. Updates Convex balance after confirmation
+ * 5. Returns the transaction signature or error
  *
  * @returns Object with executePayment function and loading state
  *
@@ -62,6 +64,7 @@ export interface PaymentResult {
  */
 export function usePayment() {
   const { signTransaction, user } = usePrivy();
+  const recordPayment = useMutation(api.wallets.recordPayment);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -162,6 +165,26 @@ export function usePayment() {
           };
         }
 
+        // Step 6: Update Convex balance
+        console.log('[usePayment] Updating Convex balance...');
+        try {
+          // Convert amount from smallest unit to EVT
+          const amountEVT = parseFloat(formatTokenAmount(params.amount));
+
+          await recordPayment({
+            walletAddress: sender,
+            amount: amountEVT,
+            signature,
+            type: 'payment',
+          });
+
+          console.log('[usePayment] Convex balance updated');
+        } catch (convexError) {
+          console.error('[usePayment] Failed to update Convex balance:', convexError);
+          // Don't fail the payment if Convex update fails
+          // The transaction was still successful on-chain
+        }
+
         console.log('[usePayment] Payment successful:', signature);
         return {
           success: true,
@@ -194,7 +217,7 @@ export function usePayment() {
         setLoading(false);
       }
     },
-    [signTransaction, user]
+    [signTransaction, user, recordPayment]
   );
 
   return {

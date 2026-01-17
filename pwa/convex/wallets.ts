@@ -117,3 +117,45 @@ export const mockTopUp = mutation({
     };
   },
 });
+
+// Record payment mutation that subtracts tokens from wallet after successful payment
+export const recordPayment = mutation({
+  args: {
+    walletAddress: v.string(),
+    amount: v.number(), // Amount in EVT (not lamports)
+    signature: v.string(),
+    type: v.string(),
+  },
+  handler: async (ctx: any, args: any) => {
+    // Get existing wallet
+    const wallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q: any) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (!wallet) {
+      throw new Error("Wallet not found");
+    }
+
+    // Subtract amount from current balance
+    const newBalance = wallet.tokenBalance - args.amount;
+
+    // Ensure balance doesn't go negative
+    if (newBalance < 0) {
+      throw new Error("Insufficient balance");
+    }
+
+    // Update wallet with new balance
+    await ctx.db.patch(wallet._id, {
+      tokenBalance: newBalance,
+      fiatBalance: newBalance * 0.1, // Mock conversion rate
+      updatedAt: Date.now(),
+    });
+
+    return {
+      success: true,
+      signature: args.signature,
+      newBalance,
+    };
+  },
+});
