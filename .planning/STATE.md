@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 
 ## Current Position
 
-Phase: 3 of 4 (Top-Up + Payments) - Next phase
-Plan: Planning phase
-Status: Phase 2 complete, ready to proceed
-Last activity: 2026-01-16 — Phase 2 verified complete (15/15 must-haves)
+Phase: 3 of 4 (Top-Up + Payments)
+Plan: 01 of 3 (Mock Top-Up Flow)
+Status: In progress, Plan 01 complete
+Last activity: 2026-01-17 — Completed Plan 03-01 (Mock Top-Up Flow)
 
-Progress: ████████░░ 62%
+Progress: █████████░ 69%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 11.9 min
-- Total execution time: 1.39 hours
+- Total plans completed: 8
+- Average duration: 10.8 min
+- Total execution time: 1.46 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: ████████░░ 62%
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
+| 3-topup-payments | 1 | 1 | 4.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 17 min (2-01), 0 min (2-02 - already complete), 1 min (2-03), 17 min (2-04)
-- Trend: Steady pace, SSR build fixes added time to 2-04
+- Last 3 plans: 1 min (2-03), 17 min (2-04), 4 min (3-01)
+- Trend: Fast execution on top-up flow, build fix required in scan page
 
 ## Accumulated Context
 
@@ -85,6 +86,13 @@ Recent decisions affecting current work:
 29. force-dynamic export on real-time pages - prevents SSR pre-rendering issues with Convex hooks
 30. Module index re-exports - created convex/_generated/index.ts for cleaner imports and better module resolution
 
+**From Plan 3-01:**
+31. Mock top-up with 2-second delay - simulates network request for realistic UX
+32. Mock transaction signature format - `mock_${timestamp}_${random}` provides unique IDs
+33. Separate success screen for top-ups - displays signature with "View Dashboard" button
+34. TopUpBundle component state management - maintains own loading/purchased state for clean separation
+35. Next.js 16 router API - use URL string syntax, not object with pathname/query (fixed bug in scan page)
+
 ### Pending Todos
 
 None yet.
@@ -101,10 +109,10 @@ None yet.
 
 **Production QR code:** Current QR code points to local network URL (192.168.1.172:3000). Must regenerate with production domain before deployment.
 
-**Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing.
+**Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing. **RESOLVED**: Plan 03-01 completed - mock top-up flow now adds tokens to balance.
 
 ## Session Continuity
 
-Last session: 2026-01-16
-Stopped at: Completed Plan 2-04 (Real-Time Balance Display) - Phase 2 complete
+Last session: 2026-01-17
+Stopped at: Completed Plan 03-01 (Mock Top-Up Flow) - Phase 3 in progress
 Resume file: None
