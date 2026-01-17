@@ -19,16 +19,14 @@ export default function ScanPage() {
       const parsed = parseSolanaPayURL(decodedText);
 
       // Navigate to confirmation screen with parsed data
-      router.push({
-        pathname: '/confirm-payment',
-        query: {
-          recipient: parsed.recipient,
-          amount: parsed.amount || '',
-          splToken: parsed.splToken || '',
-          label: parsed.label || '',
-          message: parsed.message || '',
-        },
+      const params = new URLSearchParams({
+        recipient: parsed.recipient,
+        amount: parsed.amount || '',
+        splToken: parsed.splToken || '',
+        label: parsed.label || '',
+        message: parsed.message || '',
       });
+      router.push(`/confirm-payment?${params.toString()}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to parse QR code';
       alert('Invalid QR code: ' + errorMessage);
