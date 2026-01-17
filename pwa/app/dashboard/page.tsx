@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { BalanceDisplay } from '../components/BalanceDisplay';
 import { LoginButton } from '../components/LoginButton';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
@@ -9,7 +11,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#101c22] flex flex-col">
-      {/* Header */}
       <header className="p-4 border-b border-[#1a2f38]">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Event Wallet</h1>
@@ -17,7 +18,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         {!authenticated ? (
           <div className="text-center">
@@ -26,6 +26,15 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="w-full max-w-md">
+            <div className="mb-4">
+              <Link
+                href="/topup"
+                className="w-full bg-[#13a4ec] hover:bg-[#0d8ac4] text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Top Up
+              </Link>
+            </div>
             <BalanceDisplay />
           </div>
         )}
@@ -34,6 +43,5 @@ export default function DashboardPage() {
   );
 }
 
-// Prevent static generation and SSR for this page
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
