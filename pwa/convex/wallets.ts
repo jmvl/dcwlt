@@ -76,3 +76,44 @@ export const setMockBalance = mutation({
     return await ctx.db.get(wallet._id);
   },
 });
+
+// Mock top-up mutation that simulates adding tokens to wallet
+export const mockTopUp = mutation({
+  args: {
+    walletAddress: v.string(),
+    amount: v.number(),
+  },
+  handler: async (ctx: any, args: any) => {
+    // Simulate 2-second delay for network request
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Generate mock transaction signature
+    const signature = `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Get existing wallet
+    const wallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q: any) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (!wallet) {
+      throw new Error("Wallet not found");
+    }
+
+    // Add amount to current balance
+    const newBalance = wallet.tokenBalance + args.amount;
+
+    // Update wallet with new balance
+    await ctx.db.patch(wallet._id, {
+      tokenBalance: newBalance,
+      fiatBalance: newBalance * 0.1, // Mock conversion rate
+      updatedAt: Date.now(),
+    });
+
+    return {
+      success: true,
+      signature,
+      newBalance,
+    };
+  },
+});
