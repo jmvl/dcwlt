@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3.5 of 5 (Merchant Management)
-Plan: 03 of 4 (Event Creation System)
-Status: In progress, Plan 03 complete
-Last activity: 2026-01-18 — Completed Plan 03.5-03 (Event Creation System)
+Plan: 04 of 4 (Merchant Event Assignment)
+Status: In progress, Plan 04 complete
+Last activity: 2026-01-18 — Completed Plan 03.5-04 (Merchant Event Assignment)
 
-Progress: ██████████ 81%
+Progress: ██████████ 84%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 12.1 min
-- Total execution time: 2.23 hours
+- Total plans completed: 12
+- Average duration: 11.6 min
+- Total execution time: 2.33 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: ██████████ 81%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
-| 3.5-merchant-management | 2 | 2 | 8.5 min |
+| 3.5-merchant-management | 3 | 3 | 7.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 8 min (3.5-01), 9 min (3.5-03)
+- Last 3 plans: 8 min (3.5-01), 9 min (3.5-03), 3 min (3.5-04)
 - Trend: Merchant management plans completing quickly with no deviations
 
 ## Accumulated Context
@@ -112,6 +112,13 @@ Recent decisions affecting current work:
 46. Color-coded type badges for events - each predefined type has distinct color (Concert=blue, Sports=green, Festival=purple, Custom=gray) for quick visual scanning
 47. Conditional custom type field - custom type input only appears when "Custom" selected, keeping form clean while guiding user input
 
+**From Plan 3.5-04:**
+48. Composite index for junction table uniqueness - by_event_merchant index on (eventId, merchantId) prevents duplicate merchant assignments to same event
+49. Booth number as required field in junction table - ensures every merchant assignment has a physical location mapping for event operations
+50. Approved merchant validation in assignment mutation - assignMerchantToEvent validates merchant.status === "approved" before creating assignment
+51. Join queries in backend for complete data - getEventAssignments and getMerchantAssignments fetch related entity details and return sorted results
+52. Two-panel master-detail admin UI pattern - left panel for entity selection, right panel for related items, following established /admin/events pattern
+
 ### Pending Todos
 
 None yet.
@@ -133,5 +140,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-03 (Event Creation System) - Phase 3.5 in progress
+Stopped at: Completed Plan 03.5-04 (Merchant Event Assignment) - Phase 3.5 complete
 Resume file: None
