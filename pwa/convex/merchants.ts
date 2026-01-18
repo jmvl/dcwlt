@@ -137,3 +137,73 @@ function encodeBase58(num: number): string {
 
   return encoded;
 }
+
+// Approve merchant application
+export const approveMerchant = mutation({
+  args: {
+    merchantId: v.id("merchants"),
+    adminNotes: v.optional(v.string()),
+  },
+  handler: async (ctx: any, args: any) => {
+    // Get merchant
+    const merchant = await ctx.db.get(args.merchantId);
+
+    if (!merchant) {
+      throw new Error("Merchant not found");
+    }
+
+    // Validate merchant is pending
+    if (merchant.status !== "pending") {
+      throw new Error("Can only approve pending merchants");
+    }
+
+    // Get admin user ID from auth
+    const identity = ctx.auth.getUserIdentity();
+    const adminId = identity?.subject;
+
+    // Update merchant status
+    await ctx.db.patch(args.merchantId, {
+      status: "approved",
+      reviewedAt: Date.now(),
+      reviewedBy: adminId,
+      notes: args.adminNotes,
+    });
+
+    return await ctx.db.get(args.merchantId);
+  },
+});
+
+// Reject merchant application
+export const rejectMerchant = mutation({
+  args: {
+    merchantId: v.id("merchants"),
+    rejectionReason: v.optional(v.string()),
+  },
+  handler: async (ctx: any, args: any) => {
+    // Get merchant
+    const merchant = await ctx.db.get(args.merchantId);
+
+    if (!merchant) {
+      throw new Error("Merchant not found");
+    }
+
+    // Validate merchant is pending
+    if (merchant.status !== "pending") {
+      throw new Error("Can only reject pending merchants");
+    }
+
+    // Get admin user ID from auth
+    const identity = ctx.auth.getUserIdentity();
+    const adminId = identity?.subject;
+
+    // Update merchant status
+    await ctx.db.patch(args.merchantId, {
+      status: "rejected",
+      reviewedAt: Date.now(),
+      reviewedBy: adminId,
+      notes: args.rejectionReason,
+    });
+
+    return await ctx.db.get(args.merchantId);
+  },
+});
