@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 
 ## Current Position
 
-Phase: 3 of 4 (Top-Up + Payments)
-Plan: 02 of 3 (QR Scanner)
-Status: In progress, Plan 02 complete
-Last activity: 2026-01-17 — Completed Plan 03-02 (QR Scanner with Solana Pay URL Parsing)
+Phase: 3.5 of 5 (Merchant Management)
+Plan: 01 of 4 (Merchant Self-Registration)
+Status: Complete
+Last activity: 2026-01-18 — Completed Plan 03.5-01 (Merchant Self-Registration)
 
-Progress: ██████████ 75%
+Progress: ██████████ 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 13.2 min
-- Total execution time: 1.99 hours
+- Total plans completed: 10
+- Average duration: 12.5 min
+- Total execution time: 2.08 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: ██████████ 75%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
+| 3.5-merchant-management | 1 | 1 | 8.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 17 min (2-04), 4 min (3-01), 45 min (3-02)
-- Trend: QR scanner required mobile testing and React 18 compatibility fixes
+- Last 3 plans: 4 min (3-01), 45 min (3-02), 8 min (3.5-01)
+- Trend: Merchant self-registration completed quickly with no deviations
 
 ## Accumulated Context
 
@@ -100,6 +101,11 @@ Recent decisions affecting current work:
 39. Separate parse/validate functions - isValidSolanaPayURL() returns boolean, parseSolanaPayURL() throws errors
 40. Camera permission handling with retry UI - user-friendly error states for permission denial
 
+**From Plan 3.5-01:**
+41. Mock wallet generation for POC - deterministic base58 encoding from email hash
+42. Email validation in both client and server - defense in depth for duplicate prevention
+43. No wallet display in merchant registration - merchants never see their wallet address
+
 ### Pending Todos
 
 None yet.
@@ -120,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-17
-Stopped at: Completed Plan 03-02 (QR Scanner) - Phase 3 in progress
+Last session: 2026-01-18
+Stopped at: Completed Plan 03.5-01 (Merchant Self-Registration) - Phase 3.5 in progress
 Resume file: None
