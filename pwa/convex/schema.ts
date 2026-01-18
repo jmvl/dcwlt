@@ -78,4 +78,19 @@ export default defineSchema({
   })
     .index("by_type", ["type"])
     .index("by_date", ["date"]),
+
+  // Merchant Events - junction table linking merchants to events with booth assignments
+  merchantEvents: defineTable({
+    // Reference to merchant
+    merchantId: v.id("merchants"),
+    // Reference to event
+    eventId: v.id("events"),
+    // Booth location (e.g., "A1", "B12", "Food Court 3")
+    boothNumber: v.string(),
+    // Assignment timestamp
+    createdAt: v.number(),
+  })
+    .index("by_merchant", ["merchantId"])
+    .index("by_event", ["eventId"])
+    .index("by_event_merchant", ["eventId", "merchantId"]),
 });
