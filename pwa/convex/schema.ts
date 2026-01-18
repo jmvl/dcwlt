@@ -33,4 +33,27 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_wallet", ["walletAddress"]),
+
+  // Merchants - business accounts for receiving payments
+  merchants: defineTable({
+    // Primary contact email
+    email: v.string(),
+    // Business display name
+    businessName: v.string(),
+    // Approval status
+    status: v.string(), // "pending" | "approved" | "rejected"
+    // Privy-managed wallet address (denormalized for queries)
+    walletAddress: v.string(),
+    // Registration timestamp
+    createdAt: v.number(),
+    // Admin review timestamp
+    reviewedAt: v.optional(v.number()),
+    // Admin user who reviewed
+    reviewedBy: v.optional(v.id("users")),
+    // Admin review notes
+    notes: v.optional(v.string()),
+  })
+    .index("by_email", ["email"])
+    .index("by_status", ["status"])
+    .index("by_wallet", ["walletAddress"]),
 });
