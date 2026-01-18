@@ -24,7 +24,7 @@ interface Merchant {
 }
 
 export default function AdminDashboard() {
-  const { user, isLoading: authLoading } = usePrivyAuth();
+  const { ready, user } = usePrivyAuth();
   const [selectedStatus, setSelectedStatus] = useState<MerchantStatus | "all">("all");
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
 
@@ -46,9 +46,10 @@ export default function AdminDashboard() {
   })();
 
   // Check if user is admin (you can customize this logic)
-  const isAdmin = user?.email?.endsWith("@dcwlt.com") || false;
+  const userEmail = user?.email as string | undefined;
+  const isAdmin = userEmail?.endsWith("@dcwlt.com") || false;
 
-  if (authLoading) {
+  if (!ready) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-600">Loading...</div>
@@ -68,12 +69,12 @@ export default function AdminDashboard() {
   }
 
   const handleApprove = async (merchantId: Id<"merchants">, notes?: string) => {
-    await approveMerchant.mutateAsync({ merchantId, adminNotes: notes });
+    await approveMerchant({ merchantId, adminNotes: notes });
     setSelectedMerchant(null);
   };
 
   const handleReject = async (merchantId: Id<"merchants">, reason?: string) => {
-    await rejectMerchant.mutateAsync({ merchantId, rejectionReason: reason });
+    await rejectMerchant({ merchantId, rejectionReason: reason });
     setSelectedMerchant(null);
   };
 
