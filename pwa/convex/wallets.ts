@@ -1,5 +1,16 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, action, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+
+// Get all wallets (for admin dashboard)
+export const getAllWallets = query({
+  args: {},
+  handler: async (ctx: any) => {
+    const wallets = await ctx.db.query("wallets").collect();
+    return wallets.sort((a: any, b: any) => b.updatedAt - a.updatedAt);
+  },
+});
 
 // Get wallet balance by wallet address (for real-time subscriptions)
 export const getBalance = query({
@@ -77,44 +88,127 @@ export const setMockBalance = mutation({
   },
 });
 
-// Mock top-up mutation that simulates adding tokens to wallet
-export const mockTopUp = mutation({
+// Internal query to get wallet (used by action)
+export const getWalletForTopUpInternal = internalQuery({
+  args: {
+    walletAddress: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .first();
+  },
+});
+
+// Internal mutation to update wallet balance (used by action)
+export const updateWalletForTopUpInternal = internalMutation({
+  args: {
+    walletId: v.id("wallets"),
+    newBalance: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.walletId, {
+      tokenBalance: args.newBalance,
+      fiatBalance: args.newBalance * 0.1, // Mock conversion rate
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Query to get wallet for top-up action (exported for public use)
+export const getWalletForTopUp = query({
+  args: {
+    walletAddress: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .first();
+  },
+});
+
+// Mutation to update wallet balance for top-up action (exported for public use)
+export const updateWalletForTopUp = mutation({
+  args: {
+    walletId: v.id("wallets"),
+    newBalance: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.walletId, {
+      tokenBalance: args.newBalance,
+      fiatBalance: args.newBalance * 0.1, // Mock conversion rate
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Real top-up action that transfers EVT tokens on Solana Devnet
+// Calls backend server which has the bank wallet to send tokens
+export const mockTopUp = action({
   args: {
     walletAddress: v.string(),
     amount: v.number(),
   },
-  handler: async (ctx: any, args: any) => {
-    // Simulate 2-second delay for network request
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  handler: async (ctx, args): Promise<{
+    success: boolean;
+    signature?: string;
+    newBalance?: number;
+    explorerUrl?: string;
+  }> => {
+    console.log('[mockTopUp] Starting real top-up on Solana Devnet...');
 
-    // Generate mock transaction signature
-    const signature = `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    try {
+      // Call the backend API to transfer tokens
+      const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/topup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress: args.walletAddress,
+          amount: args.amount,
+        }),
+      });
 
-    // Get existing wallet
-    const wallet = await ctx.db
-      .query("wallets")
-      .withIndex("by_wallet", (q: any) => q.eq("walletAddress", args.walletAddress))
-      .first();
+      const result = await response.json();
 
-    if (!wallet) {
-      throw new Error("Wallet not found");
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Top-up failed');
+      }
+
+      console.log('[mockTopUp] Backend response:', result);
+
+      // Get existing wallet
+      const wallet = await ctx.runQuery(internal.wallets.getWalletForTopUpInternal, {
+        walletAddress: args.walletAddress,
+      });
+
+      if (!wallet) {
+        throw new Error("Wallet not found in database");
+      }
+
+      // Update local database with new balance
+      const newBalance = wallet.tokenBalance + args.amount;
+      await ctx.runMutation(internal.wallets.updateWalletForTopUpInternal, {
+        walletId: wallet._id,
+        newBalance,
+      });
+
+      console.log('[mockTopUp] Top-up complete, signature:', result.signature);
+
+      return {
+        success: true,
+        signature: result.signature,
+        newBalance,
+        explorerUrl: result.explorerUrl,
+      };
+    } catch (error: any) {
+      console.error('[mockTopUp] Error:', error);
+      throw new Error(error?.message || 'Top-up failed');
     }
-
-    // Add amount to current balance
-    const newBalance = wallet.tokenBalance + args.amount;
-
-    // Update wallet with new balance
-    await ctx.db.patch(wallet._id, {
-      tokenBalance: newBalance,
-      fiatBalance: newBalance * 0.1, // Mock conversion rate
-      updatedAt: Date.now(),
-    });
-
-    return {
-      success: true,
-      signature,
-      newBalance,
-    };
   },
 });
 

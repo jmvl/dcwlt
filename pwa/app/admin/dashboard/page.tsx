@@ -9,16 +9,28 @@ import {
   Package,
   Plus,
   AlertCircle,
+  Wallet,
+  ExternalLink,
+  Copy,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function AdminDashboardPage() {
+  // Wallet copy state
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
   // Queries for metrics
   const allMerchants = useQuery(api.merchants.getAllMerchants, {});
   const pendingMerchants = useQuery(api.merchants.getMerchantsByStatus, { status: 'pending' });
   const approvedMerchants = useQuery(api.merchants.getMerchantsByStatus, { status: 'approved' });
   const rejectedMerchants = useQuery(api.merchants.getMerchantsByStatus, { status: 'rejected' });
   const events = useQuery(api.events.getEvents, {});
+
+  // Query wallets for merchant balances
+  const allWallets = useQuery(api.wallets.getAllWallets, {});
 
   // Calculate metrics
   const totalMerchants = allMerchants?.length || 0;
@@ -45,6 +57,31 @@ export default function AdminDashboardPage() {
 
   // Get next upcoming event
   const nextEvent = upcomingEvents[0];
+
+  // Copy wallet address to clipboard
+  const handleCopyAddress = async (address: string) => {
+    await navigator.clipboard.writeText(address);
+    setCopiedAddress(address);
+    setTimeout(() => setCopiedAddress(null), 2000);
+  };
+
+  // Truncate wallet address for display
+  const truncateAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  // Get merchant wallet balances (join merchants with wallets)
+  const merchantWallets = approvedMerchants?.map((merchant: any) => {
+    const wallet = allWallets?.find((w: any) => w.walletAddress === merchant.walletAddress);
+    return {
+      ...merchant,
+      balance: wallet?.tokenBalance || 0,
+      lastUpdated: wallet?.updatedAt || null,
+    };
+  }) || [];
+
+  // Filter merchants with low balance (< 10 EVT)
+  const lowBalanceMerchants = merchantWallets.filter((m: any) => m.balance < 10);
 
   return (
     <div className="p-6">
@@ -231,6 +268,123 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
         </div>
+      </div>
+
+      {/* Wallet Monitoring Section */}
+      <div className="bg-[#1a2f38] rounded-lg border border-[#1a2f38] p-6 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Wallet className="w-5 h-5 text-[#13a4ec]" />
+            <h2 className="text-lg font-semibold text-white">Merchant Wallet Monitoring</h2>
+          </div>
+          {lowBalanceMerchants.length > 0 && (
+            <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded-full text-xs font-medium">
+              {lowBalanceMerchants.length} low balance
+            </span>
+          )}
+        </div>
+
+        {merchantWallets.length === 0 ? (
+          <div className="text-center py-8">
+            <Wallet className="w-12 h-12 text-[#9db0b9] mx-auto mb-3" />
+            <p className="text-[#9db0b9]">No approved merchants with wallets yet</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#1a2f38]">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-[#9db0b9] uppercase tracking-wider">
+                    Merchant
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-[#9db0b9] uppercase tracking-wider">
+                    Wallet Address
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-[#9db0b9] uppercase tracking-wider">
+                    Balance (EVT)
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-[#9db0b9] uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="text-right py-3 px-4 text-xs font-medium text-[#9db0b9] uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {merchantWallets.map((merchant: any) => {
+                  const isLowBalance = merchant.balance < 10;
+                  const explorerUrl = `https://explorer.solana.com/address/${merchant.walletAddress}?cluster=devnet`;
+
+                  return (
+                    <tr
+                      key={merchant._id}
+                      className={`border-b border-[#1a2f38] hover:bg-[#243b47]/50 transition-colors ${
+                        isLowBalance ? 'bg-yellow-500/5' : ''
+                      }`}
+                    >
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="text-sm font-medium text-white">{merchant.businessName}</p>
+                          <p className="text-xs text-[#9db0b9]">{merchant.email}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <button
+                          onClick={() => handleCopyAddress(merchant.walletAddress)}
+                          className="flex items-center gap-2 text-sm text-[#13a4ec] hover:text-[#0d8ac4] transition-colors"
+                          title="Click to copy"
+                        >
+                          <span className="font-mono">{truncateAddress(merchant.walletAddress)}</span>
+                          {copiedAddress === merchant.walletAddress ? (
+                            <CheckCircle className="w-4 h-4 text-green-400" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-bold ${
+                            isLowBalance ? 'text-yellow-400' : 'text-green-400'
+                          }`}>
+                            {merchant.balance.toFixed(2)}
+                          </span>
+                          {isLowBalance && (
+                            <AlertCircle className="w-4 h-4 text-yellow-400" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <div className={`w-2 h-2 rounded-full ${
+                            isLowBalance ? 'bg-yellow-400' : 'bg-green-400'
+                          }`} />
+                          <span className={`text-xs font-medium ${
+                            isLowBalance ? 'text-yellow-400' : 'text-green-400'
+                          }`}>
+                            {isLowBalance ? 'Low' : 'Active'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <a
+                          href={explorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-[#13a4ec] hover:text-[#0d8ac4] transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Explorer
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Pending alert */}
