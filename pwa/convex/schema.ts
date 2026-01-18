@@ -56,4 +56,26 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_status", ["status"])
     .index("by_wallet", ["walletAddress"]),
+
+  // Events - events that merchants can be assigned to
+  events: defineTable({
+    // Event name (e.g., "Summer Music Festival 2026")
+    name: v.string(),
+    // Event type (predefined or custom)
+    type: v.string(), // "Concert" | "Sports" | "Festival" | "Custom"
+    // Custom type name (required if type is "Custom")
+    customType: v.optional(v.string()),
+    // Event date (ISO date string)
+    date: v.string(),
+    // Venue/location name
+    venue: v.string(),
+    // Maximum attendees
+    capacity: v.number(),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_type", ["type"])
+    .index("by_date", ["date"]),
 });
