@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3.5 of 5 (Merchant Management)
-Plan: 05 of 5 (Inventory Configuration)
-Status: In progress, Plan 05 complete
-Last activity: 2026-01-18 — Completed Plan 03.5-05 (Inventory Configuration)
+Plan: 06 of 6 (Admin Dashboard)
+Status: Phase complete
+Last activity: 2026-01-18 — Completed Plan 03.5-06 (Admin Dashboard)
 
 Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 10.7 min
-- Total execution time: 2.63 hours
+- Total plans completed: 16
+- Average duration: 10.4 min
+- Total execution time: 2.76 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: ██████████ 100%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
-| 3.5-merchant-management | 6 | 6 | 5.5 min |
+| 3.5-merchant-management | 6 | 7 | 5.9 min |
 
 **Recent Trend:**
-- Last 3 plans: 3 min (3.5-04), 2 min (3.5-02), 3.6 min (3.5-05)
-- Trend: Merchant management plans completing quickly with no deviations
+- Last 3 plans: 3.6 min (3.5-05), 8 min (3.5-06), 2 min (3.5-02)
+- Trend: Merchant management plans completing quickly with minor deviations
 
 ## Accumulated Context
 
@@ -131,6 +131,13 @@ Recent decisions affecting current work:
 59. Join queries return merchant details in getEventInventory - complete context for inventory display without N+1 queries
 60. Color-coded stock warnings (yellow < 10, red = 0) - visual inventory management for proactive restocking
 
+**From Plan 3.5-06:**
+61. Admin layout with fixed sidebar on desktop, collapsible hamburger menu on mobile - provides consistent navigation across all admin pages
+62. Cast Privy email to string for domain check - Email type doesn't support string methods like endsWith()
+63. Convex mutations called directly as functions - useMutation returns callable function, not object with .mutate() method
+64. Low balance threshold set at 10 EVT - yellow warning indicators for proactive merchant wallet management
+65. Wallet monitoring joins merchants table with wallets table via walletAddress - enables dashboard balance display without foreign key
+
 ### Pending Todos
 
 None yet.
@@ -152,5 +159,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-05 (Inventory Configuration)
+Stopped at: Completed Plan 03.5-06 (Admin Dashboard) - Phase 3.5 complete
 Resume file: None
