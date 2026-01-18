@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3.5 of 5 (Merchant Management)
-Plan: 02 of 4 (Admin Approval Workflow)
-Status: In progress, Plan 02 complete
-Last activity: 2026-01-18 — Completed Plan 03.5-02 (Admin Approval Workflow)
+Plan: 05 of 5 (Inventory Configuration)
+Status: In progress, Plan 05 complete
+Last activity: 2026-01-18 — Completed Plan 03.5-05 (Inventory Configuration)
 
-Progress: ██████████ 80%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 11.0 min
-- Total execution time: 2.57 hours
+- Total plans completed: 15
+- Average duration: 10.7 min
+- Total execution time: 2.63 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: ██████████ 80%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
-| 3.5-merchant-management | 5 | 5 | 6.0 min |
+| 3.5-merchant-management | 6 | 6 | 5.5 min |
 
 **Recent Trend:**
-- Last 3 plans: 8 min (3.5-01), 3 min (3.5-04), 2 min (3.5-02)
+- Last 3 plans: 3 min (3.5-04), 2 min (3.5-02), 3.6 min (3.5-05)
 - Trend: Merchant management plans completing quickly with no deviations
 
 ## Accumulated Context
@@ -124,6 +124,13 @@ Recent decisions affecting current work:
 54. Audit trail on merchant status changes - reviewedBy, reviewedAt, notes tracked for all approve/reject actions
 55. Separate mutations for approve/reject - clear semantic separation with different optional note fields
 
+**From Plan 3.5-05:**
+56. Stock field optional (null = unlimited) - supports both limited and unlimited inventory items without separate tables
+57. Items reference merchantEvent junction table (not merchant directly) - enables merchant-specific pricing per event
+58. Price stored as number in EVT tokens (not smallest unit) - admin-friendly display without decimal conversion
+59. Join queries return merchant details in getEventInventory - complete context for inventory display without N+1 queries
+60. Color-coded stock warnings (yellow < 10, red = 0) - visual inventory management for proactive restocking
+
 ### Pending Todos
 
 None yet.
@@ -145,5 +152,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-02 (Admin Approval Workflow)
+Stopped at: Completed Plan 03.5-05 (Inventory Configuration)
 Resume file: None
