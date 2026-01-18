@@ -93,4 +93,24 @@ export default defineSchema({
     .index("by_merchant", ["merchantId"])
     .index("by_event", ["eventId"])
     .index("by_event_merchant", ["eventId", "merchantId"]),
+
+  // Inventory - items that merchants sell at events
+  inventory: defineTable({
+    // Reference to merchant-event assignment (links to specific merchant at specific event)
+    merchantEventId: v.id("merchantEvents"),
+    // Item name (e.g., "Beer", "Hot Dog", "T-Shirt")
+    itemName: v.string(),
+    // Optional item description
+    description: v.optional(v.string()),
+    // Price in EVT tokens
+    price: v.number(),
+    // Available quantity (null for unlimited)
+    stock: v.optional(v.number()),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_merchantEvent", ["merchantEventId"])
+    .index("by_name", ["itemName"]),
 });
