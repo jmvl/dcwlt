@@ -17,6 +17,13 @@ export default function HomePage() {
               </button>
             </Link>
           </div>
+          <div className="mt-4">
+            <Link href="/merchant/register" className="block w-full text-center">
+              <button className="w-full bg-transparent border border-[#13a4ec] text-[#13a4ec] hover:bg-[#13a4ec] hover:text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                Register as Merchant
+              </button>
+            </Link>
+          </div>
         </div>
       </main>
       <InstallPrompt />
