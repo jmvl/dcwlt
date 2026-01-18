@@ -207,3 +207,48 @@ export const rejectMerchant = mutation({
     return await ctx.db.get(args.merchantId);
   },
 });
+
+// Admin queries
+
+// Get all merchants ordered by createdAt (newest first)
+export const getAllMerchants = query({
+  args: {},
+  handler: async (ctx: any) => {
+    const merchants = await ctx.db.query("merchants").collect();
+
+    // Sort by createdAt (newest first)
+    return merchants.sort((a: any, b: any) => b.createdAt - a.createdAt);
+  },
+});
+
+// Get merchants by status
+export const getMerchantsByStatus = query({
+  args: {
+    status: v.string(),
+  },
+  handler: async (ctx: any, args: any) => {
+    const merchants = await ctx.db
+      .query("merchants")
+      .withIndex("by_status", (q: any) => q.eq("status", args.status))
+      .collect();
+
+    // Sort by createdAt (newest first)
+    return merchants.sort((a: any, b: any) => b.createdAt - a.createdAt);
+  },
+});
+
+// Get merchant with details by ID
+export const getMerchantWithDetails = query({
+  args: {
+    merchantId: v.id("merchants"),
+  },
+  handler: async (ctx: any, args: any) => {
+    const merchant = await ctx.db.get(args.merchantId);
+
+    if (!merchant) {
+      return null;
+    }
+
+    return merchant;
+  },
+});
