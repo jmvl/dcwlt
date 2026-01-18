@@ -12,6 +12,25 @@ export const getAllWallets = query({
   },
 });
 
+// Get wallet by address (for merchant dashboard)
+export const getWalletByAddress = query({
+  args: {
+    walletAddress: v.string(),
+  },
+  handler: async (ctx: any, args: any) => {
+    const wallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q: any) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (!wallet) {
+      return null;
+    }
+
+    return wallet;
+  },
+});
+
 // Get wallet balance by wallet address (for real-time subscriptions)
 export const getBalance = query({
   args: {
