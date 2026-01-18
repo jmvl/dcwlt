@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3.5 of 5 (Merchant Management)
-Plan: 01 of 4 (Merchant Self-Registration)
-Status: Complete
-Last activity: 2026-01-18 — Completed Plan 03.5-01 (Merchant Self-Registration)
+Plan: 03 of 4 (Event Creation System)
+Status: In progress, Plan 03 complete
+Last activity: 2026-01-18 — Completed Plan 03.5-03 (Event Creation System)
 
-Progress: ██████████ 78%
+Progress: ██████████ 81%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 12.5 min
-- Total execution time: 2.08 hours
+- Total plans completed: 11
+- Average duration: 12.1 min
+- Total execution time: 2.23 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: ██████████ 78%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
-| 3.5-merchant-management | 1 | 1 | 8.0 min |
+| 3.5-merchant-management | 2 | 2 | 8.5 min |
 
 **Recent Trend:**
-- Last 3 plans: 4 min (3-01), 45 min (3-02), 8 min (3.5-01)
-- Trend: Merchant self-registration completed quickly with no deviations
+- Last 3 plans: 8 min (3.5-01), 9 min (3.5-03)
+- Trend: Merchant management plans completing quickly with no deviations
 
 ## Accumulated Context
 
@@ -106,6 +106,12 @@ Recent decisions affecting current work:
 42. Email validation in both client and server - defense in depth for duplicate prevention
 43. No wallet display in merchant registration - merchants never see their wallet address
 
+**From Plan 3.5-03:**
+44. Events table supports both predefined and custom types - type field stores standard categories (Concert, Sports, Festival) while customType stores custom names when type="Custom"
+45. Date stored as ISO string - using ISO date strings (e.g., "2026-07-15") for better readability and easier date manipulation, no future date validation
+46. Color-coded type badges for events - each predefined type has distinct color (Concert=blue, Sports=green, Festival=purple, Custom=gray) for quick visual scanning
+47. Conditional custom type field - custom type input only appears when "Custom" selected, keeping form clean while guiding user input
+
 ### Pending Todos
 
 None yet.
@@ -127,5 +133,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-01 (Merchant Self-Registration) - Phase 3.5 in progress
+Stopped at: Completed Plan 03.5-03 (Event Creation System) - Phase 3.5 in progress
 Resume file: None
