@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 3.5 of 5 (Merchant Management)
-Plan: 04 of 4 (Merchant Event Assignment)
-Status: In progress, Plan 04 complete
-Last activity: 2026-01-18 — Completed Plan 03.5-04 (Merchant Event Assignment)
+Plan: 02 of 4 (Admin Approval Workflow)
+Status: In progress, Plan 02 complete
+Last activity: 2026-01-18 — Completed Plan 03.5-02 (Admin Approval Workflow)
 
-Progress: ██████████ 84%
+Progress: ██████████ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 11.6 min
-- Total execution time: 2.33 hours
+- Total plans completed: 14
+- Average duration: 11.0 min
+- Total execution time: 2.57 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: ██████████ 84%
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
-| 3.5-merchant-management | 3 | 3 | 7.0 min |
+| 3.5-merchant-management | 5 | 5 | 6.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 8 min (3.5-01), 9 min (3.5-03), 3 min (3.5-04)
+- Last 3 plans: 8 min (3.5-01), 3 min (3.5-04), 2 min (3.5-02)
 - Trend: Merchant management plans completing quickly with no deviations
 
 ## Accumulated Context
@@ -119,6 +119,11 @@ Recent decisions affecting current work:
 51. Join queries in backend for complete data - getEventAssignments and getMerchantAssignments fetch related entity details and return sorted results
 52. Two-panel master-detail admin UI pattern - left panel for entity selection, right panel for related items, following established /admin/events pattern
 
+**From Plan 3.5-02:**
+53. Admin access control via email domain check - dashboard restricted to @dcwlt.com emails for security
+54. Audit trail on merchant status changes - reviewedBy, reviewedAt, notes tracked for all approve/reject actions
+55. Separate mutations for approve/reject - clear semantic separation with different optional note fields
+
 ### Pending Todos
 
 None yet.
@@ -140,5 +145,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-04 (Merchant Event Assignment) - Phase 3.5 complete
+Stopped at: Completed Plan 03.5-02 (Admin Approval Workflow)
 Resume file: None
