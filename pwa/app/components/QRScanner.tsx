@@ -75,7 +75,7 @@ export function QRScanner({ onScanSuccess, onError }: QRScannerProps) {
             },
             {
               // qr-scanner configuration for better recognition
-              onDecodeError: (error) => {
+              onDecodeError: () => {
                 // Silently ignore errors during normal scanning
                 // qr-scanner throws errors for every frame without a QR code
               },
