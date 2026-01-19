@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wallet Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13a4ec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-white font-display">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-[480px] mx-auto shadow-2xl">
+<!-- TopAppBar -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 pt-6 justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/30" data-alt="Profile photo of a young smiling man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBPJMOAkpSXHOz0uyQL4TYMQMq0pnsFUr6DUXefhGS6MHngAVfGMIrf7la5KAFxFOXS5Yz0zY4y7uPVBh2V9XHjaDsVfC8i83Kt2-pS4lDyHeGGkR8H9jKuqwgnvh7Ao8SWUmFPvF5zTYvAaxtuLzNDU62uoC388knv78Jp_g1cH-Ubst2guRkFrocLJIdEC9OIZq4rlRoTvzP1p-H9f5_HywBIMG3jBvTNhFzQMzP6o29O2yzBkYDfKNX9WqR_weV92-dHG8-PmVk");'>
+</div>
+<div>
+<p class="text-[#9db0b9] text-xs font-medium">Welcome back,</p>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Alex Rivera</h2>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-full bg-[#283339] text-white">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Balance Card -->
+<div class="p-4">
+<div class="bg-cover bg-center flex flex-col items-stretch justify-end rounded-xl pt-[100px] shadow-lg relative overflow-hidden" data-alt="Blue abstract geometric gradient background pattern" style="background-image: linear-gradient(135deg, #13a4ec 0%, #0d7db3 100%);">
+<!-- Decorative overlay -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<div class="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl"></div>
+<div class="flex w-full items-end justify-between gap-4 p-5 relative z-10">
+<div class="flex max-w-[440px] flex-1 flex-col gap-1">
+<p class="text-white/80 text-sm font-medium leading-normal">Total Balance</p>
+<p class="text-white tracking-tight text-3xl font-bold leading-tight">$12,450.00</p>
+<p class="text-white/70 text-xs font-normal mt-1">**** **** **** 8824</p>
+</div>
+<button class="flex min-w-[40px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-sm font-bold transition-all">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Actions Bar -->
+<div class="px-4 py-2">
+<div class="flex justify-between items-center bg-[#1c2a31] rounded-xl p-4 shadow-sm">
+<div class="flex flex-col items-center gap-2 flex-1 cursor-pointer group">
+<div class="rounded-full bg-primary/20 p-3 text-primary group-active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</div>
+<p class="text-white text-xs font-semibold">Top Up</p>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 cursor-pointer group border-x border-white/5">
+<div class="rounded-full bg-primary/20 p-3 text-primary group-active:scale-95 transition-transform">
+<span class="material-symbols-outlined">send</span>
+</div>
+<p class="text-white text-xs font-semibold">Send</p>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 cursor-pointer group">
+<div class="rounded-full bg-primary/20 p-3 text-primary group-active:scale-95 transition-transform">
+<span class="material-symbols-outlined">call_received</span>
+</div>
+<p class="text-white text-xs font-semibold">Request</p>
+</div>
+</div>
+</div>
+<!-- Section Header -->
+<div class="flex items-center justify-between px-4 pb-2 pt-6">
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Recent Activities</h3>
+<button class="text-primary text-sm font-bold">See All</button>
+</div>
+<!-- Activities List -->
+<div class="flex flex-col gap-1 px-4">
+<!-- Transaction 1 -->
+<div class="flex items-center gap-4 bg-[#1c2a31]/40 rounded-xl px-4 min-h-[72px] py-2 justify-between border border-white/5">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283339] shrink-0 size-12">
+<span class="material-symbols-outlined text-orange-400">coffee</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-white text-base font-semibold leading-normal">Starbucks Coffee</p>
+<p class="text-[#9db0b9] text-xs font-normal">Today, 10:45 AM</p>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-white text-base font-bold">-$5.50</p>
+<p class="text-[#9db0b9] text-[10px] uppercase font-bold">Food</p>
+</div>
+</div>
+<!-- Transaction 2 -->
+<div class="flex items-center gap-4 bg-[#1c2a31]/40 rounded-xl px-4 min-h-[72px] py-2 justify-between border border-white/5">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283339] shrink-0 size-12">
+<span class="material-symbols-outlined text-green-400">account_balance_wallet</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-white text-base font-semibold leading-normal">Salary Deposit</p>
+<p class="text-[#9db0b9] text-xs font-normal">Yesterday, 09:00 AM</p>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-primary text-base font-bold">+$2,400.00</p>
+<p class="text-[#9db0b9] text-[10px] uppercase font-bold">Income</p>
+</div>
+</div>
+<!-- Transaction 3 -->
+<div class="flex items-center gap-4 bg-[#1c2a31]/40 rounded-xl px-4 min-h-[72px] py-2 justify-between border border-white/5">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283339] shrink-0 size-12">
+<span class="material-symbols-outlined text-blue-400">shopping_bag</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-white text-base font-semibold leading-normal">Apple Store</p>
+<p class="text-[#9db0b9] text-xs font-normal">Oct 24, 02:15 PM</p>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-white text-base font-bold">-$129.00</p>
+<p class="text-[#9db0b9] text-[10px] uppercase font-bold">Tech</p>
+</div>
+</div>
+<!-- Transaction 4 -->
+<div class="flex items-center gap-4 bg-[#1c2a31]/40 rounded-xl px-4 min-h-[72px] py-2 justify-between border border-white/5">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#283339] shrink-0 size-12">
+<span class="material-symbols-outlined text-red-400">electric_bolt</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-white text-base font-semibold leading-normal">Utility Bill</p>
+<p class="text-[#9db0b9] text-xs font-normal">Oct 23, 11:30 AM</p>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-white text-base font-bold">-$84.20</p>
+<p class="text-[#9db0b9] text-[10px] uppercase font-bold">Bills</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="absolute bottom-0 left-0 right-0 bg-[#1c2a31] border-t border-white/5 flex justify-around items-center px-4 pt-3 pb-8 shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<div class="relative -top-8">
+<button class="flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 border-4 border-background-dark">
+<span class="material-symbols-outlined !text-3xl">qr_code_scanner</span>
+</button>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#9db0b9]">Scan</span>
+</div>
+<button class="flex flex-col items-center gap-1 text-[#9db0b9] hover:text-white">
+<span class="material-symbols-outlined">history</span>
+<span class="text-[10px] font-bold">History</span>
+</button>
+</nav>
+<!-- iPhone Home Indicator Area Emulation -->
+<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full"></div>
+</div>
+</body></html>

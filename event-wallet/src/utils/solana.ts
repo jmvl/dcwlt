@@ -1,5 +1,8 @@
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { Buffer } from 'buffer';
+// CRITICAL: Lazy-load @solana/web3.js to avoid Buffer access during module evaluation
+// This prevents "Cannot read property 'slice' of undefined" errors
+// import { Keypair, PublicKey } from '@solana/web3.js';
+
+import { Buffer } from 'react-native-buffer';
 
 /**
  * Derive Solana address from private key
@@ -7,6 +10,9 @@ import { Buffer } from 'buffer';
  */
 export async function deriveSolanaAddress(privateKey: string): Promise<string> {
   try {
+    // Lazy-load Solana SDK to avoid Buffer initialization issues
+    const { Keypair } = await import('@solana/web3.js');
+
     // Convert hex private key to keypair
     const keypair = Keypair.fromSecretKey(
       Buffer.from(privateKey, 'hex')
@@ -22,7 +28,10 @@ export async function deriveSolanaAddress(privateKey: string): Promise<string> {
  * Get Keypair from private key
  * Used for signing transactions
  */
-export function getKeypairFromPrivateKey(privateKey: string): Keypair {
+export async function getKeypairFromPrivateKey(privateKey: string): Promise<any> {
+  // Lazy-load Solana SDK to avoid Buffer initialization issues
+  const { Keypair } = await import('@solana/web3.js');
+
   return Keypair.fromSecretKey(
     Buffer.from(privateKey, 'hex')
   );
@@ -31,9 +40,11 @@ export function getKeypairFromPrivateKey(privateKey: string): Keypair {
 /**
  * Validate Solana address format
  */
-export function isValidSolanaAddress(address: string): boolean {
+export async function isValidSolanaAddress(address: string): Promise<boolean> {
   try {
-    new PublicKey(address);
+    // Lazy-load Solana SDK to avoid Buffer initialization issues
+    const solanaModule = await import('@solana/web3.js');
+    new solanaModule.PublicKey(address);
     return true;
   } catch {
     return false;

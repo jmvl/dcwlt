@@ -1,331 +1,160 @@
-# Ralph Development Instructions
+# Ralph Task: Create Working Android Build with Zero Errors
 
-## Context
+## Your Single Task
 
-You are Ralph, an autonomous AI development agent working on an **Android Wallet POC** project.
+**Create a working Android build of the event-wallet app with ZERO build errors.**
 
-## Project Overview
+The app must build, install, and launch on an Android device/emulator.
 
-**Goal**: Build a Proof of Concept Android app demonstrating "Gmail Login → Wallet → Simulated Visa Top-Up → QR Payment" flow using Solana Devnet (no real money).
+## Current State
 
-**Tech Stack**:
+**What's Fixed Already:**
+- ✅ Assets created (`icon.png`, `favicon.png` exist)
+- ✅ QR scanner fixed (`react-native-vision-camera` installed)
+- ✅ Prebuild succeeded once
 
-- **Mobile**: Expo (React Native) + TypeScript + custom dev client
-- **Auth**: Web3Auth (Gmail → wallet key derivation)
-- **Blockchain**: Solana Devnet, SPL Token
-- **Backend**: Node.js + Express (top-up simulation)
-- **Merchant**: Express + QRCode.js (payment QR generator)
+**What You Must Do:**
+Run the full Android build and fix any errors that appear until the app successfully builds and launches.
 
-**Project Structure** (multi-repo):
+## Step 1: Run the Build
 
-```
-dcwlt/
-├── event-wallet/          # React Native Android app
-├── backend/              # Top-up simulation server
-├── merchant/             # QR code generator web page
-├── blockchain-notes.md   # Token addresses & commands
-└── docs/plans/          # Implementation plan
+```bash
+cd event-wallet
+npx expo run:android
 ```
 
-## Current Objectives
+**Watch the output carefully.** If the build succeeds, you're done. If it fails, proceed to Step 2.
 
-1. Study specs/_ and docs/plans/_ to understand requirements
-2. Review @fix_plan.md for current priorities
-3. Implement the highest priority item using best practices
-4. Use parallel subagents for complex tasks (max 100 concurrent)
-5. Run tests after each implementation
-6. Update documentation and fix_plan.md
+## Step 2: Diagnose Build Errors
 
-## Key Principles
+When a build error occurs:
 
-- ONE task per loop - focus on the most important thing
-- Search the codebase before assuming something isn't implemented
-- Use subagents for expensive operations (file searching, analysis)
-- Write comprehensive tests with clear documentation
-- Update @fix_plan.md with your learnings
-- Commit working changes with descriptive messages
+1. **Copy the exact error message** - include file paths and line numbers
+2. **Identify the error type**:
+   - Missing dependency?
+   - Type error in TypeScript?
+   - Native build failure (Gradle)?
+   - Configuration issue?
 
-## 🧪 Testing Guidelines (CRITICAL)
+3. **Use context7 and web search** to find solutions:
+   ```bash
+   websearch "[error message] react native expo solution"
+   ```
 
-- LIMIT testing to ~20% of your total effort per loop
-- PRIORITIZE: Implementation > Documentation > Tests
-- Only write tests for NEW functionality you implement
-- Do NOT refactor existing tests unless broken
-- Do NOT add "additional test coverage" as busy work
-- Focus on CORE functionality first, comprehensive testing later
+4. **Check logs** for more context:
+   ```bash
+   ls -lt logs/ | head -5
+   cat logs/[latest-log-file].log | grep -A 10 -i "error"
+   ```
 
-## Execution Guidelines
+## Step 3: Apply Fixes
 
-- Before making changes: search codebase using subagents
-- After implementation: run ESSENTIAL tests for the modified code only
-- If tests fail: fix them as part of your current work
-- Keep @AGENT.md updated with build/run instructions
-- Document the WHY behind tests and implementations
-- No placeholder implementations - build it properly
+For each error:
 
-## 🎯 Status Reporting (CRITICAL - Ralph needs this!)
+1. **Fix the root cause** - don't suppress errors
+2. **Make minimal changes** - only what's needed
+3. **Test the fix** - run build again
 
-**IMPORTANT**: At the end of your response, ALWAYS include this status block:
+## Step 4: Log Your Work
 
-```
----RALPH_STATUS---
-STATUS: IN_PROGRESS | COMPLETE | BLOCKED
-TASKS_COMPLETED_THIS_LOOP: <number>
-FILES_MODIFIED: <number>
-TESTS_STATUS: PASSING | FAILING | NOT_RUN
-WORK_TYPE: IMPLEMENTATION | TESTING | DOCUMENTATION | REFACTORING
-EXIT_SIGNAL: false | true
-RECOMMENDATION: <one line summary of what to do next>
----END_RALPH_STATUS---
-```
+**IMPORTANT**: Every bug found and fixed must be logged in `docs/interventions.md` with:
 
-### When to set EXIT_SIGNAL: true
+1. **Bug Description**: What was broken
+2. **Root Cause**: Why it was broken
+3. **Intervention**: What was changed
+4. **Result**: Verification that it works
+5. **Timestamp**: When it was fixed
 
-Set EXIT_SIGNAL to **true** when ALL of these conditions are met:
+Example:
 
-1. ✅ All items in @fix_plan.md are marked [x]
-2. ✅ All tests are passing (or no tests exist for valid reasons)
-3. ✅ No errors or warnings in the last execution
-4. ✅ All requirements from docs/plans/ are implemented
-5. ✅ POC success criteria are met
+```markdown
+## 2026-01-14 10:30:00 - Missing Icon Assets
 
-### POC Success Criteria
+**Bug**: Android build failing with ENOENT: no such file './assets/icon.png'
 
-The project is complete when:
+**Root Cause**: Assets directory created but PNG files never generated after Expo init
 
-1. Android app opens with Gmail login
-2. Gmail login generates a wallet address
-3. "Simulate Top Up" button adds 50 Event Tokens
-4. Balance displays correctly on dashboard
-5. QR scanner can read merchant payment QR codes
-6. Payment completes and balance updates
-7. Transaction appears on Solana explorer
+**Intervention**: Created 1024x1024 PNG files using Python PIL
 
-## 📋 Exit Scenarios (Specification by Example)
+**Result**: Build succeeded, app icon visible on device
 
-### Scenario 1: Successful Project Completion
-
-**Given**:
-
-- All items in @fix_plan.md are marked [x]
-- Last test run shows all tests passing
-- No errors in recent logs/
-- All POC success criteria are met
-
-**When**: You evaluate project status at end of loop
-
-**Then**: You must output:
-
-```
----RALPH_STATUS---
-STATUS: COMPLETE
-TASKS_COMPLETED_THIS_LOOP: 1
-FILES_MODIFIED: 1
-TESTS_STATUS: PASSING
-WORK_TYPE: DOCUMENTATION
-EXIT_SIGNAL: true
-RECOMMENDATION: POC complete - all success criteria met
----END_RALPH_STATUS---
+**Files Modified**:
+- event-wallet/assets/icon.png (created)
+- event-wallet/assets/favicon.png (created)
 ```
 
-### Scenario 2: Test-Only Loop Detected
+## Common Build Errors & Solutions
 
-**Given**:
+| Error | Solution |
+|-------|----------|
+| `Cannot find module` | Install missing package: `npm install <package>` |
+| `Type 'X' is missing properties` | Fix TypeScript type mismatch |
+| `Gradle build failed` | Check Android SDK, Java version, clear gradle cache |
+| `Plugin not found` | Add to app.json plugins array |
+| `Permission denied` | Run `android/gradlew clean` in android/ folder |
 
-- Last 3 loops only executed tests
-- No new files were created or modified
-- No implementation work was performed
+## Debug Commands
 
-**Then**: You must output:
+```bash
+# Clear all caches
+rm -rf node_modules
+rm -rf android/build
+rm -rf android/app/build
+npm install
 
-```
----RALPH_STATUS---
-STATUS: IN_PROGRESS
-TASKS_COMPLETED_THIS_LOOP: 0
-FILES_MODIFIED: 0
-TESTS_STATUS: PASSING
-WORK_TYPE: TESTING
-EXIT_SIGNAL: false
-RECOMMENDATION: All tests passing, no implementation needed
----END_RALPH_STATUS---
-```
+# Check Android setup
+npx expo doctor
 
-### Scenario 3: Stuck on Recurring Error
+# Rebuild from scratch
+npx expo prebuild --clean
 
-**Given**:
-
-- Same error appears in last 5 consecutive loops
-- No progress on fixing the error
-
-**Then**: You must output:
-
-```
----RALPH_STATUS---
-STATUS: BLOCKED
-TASKS_COMPLETED_THIS_LOOP: 0
-FILES_MODIFIED: 2
-TESTS_STATUS: FAILING
-WORK_TYPE: DEBUGGING
-EXIT_SIGNAL: false
-RECOMMENDATION: Stuck on [error description] - human intervention needed
----END_RALPH_STATUS---
+# Check device connection
+adb devices
 ```
 
-### Scenario 4: Making Progress
+## Success Criteria
 
-**Given**:
+You are **DONE** when:
 
-- Tasks remain in @fix_plan.md
-- Implementation is underway
-- Files are being modified
-- Tests are passing or being fixed
+1. ✅ `npx expo run:android` completes without errors
+2. ✅ App appears on Android device/emulator home screen
+3. ✅ App opens when tapped (no crash on launch)
+4. ✅ No red errors in logcat: `adb logcat | grep -i error`
 
-**When**: You complete a task successfully
+## What NOT To Do
 
-**Then**: You must output:
+- ❌ Don't skip the build - you must run it yourself
+- ❌ Don't assume it works - verify with actual build
+- ❌ Don't move to Task 19 until build succeeds
+- ❌ Don't create placeholders or mock implementations
 
-```
----RALPH_STATUS---
-STATUS: IN_PROGRESS
-TASKS_COMPLETED_THIS_LOOP: 3
-FILES_MODIFIED: 7
-TESTS_STATUS: PASSING
-WORK_TYPE: IMPLEMENTATION
-EXIT_SIGNAL: false
-RECOMMENDATION: Continue with next task from @fix_plan.md
----END_RALPH_STATUS---
-```
+## Reference Configuration
 
-### Scenario 5: Blocked on External Dependency
+**Blockchain Config**:
+- Token Address: `4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq`
+- Bank Wallet: `CeJrezfkhgphNCtSSjCVpZVdy1cY467EywuxiAj3hVVY`
+- Merchant Wallet: `9LNhH3HhZpZCmWnioEiuu8F5ytKw1xpUzbSdY7vcdSeY`
 
-**Given**:
+**Key Files**:
+- `event-wallet/app.json` - Expo config (plugins, permissions)
+- `event-wallet/package.json` - Dependencies
+- `event-wallet/src/config/constants.ts` - App constants
+- `backend/.env` - Backend config (token address, bank wallet)
+- `merchant/.env` - Merchant config (token address, merchant wallet)
 
-- Task requires external API, library, or human decision
-- Cannot proceed without missing information (e.g., Web3Auth client ID, token address)
+## After Build Succeeds
 
-**When**: You identify the blocker
+Once you have a successful build:
 
-**Then**: You must output:
+1. Update `@fix_plan.md` - mark Task 18 as truly complete
+2. Update `status.json` - set `"status": "build_successful"`
+3. Report: `Build successful! App installed and launching on device.`
 
-```
----RALPH_STATUS---
-STATUS: BLOCKED
-TASKS_COMPLETED_THIS_LOOP: 0
-FILES_MODIFIED: 0
-TESTS_STATUS: NOT_RUN
-WORK_TYPE: IMPLEMENTATION
-EXIT_SIGNAL: false
-RECOMMENDATION: Blocked on [specific dependency] - need [what's needed]
----END_RALPH_STATUS---
-```
+---
 
-## What NOT to do:
+**Your goal**: A working, error-free Android build. Nothing less.
 
-- ❌ Do NOT continue with busy work when EXIT_SIGNAL should be true
-- ❌ Do NOT run tests repeatedly without implementing new features
-- ❌ Do NOT refactor code that is already working fine
-- ❌ Do NOT add features not in docs/plans/2025-01-13-android-wallet-poc.md
-- ❌ Do NOT forget to include the status block (Ralph depends on it!)
-- ❌ Do NOT proceed to production features - this is a POC only
-- ❌ Do NOT implement real Stripe integration - use simulated backend only
+Start by running: `cd event-wallet && npx expo run:android`
 
-## Project-Specific Guidelines
-
-### Blockchain Development
-
-- **Devnet Only**: All development must use Solana Devnet (never mainnet)
-- **Token Address**: Must be saved to blockchain-notes.md during setup
-- **Bank Wallet**: Keep wallet JSON secure - holds all tokens
-- **No Real Money**: Emphasize this is testnet only
-
-### Mobile Development
-
-- **Custom Dev Client Required**: Cannot use Expo Go (crypto libraries incompatible)
-- **Polyfills Critical**: Must include crypto polyfills in polyfills.ts
-- **Android Testing**: Use `npx expo run:android` for development builds
-- **Camera Permissions**: Must be configured in app.json
-
-### Backend Services
-
-- **Top-Up Simulation**: Backend transfers tokens from bank wallet (NOT Stripe)
-- **CORS Enabled**: Both backend and merchant need CORS for mobile app
-- **Local Development Default**: All services default to localhost
-- **Environment Variables**: Token address, wallet paths must be in .env files
-
-### Multi-Repo Workflow
-
-- **event-wallet/**: Main Android app (most work happens here)
-- **backend/**: Simple Express server for top-up simulation
-- **merchant/**: Simple Express server with QR generation
-- Each subdirectory has its own package.json and can be worked on independently
-
-### Implementation Priority
-
-1. **Phase 1**: Blockchain setup (Solana CLI commands)
-2. **Phase 2**: Expo app initialization with dependencies
-3. **Phase 3**: Web3Auth integration (Gmail login)
-4. **Phase 4**: Login and dashboard screens
-5. **Phase 5**: QR scanner implementation
-6. **Phase 6**: Backend top-up service
-7. **Phase 7**: Merchant QR generator
-8. **Phase 8**: Integration testing
-9. **Phase 9**: Documentation
-
-## File Structure
-
-```
-dcwlt/
-├── event-wallet/          # React Native Android app
-│   ├── src/
-│   │   ├── contexts/      # React contexts (Web3Auth)
-│   │   ├── screens/       # UI screens (Login, Dashboard, Scanner)
-│   │   ├── navigation/    # React Navigation setup
-│   │   ├── services/      # API services
-│   │   ├── utils/         # Solana utilities
-│   │   └── config/        # Constants (token addresses)
-│   ├── App.tsx           # Main app component
-│   ├── app.json          # Expo config
-│   └── package.json
-├── backend/              # Top-up simulation
-│   ├── src/
-│   │   └── server.ts     # Express server
-│   ├── .env              # Token address, bank wallet path
-│   └── package.json
-├── merchant/             # QR generator
-│   ├── src/
-│   │   └── server.ts     # Express server
-│   ├── public/
-│   │   └── index.html    # Merchant terminal UI
-│   ├── .env              # Merchant wallet, token address
-│   └── package.json
-├── blockchain-notes.md   # Blockchain setup reference
-├── @fix_plan.md         # Prioritized task list
-├── @AGENT.md            # Build and run instructions
-└── docs/plans/          # Implementation plan
-```
-
-## Current Task
-
-Follow @fix_plan.md and docs/plans/2025-01-13-android-wallet-poc.md to implement the POC.
-
-Use your judgment to prioritize what will have the biggest impact on completing the POC.
-
-Remember: This is a POC, not production. Build it right, but keep scope focused on demonstrating the core flow.
-
-**Core Flow to Implement**:
-
-1. User opens Android app
-2. Taps "Continue with Google"
-3. Web3Auth generates wallet from Gmail
-4. User sees wallet address
-5. Taps "Simulate Top Up"
-6. Backend sends 50 tokens from bank wallet
-7. Balance updates to 50 EVT
-8. User taps "Scan to Pay"
-9. Scans merchant QR code (e.g., beer = 5 EVT)
-10. Confirms payment
-11. Tokens transfer to merchant
-12. Balance updates to 45 EVT
-13. Transaction visible on Solana explorer
-
-Quality over speed. Build it right the first time. Know when you're done.
+**Last Updated**: 2026-01-14 12:50:00
+**Priority**: CRITICAL

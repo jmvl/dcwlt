@@ -1,0 +1,34 @@
+(node:453) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+warn =================================================================================================
+warn From React Native 0.73, your project's Metro config should extend '@react-native/metro-config'
+warn or it will fail to build. Please copy the template at:
+warn https://github.com/facebook/react-native/blob/main/packages/react-native/template/metro.config.js
+warn This warning will be removed in future (https://github.com/facebook/metro/issues/1018).
+warn =================================================================================================
+info Welcome to React Native v0.74
+info Starting dev server on port 8081...
+
+                        ▒▒▓▓▓▓▒▒
+                     ▒▓▓▓▒▒░░▒▒▓▓▓▒
+                  ▒▓▓▓▓░░░▒▒▒▒░░░▓▓▓▓▒
+                 ▓▓▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▓▓
+                 ▓▓░░░░░▒▓▓▓▓▓▓▒░░░░░▓▓
+                 ▓▓░░▓▓▒░░░▒▒░░░▒▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▒▒▒▒▓▓▓▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▓▓▓▓▓▓▓▓▒░░▓▓
+                 ▓▓▒░░▒▒▓▓▓▓▓▓▓▓▒░░░▒▓▓
+                  ▒▓▓▓▒░░░▒▓▓▒░░░▒▓▓▓▒
+                     ▒▓▓▓▒░░░░▒▓▓▓▒
+                        ▒▒▓▓▓▓▒▒
+
+
+warning: the transform cache was reset.
+                Welcome to Metro v0.80.12
+              Fast - Scalable - Integrated
+
+
+info React Native v0.83.0 is now available (your project is running on v0.74.5).
+info Changelog: https://github.com/facebook/react-native/releases/tag/v0.83.0
+info Diff: https://react-native-community.github.io/upgrade-helper/?from=0.74.5
+info For more info, check out "https://reactnative.dev/docs/upgrading?os=macos".

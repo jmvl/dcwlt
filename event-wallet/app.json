@@ -7,18 +7,13 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eventwallet.app"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "com.eventwallet.app",
       "permissions": [
         "INTERNET",
@@ -30,12 +25,18 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "@web3auth/react-native-sdk"
-    ],
     "scheme": "eventwallet",
+    "plugins": [
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Allow $(PRODUCT_NAME) to access your camera for QR code scanning",
+          "enableMicrophonePermission": false
+        }
+      ]
+    ],
     "extra": {
-      "web3authClientId": "YOUR_WEB3AUTH_CLIENT_ID_HERE"
+      "web3authClientId": "BF_3EwSny_eyZmyDHMK-FOv1mu3Zrt7gRB5G9TQQtoBYmo_2Hww_Yd6l0xCqKBLadXIM0ZVEKNCwfAxaqvHc648"
     }
   }
 }

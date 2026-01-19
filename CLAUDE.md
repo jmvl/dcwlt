@@ -1,6 +1,75 @@
 # CLAUDE.md
 
+# CLAUDE.md
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+DCWLT is a **Progressive Web Application (PWA)** for high-frequency event payments using a **Hybrid Ledger** architecture. It combines the security of Solana blockchain settlement with the speed of Convex real-time database to handle "thundering herd" scenarios (e.g., stadium halftime rushes).
+
+**Important**: This is a POC using Solana Devnet (testnet) with fake money. Never implement mainnet functionality.
+
+## Quick Reference: Agents & Skills
+
+This project has **8 autonomous agents** with separate context windows AND **8 skills** for quick reference.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DCWLT SPECIALIST TEAM                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   AGENTS (separate context, autonomous):                                  │
+│   Alex     →   PWA/Frontend (Next.js, App Router, React)                  │
+│   Igor     →   Convex Backend (database, real-time sync)                   │
+│   Satoshi  →   Solana Blockchain (SPL tokens, RPC, settlements)            │
+│   Priya    →   Privy Auth (social login, embedded wallets)                │
+│   Sarah    →   Stripe Payments (checkout, webhooks)                       │
+│   Quinn    →   QR Scanner (camera, Solana Pay URLs)                       │
+│   Tara     →   Testing (E2E, load testing, coverage)                      │
+│   Otto     →   Offline (service workers, caching)                          │
+│                                                                             │
+│   SKILLS (instant guidance, no token overhead):                            │
+│   alex, igor, satoshi, priya, sarah, quinn, tara, otto                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**How to use:**
+- **Agents** (complex tasks): "Launch Alex to create a new page"
+- **Skills** (quick reference): "Alex, how do I structure a layout?"
+- **Auto-match**: "I need Stripe webhooks" → Sarah responds automatically
+
+See `.claude/agents/USAGE.md` for complete usage guide.
+
+## Architecture
+
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│   Privy     │─────>│   Next.js    │─────>│   Convex     │
+│  (Login)     │      │    (PWA)     │      │ (Database)   │
+└─────────────┘      └──────────────┘      └─────────────┘
+                                                      │
+                                                      v
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│   Stripe    │─────>│   Solana     │<─────│   Balance   │
+│ (Top-Up)    │      │    Devnet     │      │  Updates    │
+└─────────────┘      └──────────────┘      └─────────────┘
+```
+
+### Component Structure
+
+The project consists of:
+
+1. **`pwa/`** - Next.js 16 PWA (App Router + React)
+2. **`convex/`** - Real-time backend (colocated with PWA)
+3. **Token**: EVT on Solana Devnet (mint: `4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq`)
+
+## Project Status
+
+**Current Architecture**: PWA-only (React Native removed)
+
+See `.planning/codebase/HLD.md` for the complete High-Level Design document.
 
 ## Project Overview
 

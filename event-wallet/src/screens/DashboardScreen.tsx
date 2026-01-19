@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useWeb3Auth } from '../contexts/Web3AuthContext';
-import { Connection, PublicKey } from '@solana/web3.js';
+// CRITICAL: Lazy-load @solana/web3.js to avoid Buffer access during module evaluation
+// import { Connection, PublicKey } from '@solana/web3.js';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { TOKEN_ADDRESS, SOLANA_DEVNET_RPC } from '../config/constants';
-import { topUpWallet, TopUpResponse } from '../services/api';
+import { topUpWallet, TopUpResponse, checkBackendHealth } from '../services/api';
+import { Toast, ToastType } from '../components/Toast';
 
 type DashboardScreenProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
@@ -16,6 +18,26 @@ export function DashboardScreen() {
   const [balance, setBalance] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isToppingUp, setIsToppingUp] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
+
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    setToast({ visible: true, message, type });
+  }, []);
+
+  const hideToast = useCallback(() => {
+    setToast((prev) => ({ ...prev, visible: false }));
+  }, []);
 
   useEffect(() => {
     if (walletAddress) {
@@ -23,21 +45,31 @@ export function DashboardScreen() {
     }
   }, [walletAddress]);
 
-  const fetchBalance = async () => {
+  const fetchBalance = async (showRefreshIndicator = false) => {
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    }
+
     try {
-      const connection = new Connection(SOLANA_DEVNET_RPC);
+      // Lazy-load Solana SDK to avoid Buffer initialization issues
+      const solanaWeb3 = await import('@solana/web3.js');
+      const connection = new solanaWeb3.Connection(SOLANA_DEVNET_RPC, 'confirmed');
 
       if (TOKEN_ADDRESS === 'YOUR_TOKEN_ADDRESS_HERE') {
         console.warn('Token address not configured. Update src/config/constants.ts');
         setBalance(0);
+        if (showRefreshIndicator) {
+          showToast('Token address not configured in constants.ts', 'warning');
+        }
         setIsLoading(false);
+        setIsRefreshing(false);
         return;
       }
 
-      const tokenMint = new PublicKey(TOKEN_ADDRESS);
+      const tokenMint = new solanaWeb3.PublicKey(TOKEN_ADDRESS);
 
       const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        new PublicKey(walletAddress!),
+        new solanaWeb3.PublicKey(walletAddress!),
         { mint: tokenMint }
       );
 
@@ -48,58 +80,167 @@ export function DashboardScreen() {
       } else {
         setBalance(0);
       }
+
+      if (showRefreshIndicator) {
+        showToast('Balance refreshed successfully', 'success');
+      }
     } catch (error) {
       console.error('Error fetching balance:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      // Provide specific error feedback
+      if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        showToast('Network error. Check your connection.', 'error');
+      } else if (errorMessage.includes('timeout')) {
+        showToast('Request timed out. Try again.', 'error');
+      } else {
+        showToast('Failed to fetch balance', 'error');
+      }
+
+      // Still allow UI to function even if balance fetch fails
+      setBalance(0);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   const handleSimulateTopUp = async () => {
     if (!walletAddress) {
-      Alert.alert('Error', 'Wallet not available. Please login again.');
+      Alert.alert(
+        'Wallet Error',
+        'No wallet address found. Please log in again.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Login Again', onPress: () => logout() }
+        ]
+      );
       return;
     }
 
     if (TOKEN_ADDRESS === 'YOUR_TOKEN_ADDRESS_HERE') {
       Alert.alert(
-        'Configuration Required',
-        'Token address not configured. Please update src/config/constants.ts with your token address.',
-        [{ text: 'OK' }]
+        '⚠️ Configuration Required',
+        'The Event Token address has not been configured.\n\nTo use this feature, update src/config/constants.ts with your token address from the Solana Devnet deployment.',
+        [
+          { text: 'Dismiss', style: 'cancel' },
+          {
+            text: 'Learn More',
+            onPress: () => {
+              Alert.alert(
+                'How to Configure',
+                '1. Run: spl-token create-token\n2. Copy the token address\n3. Paste it in src/config/constants.ts\n4. Rebuild the app',
+                [{ text: 'Got it' }]
+              );
+            }
+          }
+        ]
       );
       return;
     }
 
     setIsToppingUp(true);
+    showToast('Connecting to backend...', 'info');
 
     try {
+      // First check if backend is healthy
+      const health = await checkBackendHealth();
+
+      if (!health) {
+        Alert.alert(
+          '⚠️ Backend Unavailable',
+          'The backend service is not running or cannot be reached.\n\nPlease ensure the backend server is running on localhost:3000',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Retry',
+              onPress: () => handleSimulateTopUp()
+            }
+          ]
+        );
+        setIsToppingUp(false);
+        return;
+      }
+
+      // Check if bank wallet is configured
+      if (!health.bankWalletConfigured) {
+        Alert.alert(
+          '⚠️ Bank Wallet Not Configured',
+          'The backend bank wallet has not been set up.\n\nPlease run the blockchain setup scripts to create and fund the bank wallet.',
+          [{ text: 'OK' }]
+        );
+        setIsToppingUp(false);
+        return;
+      }
+
+      showToast('Processing top-up...', 'info');
+
       const result: TopUpResponse = await topUpWallet(walletAddress, 50);
 
       if (result.success) {
+        showToast('Top-up successful!', 'success');
+
         Alert.alert(
-          'Top-Up Successful!',
-          `Sent 50 Event Tokens to your wallet.\n\nSignature: ${result.signature?.slice(0, 8)}...`,
+          '✅ Top-Up Successful',
+          `Successfully sent 50 Event Tokens to your wallet.\n\nTransaction: ${result.signature?.slice(0, 8)}...${result.signature?.slice(-8)}`,
           [
-            { text: 'View Transaction', onPress: () => {
+            {
+              text: 'View on Explorer',
+              onPress: () => {
                 if (result.explorerUrl) {
-                  console.log('Transaction:', result.explorerUrl);
+                  console.log('Transaction URL:', result.explorerUrl);
+                  // In a real app, you would open this in a browser
+                  showToast('Explorer URL logged to console', 'info');
                 }
-              }},
-            { text: 'OK', onPress: () => fetchBalance() }
+              }
+            },
+            {
+              text: 'Refresh Balance',
+              onPress: () => fetchBalance(true)
+            },
+            { text: 'OK' }
           ]
         );
       } else {
+        showToast('Top-up failed', 'error');
+
+        // Provide specific error messages
+        let errorMessage = result.error || 'Failed to transfer tokens.';
+
+        if (errorMessage.includes('insufficient')) {
+          errorMessage = 'The bank wallet has insufficient tokens. Please fund the bank wallet on Solana Devnet.';
+        } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (errorMessage.includes('timeout')) {
+          errorMessage = 'The request timed out. The Solana network may be congested. Please try again.';
+        }
+
         Alert.alert(
-          'Top-Up Failed',
-          result.error || 'Failed to transfer tokens. Please check backend connection.',
-          [{ text: 'OK' }]
+          '❌ Top-Up Failed',
+          errorMessage,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Retry',
+              onPress: () => handleSimulateTopUp()
+            }
+          ]
         );
       }
     } catch (error) {
+      console.error('Top-up error:', error);
+      showToast('Connection error', 'error');
+
       Alert.alert(
-        'Top-Up Error',
-        'Failed to connect to backend. Ensure backend is running on localhost:3000',
-        [{ text: 'OK' }]
+        '⚠️ Connection Error',
+        'Could not connect to the backend service.\n\nPlease ensure:\n• Backend server is running on port 3000\n• You\'re connected to the internet\n• Firewall is not blocking the connection',
+        [
+          { text: 'OK' },
+          {
+            text: 'Retry',
+            onPress: () => handleSimulateTopUp()
+          }
+        ]
       );
     } finally {
       setIsToppingUp(false);
@@ -161,6 +302,14 @@ export function DashboardScreen() {
         <Text style={styles.scanButtonText}>📷 Scan to Pay</Text>
         <Text style={styles.scanButtonSubtext}>Pay at merchant terminal</Text>
       </TouchableOpacity>
+
+      {/* Toast notification for user feedback */}
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHidden={hideToast}
+      />
     </View>
   );
 }

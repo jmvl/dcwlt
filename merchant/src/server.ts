@@ -2,12 +2,27 @@ import express from 'express';
 import QRCode from 'qrcode';
 import dotenv from 'dotenv';
 import { PublicKey } from '@solana/web3.js';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
+
+export { app };
+
+// Rate limiting for QR generation: 60 per minute
+const qrLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: {
+    success: false,
+    error: 'Too many QR generation requests. Please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Merchant wallet address (create one and save here)
 const MERCHANT_WALLET = process.env.MERCHANT_WALLET || 'YOUR_MERCHANT_WALLET_ADDRESS';
@@ -57,7 +72,7 @@ app.get('/health', (req, res) => {
  * Generate QR code for payment
  * GET /api/qr/:amount
  */
-app.get('/api/qr/:amount', async (req, res) => {
+app.get('/api/qr/:amount', qrLimiter, async (req, res) => {
   try {
     const amount = parseFloat(req.params.amount);
 
@@ -164,12 +179,15 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`\n🏪 Event Wallet Merchant Terminal`);
-  console.log(`   Running on http://localhost:${PORT}`);
-  console.log(`   Network: Solana Devnet`);
-  console.log(`\n📚 Endpoints:`);
-  console.log(`   GET  /health         - Health check`);
-  console.log(`   GET  /api/qr/:amount - Generate payment QR code`);
-  console.log(`   GET  /api/status     - Service status\n`);
-});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🏪 Event Wallet Merchant Terminal`);
+    console.log(`   Running on http://localhost:${PORT}`);
+    console.log(`   Network: Solana Devnet`);
+    console.log(`\n📚 Endpoints:`);
+    console.log(`   GET  /health         - Health check`);
+    console.log(`   GET  /api/qr/:amount - Generate payment QR code`);
+    console.log(`   GET  /api/status     - Service status\n`);
+  });
+}

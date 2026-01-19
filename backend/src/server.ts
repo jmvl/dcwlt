@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import {
   createTransferInstruction,
-  getAssociatedTokenAddress
+  getAssociatedTokenAddress,
+  getOrCreateAssociatedTokenAccount
 } from '@solana/spl-token';
 import fs from 'fs';
 
@@ -13,6 +15,65 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Rate limiting configuration
+const RATE_LIMIT_TOPUP_MAX = parseInt(process.env.RATE_LIMIT_TOPUP_MAX || '10', 10);
+const RATE_LIMIT_TOPUP_WINDOW_MS = parseInt(process.env.RATE_LIMIT_TOPUP_WINDOW_MS || '60000', 10);
+const RATE_LIMIT_HEALTH_MAX = parseInt(process.env.RATE_LIMIT_HEALTH_MAX || '60', 10);
+const RATE_LIMIT_STATUS_MAX = parseInt(process.env.RATE_LIMIT_STATUS_MAX || '60', 10);
+
+// Disable rate limiting during tests
+const isTest = process.env.NODE_ENV === 'test';
+
+// Create a pass-through limiter for tests
+const passthroughLimiter = (_req: any, _res: any, next: any) => next();
+
+// Health check endpoint rate limiter (less strict)
+const healthLimiter = isTest ? passthroughLimiter : rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: RATE_LIMIT_HEALTH_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many health check requests. Please try again later.'
+  }
+});
+
+// Status endpoint rate limiter (less strict)
+const statusLimiter = isTest ? passthroughLimiter : rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: RATE_LIMIT_STATUS_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many status requests. Please try again later.'
+  }
+});
+
+// Top-up endpoint rate limiter (strict - prevents abuse)
+const topupLimiter = isTest ? passthroughLimiter : rateLimit({
+  windowMs: RATE_LIMIT_TOPUP_WINDOW_MS,
+  max: RATE_LIMIT_TOPUP_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many top-up requests. Please try again later.',
+    retryAfter: Math.ceil(RATE_LIMIT_TOPUP_WINDOW_MS / 1000)
+  },
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      error: 'Too many top-up requests. Please try again later.',
+      retryAfter: Math.ceil(RATE_LIMIT_TOPUP_WINDOW_MS / 1000)
+    });
+  }
+});
+
+// Export app for testing
+export { app };
 
 // Load bank wallet from environment path
 function loadBankWallet(): Keypair {
@@ -40,7 +101,7 @@ try {
 }
 
 // Top-up endpoint - simulates Visa payment by transferring tokens from bank wallet
-app.post('/api/topup', async (req, res) => {
+app.post('/api/topup', topupLimiter, async (req, res) => {
   try {
     const { walletAddress, amount = 50 } = req.body;
 
@@ -78,8 +139,9 @@ app.post('/api/topup', async (req, res) => {
 
     console.log(`📝 Processing top-up: ${topUpAmount} EVT to ${walletAddress}`);
 
-    // Connect to Solana Devnet
-    const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+    // Connect to Solana
+    const rpcUrl = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+    const connection = new Connection(rpcUrl, 'confirmed');
     const tokenMint = new PublicKey(tokenAddress);
     const toWallet = new PublicKey(walletAddress);
 
@@ -88,7 +150,16 @@ app.post('/api/topup', async (req, res) => {
       tokenMint,
       bankWalletKeypair.publicKey
     );
-    const toATA = await getAssociatedTokenAddress(tokenMint, toWallet);
+
+    // Ensure the recipient has an associated token account
+    console.log(`   Ensuring ATA exists for ${toWallet.toBase58()}...`);
+    const toAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      bankWalletKeypair,
+      tokenMint,
+      toWallet
+    );
+    const toATA = toAccount.address;
 
     console.log(`   From: ${fromATA.toBase58()}`);
     console.log(`   To: ${toATA.toBase58()}`);
@@ -110,6 +181,10 @@ app.post('/api/topup', async (req, res) => {
 
     // Sign and send transaction
     const signature = await connection.sendTransaction(transaction, [bankWalletKeypair]);
+
+    // Wait for transaction confirmation with 'confirmed' commitment
+    console.log(`⏳ Waiting for confirmation...`);
+    await connection.confirmTransaction(signature, 'confirmed');
 
     console.log(`✅ Top-up successful: ${signature}`);
 
@@ -136,7 +211,7 @@ app.post('/api/topup', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', healthLimiter, (req, res) => {
   const bankWalletConfigured = !!bankWalletKeypair;
   const tokenAddressConfigured = !!process.env.TOKEN_ADDRESS;
 
@@ -151,7 +226,7 @@ app.get('/health', (req, res) => {
 });
 
 // Get backend status
-app.get('/api/status', (req, res) => {
+app.get('/api/status', statusLimiter, (req, res) => {
   res.json({
     service: 'Event Wallet Top-Up Simulation',
     version: '1.0.0',
@@ -187,13 +262,16 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 Event Wallet Backend Server`);
-  console.log(`   Running on http://localhost:${PORT}`);
-  console.log(`   Network: Solana Devnet`);
-  console.log(`\n📚 Endpoints:`);
-  console.log(`   POST /api/topup    - Simulate Visa top-up`);
-  console.log(`   GET  /health        - Health check`);
-  console.log(`   GET  /api/status    - Service status\n`);
-});
+// Only start server if this file is run directly (not imported)
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Event Wallet Backend Server`);
+    console.log(`   Running on http://localhost:${PORT}`);
+    console.log(`   Network: Solana Devnet`);
+    console.log(`\n📚 Endpoints:`);
+    console.log(`   POST /api/topup    - Simulate Visa top-up`);
+    console.log(`   GET  /health        - Health check`);
+    console.log(`   GET  /api/status    - Service status\n`);
+  });
+}

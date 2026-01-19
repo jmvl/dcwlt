@@ -1,13 +1,40 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Web3Auth, Web3AuthOptions } from '@web3auth/react-native-sdk';
-import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from '@web3auth/base';
-import * as Constants from 'expo-constants';
-import { Connection } from '@solana/web3.js';
+// CRITICAL: Do NOT import Web3Auth or SolanaPrivateKeyProvider at the top level!
+// This causes Buffer to be accessed before polyfills are ready.
+// Instead, we will lazy-load them when needed.
+// import Web3Auth, { WEB3AUTH_NETWORK, ChainNamespace } from '@web3auth/react-native-sdk';
+// import { SolanaPrivateKeyProvider } from '../utils/SolanaPrivateKeyProvider';
+
+import { openAuthSessionAsync, dismissAuthSession } from '@toruslabs/react-native-web-browser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { deriveSolanaAddress } from '../utils/solana';
-import { SOLANA_DEVNET_RPC } from '../config/constants';
+
+console.log('Web3AuthContext: Module loaded');
+
+// WebBrowser interface for Web3Auth - pass the module directly with required methods
+const WebBrowser = {
+  openAuthSessionAsync,
+  dismissAuthSession,
+};
+
+// Create an EncryptedStorage adapter using AsyncStorage
+const storageAdapter = {
+  setItem: async (key: string, value: string) => {
+    await AsyncStorage.setItem(key, value);
+  },
+  getItem: async (key: string) => {
+    return await AsyncStorage.getItem(key);
+  },
+  removeItem: async (key: string) => {
+    await AsyncStorage.removeItem(key);
+  },
+  clear: async () => {
+    await AsyncStorage.clear();
+  },
+};
 
 interface Web3AuthContextType {
-  web3auth: Web3Auth | null;
+  web3auth: any | null;
   privateKey: string | null;
   walletAddress: string | null;
   isLoggedIn: boolean;
@@ -18,68 +45,114 @@ interface Web3AuthContextType {
 
 const Web3AuthContext = createContext<Web3AuthContextType | null>(null);
 
+// Get redirect URL from app config
+const getRedirectUrl = () => {
+  const scheme = 'eventwallet';
+  return `${scheme}://auth`;
+};
+
 export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
-  const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
+  const [web3auth, setWeb3auth] = useState<any>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Web3AuthProvider: init called');
     init();
   }, []);
 
   const init = async () => {
     try {
-      const clientId = Constants.expoConfig?.extra?.web3authClientId as string;
-
-      if (!clientId || clientId === 'YOUR_WEB3AUTH_CLIENT_ID_HERE') {
-        console.warn('Web3Auth Client ID not configured. Please update app.json');
+      // TEST MODE: Skip Web3Auth initialization for UI testing
+      const TEST_MODE = true;
+      if (TEST_MODE) {
+        console.log('TEST MODE: Skipping Web3Auth initialization');
+        // Mock wallet address for testing Dashboard UI
+        setWalletAddress('TestWallet1234');
+        setIsLoggedIn(true);
         setIsLoading(false);
         return;
       }
 
-      const options: Web3AuthOptions = {
-        clientId,
-        network: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
-        chainConfig: {
-          chainNamespace: CHAIN_NAMESPACES.SOLANA,
-          chainId: '0x3', // Devnet
-          rpcTarget: SOLANA_DEVNET_RPC,
-          displayName: 'Solana Devnet',
-          blockExplorer: 'https://explorer.solana.com/?cluster=devnet',
-          ticker: 'SOL',
-          tickerName: 'Solana',
-        },
-      };
+      // CRITICAL: Lazy-load Web3Auth and SolanaPrivateKeyProvider after polyfills are set up
+      console.log('Web3Auth: Lazy-loading @web3auth/react-native-sdk...');
+      const Web3AuthModule = await import('@web3auth/react-native-sdk');
+      const { Web3Auth, WEB3AUTH_NETWORK, ChainNamespace } = Web3AuthModule;
+      console.log('Web3Auth: Module loaded successfully');
 
-      const web3AuthInstance = new Web3Auth(options);
+      // Lazy-load SolanaPrivateKeyProvider
+      const { SolanaPrivateKeyProvider } = await import('../utils/SolanaPrivateKeyProvider');
+      console.log('SolanaPrivateKeyProvider: Loaded successfully');
+
+      // Web3Auth client ID from app.json
+      const clientId = 'BF_3EwSny_eyZmyDHMK-FOv1mu3Zrt7gRB5G9TQQtoBYmo_2Hww_Yd6l0xCqKBLadXIM0ZVEKNCwfAxaqvHc648';
+
+      if (!clientId) {
+        console.warn('Web3Auth Client ID not configured properly');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Web3Auth: Initializing with WEB3AUTH_NETWORK.TESTNET...');
+
+      // Create Solana Private Key Provider
+      const privateKeyProvider = new SolanaPrivateKeyProvider({
+        chainNamespace: ChainNamespace.SOLANA,
+        chainId: '0x3', // Solana Devnet
+        rpcTarget: 'https://api.devnet.solana.com',
+        displayName: 'Solana Devnet',
+        blockExplorerUrl: 'https://explorer.solana.com/?cluster=devnet',
+        ticker: 'SOL',
+        tickerName: 'Solana',
+      });
+
+      console.log('SolanaPrivateKeyProvider created:', !!privateKeyProvider);
+
+      // Initialize Web3Auth with WebBrowser, storage, and options
+      const web3AuthInstance = new Web3Auth(WebBrowser, storageAdapter, {
+        clientId,
+        network: WEB3AUTH_NETWORK.TESTNET,
+        redirectUrl: getRedirectUrl(),
+        privateKeyProvider,
+      });
+
+      console.log('Web3Auth instance created, calling init()...');
+
+      // Initialize the SDK
       await web3AuthInstance.init();
+
+      console.log('Web3Auth init() completed');
+
       setWeb3auth(web3AuthInstance);
 
-      if (web3AuthInstance.connected) {
-        await getUserInfo(web3AuthInstance);
+      // Check if user is already logged in via provider
+      const provider = web3AuthInstance.provider;
+      if (provider) {
+        console.log('Provider found, checking for existing session...');
+        try {
+          const privKey = await provider.request<string, string>({ method: 'solanaPrivateKey' });
+          if (privKey) {
+            setPrivateKey(privKey);
+            const address = await deriveSolanaAddress(privKey);
+            setWalletAddress(address);
+            setIsLoggedIn(true);
+            console.log('Existing session restored for:', address);
+          }
+        } catch (sessionError) {
+          console.log('No existing session found (expected for first launch)');
+        }
+      } else {
+        console.log('No provider found (user not logged in yet)');
       }
+
+      console.log('Web3Auth initialized successfully');
     } catch (error) {
       console.error('Web3Auth init error:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getUserInfo = async (web3AuthInstance: Web3Auth) => {
-    try {
-      const key = await web3AuthInstance.privKey;
-      setPrivateKey(key);
-
-      // Derive Solana address from private key
-      if (key) {
-        const address = await deriveSolanaAddress(key);
-        setWalletAddress(address);
-        setIsLoggedIn(true);
-      }
-    } catch (error) {
-      console.error('Error getting user info:', error);
     }
   };
 
@@ -89,10 +162,38 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      await web3auth.login();
-      await getUserInfo(web3auth);
+      console.log('Web3Auth login: Starting...');
+
+      // Login with Google (default provider)
+      const provider = await web3auth.login({
+        loginProvider: 'google',
+        redirectUrl: getRedirectUrl(),
+      });
+
+      console.log('Web3Auth login: Provider received:', !!provider);
+
+      if (provider) {
+        // Get private key from provider
+        const privKey = await provider.request<string, string>({ method: 'solanaPrivateKey' });
+        console.log('Web3Auth login: Private key received:', !!privKey);
+
+        if (privKey) {
+          setPrivateKey(privKey);
+          // Derive Solana address from private key
+          const address = await deriveSolanaAddress(privKey);
+          console.log('Web3Auth login: Wallet address derived:', address);
+          setWalletAddress(address);
+          setIsLoggedIn(true);
+          console.log('Web3Auth login: State updated - isLoggedIn = true');
+        }
+
+        console.log('Web3Auth login successful');
+      } else {
+        console.error('Web3Auth login: No provider returned');
+        throw new Error('Login failed - no provider returned');
+      }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Web3Auth login error:', error);
       throw error;
     }
   };
@@ -105,8 +206,9 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
       setPrivateKey(null);
       setWalletAddress(null);
       setIsLoggedIn(false);
+      console.log('Web3Auth logout successful');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Web3Auth logout error:', error);
     }
   };
 
