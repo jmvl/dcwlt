@@ -42,7 +42,8 @@ export default function MerchantRegisterPage() {
       const emailAccount = user.linkedAccounts?.find(
         (account: any) => account.type === "email" || account.type === "google"
       );
-      const email = emailAccount?.address as string | undefined;
+      // For email/google accounts, use 'email' property; for wallet accounts, use 'address'
+      const email = (emailAccount as any)?.email || (emailAccount as any)?.address as string | undefined;
 
       if (email) {
         // You could add a query here to check if merchant already exists
