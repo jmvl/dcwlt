@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 
 ## Current Position
 
-Phase: 3.5 of 5 (Merchant Management)
-Plan: 06 of 6 (Admin Dashboard)
-Status: Phase complete
-Last activity: 2026-01-18 — Completed Plan 03.5-06 (Admin Dashboard)
+Phase: 4 of 5 (Merchant Experience)
+Plan: 02 of 4 (Merchant Inventory View)
+Status: In progress
+Last activity: 2026-01-19 — Completed Plan 04-02 (Merchant Inventory View)
 
-Progress: ██████████ 100%
+Progress: ████████░░░ 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: 10.4 min
-- Total execution time: 2.76 hours
+- Total plans completed: 17
+- Average duration: 10.0 min
+- Total execution time: 2.83 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: ██████████ 100%
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
 | 3.5-merchant-management | 6 | 7 | 5.9 min |
+| 4-merchant-experience | 2 | 2 | 5.5 min |
 
 **Recent Trend:**
-- Last 3 plans: 3.6 min (3.5-05), 8 min (3.5-06), 2 min (3.5-02)
-- Trend: Merchant management plans completing quickly with minor deviations
+- Last 3 plans: 2 min (04-01), 2.7 min (04-02), 8 min (3.5-06)
+- Trend: Merchant experience plans completing quickly
 
 ## Accumulated Context
 
@@ -138,6 +139,19 @@ Recent decisions affecting current work:
 64. Low balance threshold set at 10 EVT - yellow warning indicators for proactive merchant wallet management
 65. Wallet monitoring joins merchants table with wallets table via walletAddress - enables dashboard balance display without foreign key
 
+**From Plan 04-01:**
+66. MerchantAuthProvider handles all authentication logic and status checks - validates merchant status (pending, approved, rejected) and redirects to home with appropriate error messages
+67. Merchant portal uses same design system as admin panel - consistent UI/UX across both interfaces (sidebar navigation, color scheme, responsive patterns)
+68. Sales display is placeholder until sales tracking is implemented - dashboard shows empty state with note that sales tracking will come in later phase
+69. Wallet balance queried through existing wallets table - added getWalletByAddress query to look up merchant wallets by address for balance display
+
+**From Plan 04-02:**
+70. Auto-select first event when merchant has multiple event assignments - improves UX by not requiring selection when only one option exists
+71. Accordion expand/collapse managed via Set<string> for O(1) lookups - efficient state management for expanded groups
+72. Stock color coding: green (>5), yellow (1-5), red (0) - visual inventory status indicators for proactive restocking
+73. Unlimited stock displayed as "Unlimited" when stock is null - clear distinction between limited and unlimited inventory
+74. getMerchantItemOverrides query added to look up merchant-specific pricing and stock overrides - enables per-merchant customization
+
 ### Pending Todos
 
 None yet.
@@ -158,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Completed Plan 03.5-06 (Admin Dashboard) - Phase 3.5 complete
+Last session: 2026-01-19
+Stopped at: Completed Plan 04-02 (Merchant Inventory View)
 Resume file: None
