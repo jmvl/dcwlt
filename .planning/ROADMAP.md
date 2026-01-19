@@ -17,7 +17,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Auth + Wallet + Core UI** - Social login, embedded wallet, real-time balance display
 - [ ] **Phase 3: Top-Up + Payments** - Mock top-up flow, QR scanning, payment execution
 - [x] **Phase 3.5: Merchant Registration & Management** - Merchant self-registration with approval, admin-controlled events and item pricing
-- [ ] **Phase 4: History + Offline** - Transaction history, offline support
+- [x] **Phase 4: Merchant Experience** - Merchant dashboard, inventory management, QR generation, sales history
+- [ ] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
+- [ ] **Phase 5: History + Offline** - Transaction history, offline support
 
 ## Phase Details
 
@@ -136,12 +138,31 @@ Plans:
 - [x] 04-03: QR code generation for payments
 - [x] 04-04: Sales history and transaction list
 
+### Phase 4.1: Merchant Payment Notifications
+
+**Goal**: Instant payment notifications for merchants via Convex real-time subscriptions
+**Depends on**: Phase 4 (transactions table and sales page must exist)
+**Requirements**: Real-time payment notifications for merchant UX (new requirement)
+**Success Criteria** (what must be TRUE):
+
+1. Merchants see new payments within 1 second without manual refresh
+2. Multiple merchant devices (tablets, phones) sync simultaneously
+3. Date range and wallet search filters work without interrupting real-time updates
+4. Toast notification appears on new payment with item name and amount
+5. No UI flicker when filters active and new payment arrives
+   **Research**: Unlikely (Convex real-time subscriptions well-understood from Phase 2)
+   **Plans**: TBD
+
+Plans:
+
+- [x] 04.1-01: Real-time transaction subscriptions with client-side filtering
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 5
 
-Decimal phases (like 3.5) execute between their surrounding integers (3 → 3.5 → 4).
+Decimal phases (like 3.5, 4.1) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 5).
 
 | Phase                                   | Plans Complete | Status      | Completed  |
 | --------------------------------------- | -------------- | ----------- | ---------- |
@@ -150,3 +171,4 @@ Decimal phases (like 3.5) execute between their surrounding integers (3 → 3.5 
 | 3. Top-Up + Payments                    | 0/4            | Not started | -          |
 | 3.5. Merchant Registration & Management | 6/6            | Complete    | 2026-01-18 |
 | 4. Merchant Experience                 | 4/4            | Complete    | 2026-01-19 |
+| 4.1. Merchant Payment Notifications    | 1/1            | Complete    | 2026-01-19 |
