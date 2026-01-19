@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 
 ## Current Position
 
-Phase: 4 of 5 (Merchant Experience)
-Plan: 04 of 4 (Sales History)
+Phase: 4.1 of 5 (Merchant Notifications)
+Plan: 01 of 1 (Real-Time Notifications)
 Status: Completed
-Last activity: 2026-01-19 — Completed Phase 04 (Merchant Experience)
+Last activity: 2026-01-19 — Completed Phase 04.1 (Merchant Notifications)
 
 Progress: ███████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 10.1 min
-- Total execution time: 3.36 hours
+- Total plans completed: 21
+- Average duration: 9.7 min
+- Total execution time: 3.38 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: ███████████ 100%
 | 3-topup-payments | 2 | 2 | 24.5 min |
 | 3.5-merchant-management | 6 | 7 | 5.9 min |
 | 4-merchant-experience | 4 | 7 | 8.5 min |
+| 4.1-merchant-notifications | 1 | 1 | 2.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 2.7 min (04-02), 8 min (04-03), 15 min (04-04)
-- Trend: Phase 4 complete, merchant experience fully functional
+- Last 3 plans: 2 min (04.1-01), 15 min (04-04), 8 min (04-03)
+- Trend: Phase 4.1 complete, all merchant features functional with real-time notifications
 
 ## Accumulated Context
 
@@ -173,6 +174,11 @@ Recent decisions affecting current work:
 90. Mock transaction seeding function generates 10-20 transactions with varied timestamps and statuses - enables UI testing before real payment flow
 91. Sales page amount displayed in red color to represent money out from customer perspective - matches payment UX patterns
 
+**From Plan 04.1-01:**
+92. Client-side filtering preserves stable WebSocket subscription - unfiltered query with stable parameters + useMemo for filtered data prevents resubscription on filter changes
+93. Toast notifications use sonner library for modern, React 19-compatible alerts with custom styling matching merchant portal theme
+94. Limited live query to last 100 transactions for performance while covering reasonable event volume - balances data transfer with real-time responsiveness
+
 ### Pending Todos
 
 None yet.
@@ -196,5 +202,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed Plan 04-04 (Sales History and Transaction List)
+Stopped at: Completed Plan 04.1-01 (Merchant Real-Time Notifications)
 Resume file: None
