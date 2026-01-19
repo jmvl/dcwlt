@@ -52,8 +52,9 @@ export function usePayment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Convex mutation for creating transaction records
+  // Convex mutations for transaction records
   const createTransaction = useMutation(api.transactions.createTransaction);
+  const updateTransactionStatus = useMutation(api.transactions.updateTransactionStatus);
 
   /**
    * Execute a payment transaction
@@ -111,46 +112,13 @@ export function usePayment() {
         console.log('[usePayment] Transaction signed successfully!');
         console.log('[usePayment] Signed transaction length:', signedTransaction.length);
 
-        // Step 4: Send the signed transaction to Solana
-        console.log('[usePayment] Sending transaction to Solana Devnet...');
-        const connection = new Connection(DEVNET_RPC, 'confirmed');
+        // Initialize transaction ID for tracking
+        let convexTransactionId: string | null = null;
 
-        // Send to Solana
-        const txSignature = await connection.sendRawTransaction(signedTransaction);
-
-        console.log('[usePayment] Transaction sent:', txSignature);
-
-        // Step 5: Wait for confirmation
-        console.log('[usePayment] Waiting for confirmation...');
-        const confirmation = await connection.confirmTransaction(
-          txSignature,
-          'confirmed'
-        );
-
-        if (confirmation.value.err) {
-          console.error('[usePayment] Transaction failed:', confirmation.value.err);
-          return {
-            success: false,
-            error: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
-          };
-        }
-
-        // Step 6: Invalidate balance query to trigger refetch from Solana
-        console.log('[usePayment] Invalidating balance query...');
-        try {
-          queryClient.invalidateQueries({
-            queryKey: balanceQueryKeys.detail(sender),
-          });
-          console.log('[usePayment] Balance query invalidated successfully');
-        } catch (queryError) {
-          console.error('[usePayment] Failed to invalidate balance query:', queryError);
-          // Don't fail the payment if query invalidation fails
-          // The transaction was still successful on-chain
-        }
-
-        // Step 7: Create transaction record in Convex (if merchant and item provided)
+        // Step 4: Create transaction record in Convex as PENDING (before sending to Solana)
+        // This provides audit trail even if Solana transaction fails
         if (params.merchantId && params.itemId) {
-          console.log('[usePayment] Creating Convex transaction record...');
+          console.log('[usePayment] Creating Convex transaction record as PENDING...');
           console.log('[usePayment] IDs:', {
             merchantId: params.merchantId.toString(),
             itemId: params.itemId.toString(),
@@ -164,24 +132,91 @@ export function usePayment() {
             console.log('[usePayment] Calling createTransaction mutation...');
             // Type assertion: params.merchantId and params.itemId are string IDs at runtime
             // The Convex mutation expects Id<> types for type safety, but at runtime these are just strings
-            const transactionId = await createTransaction({
+            convexTransactionId = await createTransaction({
               merchantId: params.merchantId as any,
               itemId: params.itemId as any,
               customerWallet: sender,
               amount: amountInEVT,
-              signature: txSignature,
+              // No signature yet - transaction is pending
             });
-            console.log('[usePayment] Convex transaction record created:', transactionId);
+            console.log('[usePayment] Convex transaction record created:', convexTransactionId);
           } catch (convexError) {
             console.error('[usePayment] Failed to create Convex transaction record:', convexError);
             // Don't fail the payment if Convex write fails
-            // The transaction was still successful on-chain
+            // The transaction can still proceed on Solana
           }
         } else {
           console.log('[usePayment] Skipping Convex transaction record (no merchantId/itemId)', {
             hasMerchantId: !!params.merchantId,
             hasItemId: !!params.itemId,
           });
+        }
+
+        // Step 5: Send the signed transaction to Solana
+        console.log('[usePayment] Sending transaction to Solana Devnet...');
+        const connection = new Connection(DEVNET_RPC, 'confirmed');
+
+        // Send to Solana
+        const txSignature = await connection.sendRawTransaction(signedTransaction);
+
+        console.log('[usePayment] Transaction sent:', txSignature);
+
+        // Step 6: Wait for confirmation
+        console.log('[usePayment] Waiting for confirmation...');
+        const confirmation = await connection.confirmTransaction(
+          txSignature,
+          'confirmed'
+        );
+
+        if (confirmation.value.err) {
+          console.error('[usePayment] Transaction failed:', confirmation.value.err);
+
+          // Update Convex transaction to FAILED status
+          if (convexTransactionId) {
+            try {
+              await updateTransactionStatus({
+                transactionId: convexTransactionId as any,
+                status: 'failed',
+              });
+              console.log('[usePayment] Convex transaction updated to: failed');
+            } catch (updateError) {
+              console.error('[usePayment] Failed to update transaction status:', updateError);
+            }
+          }
+
+          return {
+            success: false,
+            error: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
+          };
+        }
+
+        // Step 7: Update transaction to CONFIRMED in Convex
+        if (convexTransactionId) {
+          try {
+            await updateTransactionStatus({
+              transactionId: convexTransactionId as any,
+              status: 'confirmed',
+              signature: txSignature,
+            });
+            console.log('[usePayment] Convex transaction updated to: confirmed');
+          } catch (updateError) {
+            console.error('[usePayment] Failed to update transaction status:', updateError);
+            // Don't fail the payment if Convex update fails
+            // The transaction was still successful on-chain
+          }
+        }
+
+        // Step 8: Invalidate balance query to trigger refetch from Solana
+        console.log('[usePayment] Invalidating balance query...');
+        try {
+          queryClient.invalidateQueries({
+            queryKey: balanceQueryKeys.detail(sender),
+          });
+          console.log('[usePayment] Balance query invalidated successfully');
+        } catch (queryError) {
+          console.error('[usePayment] Failed to invalidate balance query:', queryError);
+          // Don't fail the payment if query invalidation fails
+          // The transaction was still successful on-chain
         }
 
         console.log('[usePayment] Payment successful:', txSignature);
@@ -212,7 +247,7 @@ export function usePayment() {
         setLoading(false);
       }
     },
-    [wallets, signTransaction, queryClient, createTransaction]
+    [wallets, signTransaction, queryClient, createTransaction, updateTransactionStatus]
   );
 
   return {
