@@ -223,7 +223,7 @@ export default function MerchantSalesPage() {
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13a4ec]" />
             </div>
-          ) : transactions.length === 0 ? (
+          ) : !transactions || transactions.length === 0 ? (
             /* Empty state */
             <div className="text-center py-12">
               <ShoppingBag className="w-16 h-16 text-[#9db0b9] mx-auto mb-4" />
@@ -259,7 +259,7 @@ export default function MerchantSalesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((tx) => {
+                  {transactions?.map((tx) => {
                     const explorerUrl = tx.signature
                       ? `https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`
                       : null;
