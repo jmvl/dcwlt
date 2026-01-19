@@ -5,6 +5,7 @@ import { PrivyAuthProvider } from './components/PrivyProvider';
 import { ConvexClientProvider } from './components/ConvexProvider';
 import { QueryProvider } from './components/QueryProvider';
 import ServiceWorkerRegister from './components/ServiceWorkerRegister';
+import { Toaster } from 'sonner';
 
 const manrope = Manrope({ subsets: ['latin'] });
 
@@ -42,6 +43,17 @@ export default function RootLayout({
             <QueryProvider>
               <ServiceWorkerRegister />
               {children}
+              <Toaster
+                position="top-center"
+                duration={5000}
+                toastOptions={{
+                  style: {
+                    background: '#1a2f38',
+                    border: '1px solid #13a4ec',
+                    color: '#fff',
+                  },
+                }}
+              />
             </QueryProvider>
           </ConvexClientProvider>
         </PrivyAuthProvider>

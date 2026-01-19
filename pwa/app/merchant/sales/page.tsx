@@ -12,7 +12,9 @@ import {
   ExternalLink,
   Clock,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useMerchantLiveTransactions } from '@/app/hooks/useMerchantLiveTransactions';
+import { toast } from 'sonner';
 
 export default function MerchantSalesPage() {
   const { merchant } = useMerchantAuth();
@@ -28,18 +30,35 @@ export default function MerchantSalesPage() {
     return () => clearTimeout(timer);
   }, [searchWallet]);
 
-  // Query sales stats
-  const stats = useQuery(api.transactions.getMerchantSalesStats, {
-    merchantId: merchant!._id,
-    dateRange,
-  });
+  // Use live hook instead of direct useQuery
+  const { transactions, allTransactions, isLoading, isNewPayment } =
+    useMerchantLiveTransactions(merchant!._id, { dateRange, searchWallet: debouncedSearch });
 
-  // Query transactions list
-  const transactions = useQuery(api.transactions.listMerchantTransactions, {
-    merchantId: merchant!._id,
-    dateRange,
-    searchWallet: debouncedSearch || undefined,
-  });
+  // Show toast notification for new payment
+  useEffect(() => {
+    if (isNewPayment && transactions && transactions.length > 0) {
+      const newTx = transactions[0]; // Most recent transaction
+      toast.success(`New payment: ${newTx.itemName} - ${newTx.amount} EVT`);
+    }
+  }, [isNewPayment, transactions]);
+
+  // Update stats to use allTransactions (unfiltered) for accurate totals
+  const stats = useMemo(() => {
+    if (!allTransactions) return null;
+
+    const confirmed = allTransactions.filter((tx) => tx.status === 'confirmed');
+
+    return {
+      totalSales: confirmed.reduce((sum, tx) => sum + tx.amount, 0),
+      transactionCount: confirmed.length,
+      averageTransaction: confirmed.length > 0
+        ? confirmed.reduce((sum, tx) => sum + tx.amount, 0) / confirmed.length
+        : 0,
+      todaySales: confirmed
+        .filter((tx) => tx.timestamp >= Date.now() - 24 * 60 * 60 * 1000)
+        .reduce((sum, tx) => sum + tx.amount, 0),
+    };
+  }, [allTransactions]);
 
   // Format relative time
   const formatRelativeTime = (timestamp: number) => {
@@ -200,7 +219,7 @@ export default function MerchantSalesPage() {
 
         <div className="p-4">
           {/* Loading state */}
-          {transactions === undefined ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13a4ec]" />
             </div>
