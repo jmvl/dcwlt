@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { Loader2, ChevronDown, Package } from 'lucide-react';
+import { Loader2, ChevronDown, Package, QrCode } from 'lucide-react';
+import { QRCodeGenerator } from './QRCodeGenerator';
+import { useMerchantAuth } from './MerchantAuthProvider';
 
 interface MerchantInventoryProps {
   merchantEventId: Id<'merchantEvents'>;
@@ -12,7 +14,21 @@ interface MerchantInventoryProps {
 }
 
 export default function MerchantInventory({ merchantEventId, merchantId }: MerchantInventoryProps) {
+  const { merchant } = useMerchantAuth();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [qrModalState, setQrModalState] = useState<{
+    isOpen: boolean;
+    merchantAddress: string;
+    itemPrice: number;
+    itemName: string;
+    itemId: string;
+  }>({
+    isOpen: false,
+    merchantAddress: '',
+    itemPrice: 0,
+    itemName: '',
+    itemId: '',
+  });
 
   // Query merchant's assigned groups
   const merchantAssignments = useQuery(
@@ -56,6 +72,7 @@ export default function MerchantInventory({ merchantEventId, merchantId }: Merch
   }
 
   return (
+    <>
     <div className="space-y-3">
       {merchantAssignments.map((assignment: any) => {
         const groupId = assignment.group._id.toString();
@@ -93,6 +110,17 @@ export default function MerchantInventory({ merchantEventId, merchantId }: Merch
                 <ExpandedItems
                   itemGroupId={group._id}
                   merchantGroupAssignmentId={assignment._id}
+                  onGenerateQR={(effectivePrice, item) => {
+                    if (merchant) {
+                      setQrModalState({
+                        isOpen: true,
+                        merchantAddress: merchant.walletAddress,
+                        itemPrice: effectivePrice,
+                        itemName: item.name,
+                        itemId: item._id.toString(),
+                      });
+                    }
+                  }}
                 />
               </div>
             )}
@@ -100,15 +128,29 @@ export default function MerchantInventory({ merchantEventId, merchantId }: Merch
         );
       })}
     </div>
+
+    {/* QR Code Generator Modal */}
+    {merchant && (
+      <QRCodeGenerator
+        isOpen={qrModalState.isOpen}
+        onClose={() => setQrModalState({ ...qrModalState, isOpen: false })}
+        merchantAddress={qrModalState.merchantAddress}
+        itemPrice={qrModalState.itemPrice}
+        itemName={qrModalState.itemName}
+        itemId={qrModalState.itemId}
+      />
+    )}
+  </>
   );
 }
 
 interface ExpandedItemsProps {
   itemGroupId: Id<'itemGroups'>;
   merchantGroupAssignmentId: Id<'merchantGroupAssignments'>;
+  onGenerateQR: (effectivePrice: number, item: any) => void;
 }
 
-function ExpandedItems({ itemGroupId, merchantGroupAssignmentId }: ExpandedItemsProps) {
+function ExpandedItems({ itemGroupId, merchantGroupAssignmentId, onGenerateQR }: ExpandedItemsProps) {
   // Query items in this group
   const groupItems = useQuery(
     api.itemGroups.getGroupItems,
@@ -138,6 +180,7 @@ function ExpandedItems({ itemGroupId, merchantGroupAssignmentId }: ExpandedItems
           key={item._id}
           item={item}
           merchantGroupAssignmentId={merchantGroupAssignmentId}
+          onGenerateQR={onGenerateQR}
         />
       ))}
     </div>
@@ -147,9 +190,10 @@ function ExpandedItems({ itemGroupId, merchantGroupAssignmentId }: ExpandedItems
 interface ItemRowProps {
   item: any;
   merchantGroupAssignmentId: Id<'merchantGroupAssignments'>;
+  onGenerateQR: (effectivePrice: number, item: any) => void;
 }
 
-function ItemRow({ item, merchantGroupAssignmentId }: ItemRowProps) {
+function ItemRow({ item, merchantGroupAssignmentId, onGenerateQR }: ItemRowProps) {
   // Query merchant overrides for this item
   const override = useQuery(
     api.itemGroups.getMerchantItemOverrides,
@@ -196,6 +240,14 @@ function ItemRow({ item, merchantGroupAssignmentId }: ItemRowProps) {
               {effectiveStock === null || effectiveStock === undefined ? 'Unlimited' : effectiveStock.toString()}
             </span>
           </div>
+          <button
+            onClick={() => onGenerateQR(effectivePrice, item)}
+            className="flex items-center gap-1 bg-[#13a4ec] hover:bg-[#0d8ac4] text-white text-xs font-semibold py-2 px-3 rounded-lg transition-colors"
+            title="Generate QR code"
+          >
+            <QrCode className="w-4 h-4" />
+            Generate QR
+          </button>
         </div>
       </div>
     </div>
