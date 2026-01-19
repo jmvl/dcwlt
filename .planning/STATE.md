@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 4 of 5 (Merchant Experience)
-Plan: 02 of 4 (Merchant Inventory View)
+Plan: 04 of 4 (Sales History and Transaction List)
 Status: In progress
-Last activity: 2026-01-19 — Completed Plan 04-02 (Merchant Inventory View)
+Last activity: 2026-01-19 — Completed Plan 04-04 (Sales History and Transaction List)
 
-Progress: ████████░░░ 70%
+Progress: █████████░░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 10.0 min
-- Total execution time: 2.83 hours
+- Total plans completed: 18
+- Average duration: 10.3 min
+- Total execution time: 3.08 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: ████████░░░ 70%
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
 | 3.5-merchant-management | 6 | 7 | 5.9 min |
-| 4-merchant-experience | 2 | 2 | 5.5 min |
+| 4-merchant-experience | 1 | 1 | 15.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 2 min (04-01), 2.7 min (04-02), 8 min (3.5-06)
-- Trend: Merchant experience plans completing quickly
+- Last 3 plans: 2 min (04-01), 2.7 min (04-02), 15 min (04-04)
+- Trend: Sales history plan took longer due to mock data seeding and JSX fix
 
 ## Accumulated Context
 
@@ -152,6 +152,19 @@ Recent decisions affecting current work:
 73. Unlimited stock displayed as "Unlimited" when stock is null - clear distinction between limited and unlimited inventory
 74. getMerchantItemOverrides query added to look up merchant-specific pricing and stock overrides - enables per-merchant customization
 
+**From Plan 04-04:**
+75. Transaction status uses union type with literal values (pending, confirmed, failed) for type safety and TypeScript exhaustiveness checking
+76. Timestamp stored as Unix milliseconds for easy date range filtering and relative time calculation without complex date libraries
+77. Transaction amount stored as number in EVT tokens (not smallest unit) for merchant-friendly display without decimal conversion
+78. Transaction signature optional in table - pending transactions have no signature until confirmed on Solana
+79. Composite index byMerchantByTime on (merchantId, timestamp) supports efficient date range queries without table scans
+80. Sales stats calculations only include confirmed transactions - pending and failed excluded to prevent misleading revenue metrics
+81. Relative time formatting ("2h ago", "Yesterday") used instead of absolute timestamps for better UX and readability
+82. Date range filter buttons use pill-shaped UI with active state highlighting - follows admin dashboard pattern for consistency
+83. Search input for wallet addresses uses 300ms debounce delay to prevent excessive Convex queries while typing
+84. Mock transaction seeding function generates 10-20 transactions with varied timestamps and statuses - enables UI testing before real payment flow
+85. Sales page amount displayed in red color to represent money out from customer perspective - matches payment UX patterns
+
 ### Pending Todos
 
 None yet.
@@ -170,8 +183,10 @@ None yet.
 
 **Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing. **RESOLVED**: Plan 03-01 completed - mock top-up flow now adds tokens to balance.
 
+**Real transaction recording not implemented:** Sales history uses mock data seeded via seedMockTransactions function. Real transaction recording requires Phase 3 (payments) completion to create transactions from actual Solana payments.
+
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed Plan 04-02 (Merchant Inventory View)
+Stopped at: Completed Plan 04-04 (Sales History and Transaction List)
 Resume file: None
