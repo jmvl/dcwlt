@@ -203,8 +203,8 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
                       sessionStorage.removeItem(key);
                     }
                   });
-                  // Force hard refresh to home - this clears all React state
-                  window.location.href = '/';
+                  // Force hard refresh to merchant login - this clears all React state
+                  window.location.href = '/merchant/login';
                 }
               }}
               className="w-full px-6 py-3 border border-[#2d4452] rounded-lg text-[#9db0b9] hover:text-white hover:bg-[#243b47] transition-colors"
