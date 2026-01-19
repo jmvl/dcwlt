@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
 
 /**
@@ -57,10 +57,10 @@ function formatAmount(amountDisplay: string): string {
 }
 
 /**
- * Payment confirmation component with safety countdown timer
+ * Payment confirmation component
  *
- * Displays payment details and requires user to wait 3 seconds before
- * confirming, preventing accidental payments.
+ * Displays payment details for user confirmation before executing
+ * a Solana Pay transaction.
  *
  * @example
  * ```tsx
@@ -86,27 +86,6 @@ export function PaymentConfirmation({
   loading = false,
   error = null,
 }: PaymentConfirmationProps) {
-  const [countdown, setCountdown] = useState(3);
-  const [canConfirm, setCanConfirm] = useState(false);
-
-  // Countdown timer effect
-  useEffect(() => {
-    if (loading) return; // Don't start countdown if already loading
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setCanConfirm(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [loading]);
-
   const displayAmount = formatAmount(amount);
   const displayRecipient = formatAddress(recipient);
   const merchantLabel = label || 'Unknown Merchant';
@@ -166,15 +145,6 @@ export function PaymentConfirmation({
             </div>
           )}
 
-          {/* Countdown */}
-          {!canConfirm && !loading && (
-            <div className="mb-4 text-center">
-              <p className="text-[#9db0b9] text-sm">
-                Confirming in <span className="text-[#13a4ec] font-semibold">{countdown}</span>...
-              </p>
-            </div>
-          )}
-
           {/* Buttons */}
           <div className="flex gap-3">
             <button
@@ -187,7 +157,7 @@ export function PaymentConfirmation({
 
             <button
               onClick={onConfirm}
-              disabled={!canConfirm || loading}
+              disabled={loading}
               className="flex-1 py-3 px-4 rounded-xl bg-[#13a4ec] text-white font-medium hover:bg-[#0d8ac4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
