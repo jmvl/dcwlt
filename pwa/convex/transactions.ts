@@ -13,6 +13,48 @@ import { v } from "convex/values";
 // ============================================================================
 
 /**
+ * List all transactions for a merchant in real-time without filtering.
+ *
+ * This query is designed for live subscriptions - it takes only merchantId
+ * as a parameter to maintain a stable WebSocket connection. Filtering is
+ * handled client-side in the useMerchantLiveTransactions hook.
+ *
+ * @param merchantId - The merchant to get transactions for
+ * @returns Array of transactions with item details, newest first
+ *
+ * @example
+ * const transactions = await listLiveMerchantTransactions({
+ *   merchantId: "merchant123"
+ * });
+ */
+export const listLiveMerchantTransactions = query({
+  args: {
+    merchantId: v.id("merchants"),
+  },
+  handler: async (ctx, args) => {
+    // Query all transactions for this merchant, no filters
+    const transactions = await ctx.db
+      .query("transactions")
+      .withIndex("byMerchantByTime", (q) => q.eq("merchantId", args.merchantId))
+      .order("desc")
+      .take(100); // Limit to last 100 for performance
+
+    // Fetch item names for display
+    const transactionsWithItems = await Promise.all(
+      transactions.map(async (tx) => {
+        const item = await ctx.db.get(tx.itemId);
+        return {
+          ...tx,
+          itemName: item?.name || "Unknown Item",
+        };
+      })
+    );
+
+    return transactionsWithItems;
+  },
+});
+
+/**
  * List transactions for a merchant with optional filtering.
  *
  * @param merchantId - The merchant to get transactions for
