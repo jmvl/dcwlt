@@ -66,7 +66,8 @@ export default function MerchantRegisterPage() {
     const emailAccount = user?.linkedAccounts?.find(
       (account: any) => account.type === "email" || account.type === "google"
     );
-    const email = emailAccount?.address as string | undefined;
+    // For email/google accounts, use 'email' property; for wallet accounts, use 'address'
+    const email = (emailAccount as any)?.email || (emailAccount as any)?.address as string | undefined;
 
     if (!email) {
       setErrorMessage("Could not retrieve email from authentication. Please try logging in again.");
@@ -156,9 +157,11 @@ export default function MerchantRegisterPage() {
   }
 
   // Get email from authenticated user for display
-  const userEmail = user?.linkedAccounts?.find(
+  const emailAccount = user?.linkedAccounts?.find(
     (account: any) => account.type === "email" || account.type === "google"
-  )?.address as string | undefined;
+  );
+  // For email/google accounts, use 'email' property; for wallet accounts, use 'address'
+  const userEmail = (emailAccount as any)?.email || (emailAccount as any)?.address as string | undefined;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#101c22] py-12 px-4">

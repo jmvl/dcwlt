@@ -26,12 +26,12 @@ export function usePrivyAuth() {
 
       if (solanaWallet && 'address' in solanaWallet) {
         console.log('[usePrivyAuth] Creating/updating wallet record:', solanaWallet.address);
-        // Extract email from Privy user (email/google accounts have 'address' property)
+        // Extract email from Privy user (email/google accounts have 'email' property)
         const emailAccount = user.linkedAccounts?.find(
           (account: any) => (account.type === 'email' || account.type === 'google')
         );
-        // Privy email/google accounts have structure: { type, address }
-        const email = (emailAccount as any)?.address as string | undefined;
+        // Privy email/google accounts have structure: { type, email }
+        const email = (emailAccount as any)?.email as string | undefined;
 
         createUser({
           walletAddress: solanaWallet.address as string,
