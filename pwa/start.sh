@@ -67,8 +67,8 @@ echo -e "${BLUE}[1/2]${NC} Starting Convex dev agent..."
 if pgrep -f "convex dev" > /dev/null; then
     echo -e "${YELLOW}Convex dev is already running${NC}"
 else
-    # Start Convex in background, redirect output to log file
-    npx convex dev > /tmp/convex-dev.log 2>&1 &
+    # Start Convex in background with deployment from env, redirect output to log file
+    CONVEX_DEPLOYMENT=cool-flamingo-776 npx convex dev > /tmp/convex-dev.log 2>&1 &
     CONVEX_PID=$!
 
     # Wait for Convex to be ready
