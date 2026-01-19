@@ -56,7 +56,8 @@ sleep 5
 URL=$(grep -o 'https://[a-z0-9]\{8,\}\.ngrok[^"]*' /tmp/ngrok/tunnel.log | head -1)
 
 if [ -n "$URL" ]; then
-  clear
+  # Don't clear - let user see the URL first
+  echo ""
   echo "═══════════════════════════════════════════════"
   echo "  NGROK TUNNEL ACTIVE"
   echo "═══════════════════════════════════════════════"
@@ -66,18 +67,22 @@ if [ -n "$URL" ]; then
   echo ""
   echo "  Scan QR code to access from your phone:"
   echo ""
+
+  # Generate QR code
   echo "$URL" | qrencode -t ANSIUTF8
+
   echo ""
   echo "═══════════════════════════════════════════════"
   echo ""
   echo "  Press Ctrl+C to stop the tunnel"
   echo ""
   echo "  Tunnel log: /tmp/ngrok/tunnel.log"
+  echo "  Direct URL: $URL"
   echo "═══════════════════════════════════════════════"
   echo ""
 
   # Handle graceful shutdown
-  trap "echo ''; echo 'Stopping ngrok...'; kill $NGROK_PID 2>/dev/null; exit" INT TERM
+  trap "echo ''; echo 'Stopping ngrok...'; kill $NGROK_PID 2>/dev/null; pkill -f 'tail.*ngrok' 2>/dev/null; exit" INT TERM
 
   # Keep script running and show ngrok activity
   tail -f /tmp/ngrok/tunnel.log &
