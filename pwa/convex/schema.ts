@@ -113,4 +113,101 @@ export default defineSchema({
   })
     .index("by_merchantEvent", ["merchantEventId"])
     .index("by_name", ["itemName"]),
+
+  // Item Groups - event-level item categories (Beverages, Food, Merchandise, etc.)
+  itemGroups: defineTable({
+    // Reference to event
+    eventId: v.id("events"),
+    // Group name (e.g., "Beverages", "Food", "Merchandise")
+    name: v.string(),
+    // Optional group description
+    description: v.optional(v.string()),
+    // Display order for sorting
+    order: v.number(),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_order", ["eventId", "order"]),
+
+  // Group Items - items within item groups (event-level catalog)
+  groupItems: defineTable({
+    // Reference to item group
+    itemGroupId: v.id("itemGroups"),
+    // Item name (e.g., "Beer", "Hot Dog", "T-Shirt")
+    name: v.string(),
+    // Optional item description
+    description: v.optional(v.string()),
+    // Default price in EVT tokens
+    defaultPrice: v.number(),
+    // Default available quantity (null for unlimited)
+    defaultStock: v.optional(v.number()),
+    // Display order within the group
+    order: v.number(),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_group", ["itemGroupId"])
+    .index("by_group_order", ["itemGroupId", "order"]),
+
+  // Merchant Group Assignments - links item groups to merchants with optional overrides
+  merchantGroupAssignments: defineTable({
+    // Reference to merchant-event assignment
+    merchantEventId: v.id("merchantEvents"),
+    // Reference to item group
+    itemGroupId: v.id("itemGroups"),
+    // Whether this group is enabled for this merchant
+    enabled: v.boolean(),
+    // Display order for this merchant
+    order: v.number(),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_merchantEvent", ["merchantEventId"])
+    .index("by_event_group", ["itemGroupId"])
+    .index("by_merchantEvent_order", ["merchantEventId", "order"]),
+
+  // Merchant Item Overrides - per-merchant overrides for item properties
+  merchantItemOverrides: defineTable({
+    // Reference to merchant group assignment
+    merchantGroupAssignmentId: v.id("merchantGroupAssignments"),
+    // Reference to group item
+    groupItemId: v.id("groupItems"),
+    // Optional price override (null means use default)
+    priceOverride: v.optional(v.number()),
+    // Optional stock override (null means use default)
+    stockOverride: v.optional(v.number()),
+    // Creation timestamp
+    createdAt: v.number(),
+    // Last update timestamp
+    updatedAt: v.number(),
+  })
+    .index("by_merchantGroupAssignment", ["merchantGroupAssignmentId"])
+    .index("by_groupItem", ["groupItemId"]),
+
+  // Transactions - payment transaction records
+  transactions: defineTable({
+    // Reference to merchant receiving payment
+    merchantId: v.id("merchants"),
+    // Reference to item purchased
+    itemId: v.id("groupItems"),
+    // Customer wallet address
+    customerWallet: v.string(),
+    // Amount in EVT (lamports/smallest unit)
+    amount: v.number(),
+    // Unix timestamp in milliseconds
+    timestamp: v.number(),
+    // Solana transaction signature (optional for pending transactions)
+    signature: v.optional(v.string()),
+    // Transaction status
+    status: v.union(v.literal("pending"), v.literal("confirmed"), v.literal("failed")),
+  })
+    .index("byMerchant", ["merchantId"])
+    .index("byMerchantByTime", ["merchantId", "timestamp"]),
 });
