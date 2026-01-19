@@ -6,6 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Connection, Transaction } from '@solana/web3.js';
 import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions';
 import { balanceQueryKeys } from './useSolanaBalance';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Payment parameters
@@ -17,6 +20,10 @@ export interface PaymentParams {
   amount: string;
   /** SPL Token mint address */
   splToken: string;
+  /** Optional merchant ID for Convex transaction record */
+  merchantId?: Id<'merchants'>;
+  /** Optional item ID for Convex transaction record */
+  itemId?: Id<'groupItems'>;
 }
 
 /**
@@ -45,6 +52,9 @@ export function usePayment() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Convex mutation for creating transaction records
+  const createTransaction = useMutation(api.transactions.createTransaction);
 
   /**
    * Execute a payment transaction
@@ -139,6 +149,30 @@ export function usePayment() {
           // The transaction was still successful on-chain
         }
 
+        // Step 7: Create transaction record in Convex (if merchant and item provided)
+        if (params.merchantId && params.itemId) {
+          console.log('[usePayment] Creating Convex transaction record...');
+          try {
+            // Convert amount from base units to display amount (EVT)
+            const amountInEVT = Number(params.amount) / 1e9; // TOKEN_DECIMALS = 9
+
+            await createTransaction({
+              merchantId: params.merchantId,
+              itemId: params.itemId,
+              customerWallet: sender,
+              amount: amountInEVT,
+              signature: txSignature,
+            });
+            console.log('[usePayment] Convex transaction record created');
+          } catch (convexError) {
+            console.error('[usePayment] Failed to create Convex transaction record:', convexError);
+            // Don't fail the payment if Convex write fails
+            // The transaction was still successful on-chain
+          }
+        } else {
+          console.log('[usePayment] Skipping Convex transaction record (no merchantId/itemId)');
+        }
+
         console.log('[usePayment] Payment successful:', txSignature);
         return {
           success: true,
@@ -167,7 +201,7 @@ export function usePayment() {
         setLoading(false);
       }
     },
-    [wallets, signTransaction, queryClient]
+    [wallets, signTransaction, queryClient, createTransaction]
   );
 
   return {

@@ -6,6 +6,9 @@ import { PaymentConfirmation } from '../components/PaymentConfirmation';
 import { usePayment } from '../hooks/usePayment';
 import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
 import { parseTokenAmount, TOKEN_DECIMALS } from '../../src/utils/transactions';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Inner component that uses useSearchParams
@@ -31,6 +34,13 @@ function ConfirmPaymentContent() {
   const splToken = searchParams.get('splToken');
   const label = searchParams.get('label') || undefined;
   const message = searchParams.get('message') || undefined;
+  const reference = searchParams.get('reference'); // This is the itemId
+
+  // Look up merchant by wallet address (recipient)
+  const merchant = useQuery(
+    api.merchants.getMerchantByWallet,
+    recipient ? { walletAddress: recipient } : 'skip'
+  );
 
   // Validate required parameters (useMemo for computed value)
   const isValid = useMemo(() => recipient && amount && splToken, [recipient, amount, splToken]);
@@ -84,6 +94,8 @@ function ConfirmPaymentContent() {
         recipient,
         amount: amountInBaseUnits,
         splToken,
+        merchantId: merchant?._id,
+        itemId: reference as Id<'groupItems'> | undefined,
       });
       console.log('[ConfirmPayment] executePayment returned:', result);
 
