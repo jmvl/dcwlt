@@ -45,6 +45,8 @@ function ConfirmPaymentContent() {
   // The reference parameter from QR code is already a string ID
   const merchantId: string | undefined = merchant?._id?.toString() || undefined;
   const itemId: string | undefined = reference || undefined;
+  // Use merchant business name from Convex lookup, fallback to URL parameter
+  const merchantLabel = merchant?.businessName || label || undefined;
 
   console.log('[ConfirmPayment] Payment parameters:', {
     recipient,
@@ -278,7 +280,7 @@ function ConfirmPaymentContent() {
       recipient={recipient!}
       amount={amount!}
       splToken={splToken!}
-      label={label}
+      label={merchantLabel}
       message={message}
       onConfirm={handleConfirm}
       onCancel={handleCancel}
