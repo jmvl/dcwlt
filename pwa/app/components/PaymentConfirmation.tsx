@@ -146,11 +146,11 @@ export function PaymentConfirmation({
           )}
 
           {/* Buttons */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onCancel}
               disabled={loading}
-              className="flex-1 py-3 px-4 rounded-xl border border-[#243b47] text-[#9db0b9] font-medium hover:bg-[#243b47] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-4 px-6 text-base rounded-xl border border-[#243b47] text-[#9db0b9] font-medium hover:bg-[#243b47] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Cancel
             </button>
@@ -158,7 +158,7 @@ export function PaymentConfirmation({
             <button
               onClick={onConfirm}
               disabled={loading}
-              className="flex-1 py-3 px-4 rounded-xl bg-[#13a4ec] text-white font-medium hover:bg-[#0d8ac4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-4 px-6 text-base rounded-xl bg-[#13a4ec] text-white font-medium hover:bg-[#0d8ac4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
             >
               {loading ? (
                 <>
