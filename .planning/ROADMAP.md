@@ -113,24 +113,28 @@ Plans:
 - [x] 03.5-05: Item configuration per merchant/event (admin sets prices and inventory for each merchant's assigned booth)
 - [x] 03.5-06: Admin dashboard (merchant management, wallet monitoring, event-item assignment monitoring)
 
-### Phase 4: History + Offline
+### Phase 4: Merchant Experience
 
-**Goal**: Transaction history and offline support
-**Depends on**: Phase 3.5 (merchant system must exist before showing merchant transactions in history)
-**Requirements**: HIST-01, HIST-02, HIST-03, HIST-04, HIST-05, HIST-06, OFF-01, OFF-02, OFF-03, OFF-04, OFF-05, OFF-06
+**Goal**: Merchant-facing dashboard for viewing balance, assigned inventory, sales history, and generating payment QR codes
+**Depends on**: Phase 3.5 (merchant registration, approval workflow, and item groups must exist)
+**Requirements**: MERCH-EXP-01, MERCH-EXP-02, MERCH-EXP-03, MERCH-EXP-04, MERCH-EXP-05, MERCH-EXP-06, MERCH-EXP-07, MERCH-EXP-08
 **Success Criteria** (what must be TRUE):
 
-1. Transaction history list shows all activity
-2. Offline banner shown when disconnected
-3. Last-known balance displayed when offline
-   **Research**: Unlikely (builds on Phase 1 service worker)
+1. Approved merchants can log in via same Privy auth as regular users
+2. Merchant dashboard displays their EVT balance and wallet address
+3. Merchants can view their assigned item groups and inventory for events
+4. Merchants can generate Solana Pay QR codes for each item
+5. Merchants can view their sales history with transaction details
+6. Unauthorized users (non-approved merchants) cannot access merchant dashboard
+   **Research**: Unlikely (builds on Phase 3.5 backend which is complete)
    **Plans**: TBD
 
 Plans:
 
-- [ ] 04-01: Transaction history component with Convex queries
-- [ ] 04-02: Offline detection and banner
-- [ ] 04-03: Runtime caching for API responses
+- [x] 04-01: Merchant authentication and dashboard layout
+- [x] 04-02: Merchant inventory view (assigned item groups and items)
+- [x] 04-03: QR code generation for payments
+- [x] 04-04: Sales history and transaction list
 
 ## Progress
 
@@ -145,4 +149,4 @@ Decimal phases (like 3.5) execute between their surrounding integers (3 → 3.5 
 | 2. Auth + Wallet + Core UI              | 4/4            | Complete    | 2026-01-16 |
 | 3. Top-Up + Payments                    | 0/4            | Not started | -          |
 | 3.5. Merchant Registration & Management | 6/6            | Complete    | 2026-01-18 |
-| 4. History + Offline                    | 0/3            | Not started | -          |
+| 4. Merchant Experience                 | 4/4            | Complete    | 2026-01-19 |

@@ -76,6 +76,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **OFF-05**: "You're offline" banner shown when disconnected
 - [ ] **OFF-06**: Last-known balance displayed when offline
 
+### Merchant Experience
+
+- [x] **MERCH-EXP-01**: Merchant authentication uses same Privy social login as regular users
+- [x] **MERCH-EXP-02**: Merchant dashboard route accessible only to approved merchants (status="approved")
+- [x] **MERCH-EXP-03**: Merchant balance card displays EVT balance and wallet address
+- [x] **MERCH-EXP-04**: Merchant inventory view shows assigned item groups for their events
+- [x] **MERCH-EXP-05**: Each item displays name, description, price (in EVT), and stock count
+- [x] **MERCH-EXP-06**: QR code generation button for each item (Solana Pay URL format)
+- [x] **MERCH-EXP-07**: Sales history list shows all transactions with timestamp, item, amount, and customer wallet
+- [x] **MERCH-EXP-08**: Logout button terminates merchant session and returns to home page
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -129,7 +140,6 @@ Explicitly excluded. Documented to prevent scope creep.
 | Multi-language support | MVP focused on single market; adds localization complexity |
 | Mainnet deployment | Devnet only for MVP validation; mainnet requires security audit and legal compliance |
 | iOS/Android native apps | PWA deliberately chosen to avoid App Store/Play Store review cycles |
-| Merchant dashboard | Merchants use static QR codes initially; dynamic pricing deferred |
 | Thundering Herd optimization | Full 20,000-user concurrency optimization deferred until MVP validates core flows |
 
 ## Traceability
@@ -186,9 +196,17 @@ Which phases cover which requirements. Updated by create-roadmap.
 | OFF-04 | Phase 4 | Pending |
 | OFF-05 | Phase 4 | Pending |
 | OFF-06 | Phase 4 | Pending |
+| MERCH-EXP-01 | Phase 4 | Complete |
+| MERCH-EXP-02 | Phase 4 | Complete |
+| MERCH-EXP-03 | Phase 4 | Complete |
+| MERCH-EXP-04 | Phase 4 | Complete |
+| MERCH-EXP-05 | Phase 4 | Complete |
+| MERCH-EXP-06 | Phase 4 | Complete |
+| MERCH-EXP-07 | Phase 4 | Complete |
+| MERCH-EXP-08 | Phase 4 | Complete |
 
 **Coverage:**
-- v1 requirements: 48 total
+- v1 requirements: 56 total
 - Mapped to phases: 48
 - Unmapped: 0 ✓
 
