@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 4 of 5 (Merchant Experience)
-Plan: 04 of 4 (Sales History and Transaction List)
-Status: In progress
-Last activity: 2026-01-19 — Completed Plan 04-04 (Sales History and Transaction List)
+Plan: 03 of 4 (QR Code Generation)
+Status: Completed
+Last activity: 2026-01-19 — Completed Plan 04-03 (QR Code Generation)
 
-Progress: █████████░░ 80%
+Progress: ██████████░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 10.3 min
-- Total execution time: 3.08 hours
+- Total plans completed: 19
+- Average duration: 10.4 min
+- Total execution time: 3.29 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: █████████░░ 80%
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
 | 3-topup-payments | 2 | 2 | 24.5 min |
 | 3.5-merchant-management | 6 | 7 | 5.9 min |
-| 4-merchant-experience | 1 | 1 | 15.0 min |
+| 4-merchant-experience | 3 | 3 | 9.3 min |
 
 **Recent Trend:**
-- Last 3 plans: 2 min (04-01), 2.7 min (04-02), 15 min (04-04)
-- Trend: Sales history plan took longer due to mock data seeding and JSX fix
+- Last 3 plans: 2.7 min (04-02), 8 min (04-03), 15 min (04-04)
+- Trend: Merchant experience plans completing quickly with good consistency
 
 ## Accumulated Context
 
@@ -152,18 +152,26 @@ Recent decisions affecting current work:
 73. Unlimited stock displayed as "Unlimited" when stock is null - clear distinction between limited and unlimited inventory
 74. getMerchantItemOverrides query added to look up merchant-specific pricing and stock overrides - enables per-merchant customization
 
+**From Plan 04-03:**
+75. Use qrcode library for client-side QR code generation on HTML5 canvas - avoids server-side generation and enables instant QR code display
+76. Solana Pay URL format: solana:address?amount=X&spl-token=Y&reference=Z - standardized URL format for Solana Pay transactions with item reference
+77. TOKEN_MINT_ADDRESS defined inline in QRCodeGenerator component (same as useSolanaBalance hook) - consistent with existing pattern for token mint address
+78. Download PNG converts canvas to blob and creates download link - enables merchants to save QR codes as images for printing
+79. Print button opens browser print dialog with @media print CSS to hide non-QR elements - clean print output showing only QR code
+80. QR code modal shows item name, price, and Solana Pay URL for reference - merchants can verify QR code contents before printing
+
 **From Plan 04-04:**
-75. Transaction status uses union type with literal values (pending, confirmed, failed) for type safety and TypeScript exhaustiveness checking
-76. Timestamp stored as Unix milliseconds for easy date range filtering and relative time calculation without complex date libraries
-77. Transaction amount stored as number in EVT tokens (not smallest unit) for merchant-friendly display without decimal conversion
-78. Transaction signature optional in table - pending transactions have no signature until confirmed on Solana
-79. Composite index byMerchantByTime on (merchantId, timestamp) supports efficient date range queries without table scans
-80. Sales stats calculations only include confirmed transactions - pending and failed excluded to prevent misleading revenue metrics
-81. Relative time formatting ("2h ago", "Yesterday") used instead of absolute timestamps for better UX and readability
-82. Date range filter buttons use pill-shaped UI with active state highlighting - follows admin dashboard pattern for consistency
-83. Search input for wallet addresses uses 300ms debounce delay to prevent excessive Convex queries while typing
-84. Mock transaction seeding function generates 10-20 transactions with varied timestamps and statuses - enables UI testing before real payment flow
-85. Sales page amount displayed in red color to represent money out from customer perspective - matches payment UX patterns
+81. Transaction status uses union type with literal values (pending, confirmed, failed) for type safety and TypeScript exhaustiveness checking
+82. Timestamp stored as Unix milliseconds for easy date range filtering and relative time calculation without complex date libraries
+83. Transaction amount stored as number in EVT tokens (not smallest unit) for merchant-friendly display without decimal conversion
+84. Transaction signature optional in table - pending transactions have no signature until confirmed on Solana
+85. Composite index byMerchantByTime on (merchantId, timestamp) supports efficient date range queries without table scans
+86. Sales stats calculations only include confirmed transactions - pending and failed excluded to prevent misleading revenue metrics
+87. Relative time formatting ("2h ago", "Yesterday") used instead of absolute timestamps for better UX and readability
+88. Date range filter buttons use pill-shaped UI with active state highlighting - follows admin dashboard pattern for consistency
+89. Search input for wallet addresses uses 300ms debounce delay to prevent excessive Convex queries while typing
+90. Mock transaction seeding function generates 10-20 transactions with varied timestamps and statuses - enables UI testing before real payment flow
+91. Sales page amount displayed in red color to represent money out from customer perspective - matches payment UX patterns
 
 ### Pending Todos
 
