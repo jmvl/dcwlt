@@ -8,7 +8,6 @@ import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions'
 import { balanceQueryKeys } from './useSolanaBalance';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Payment parameters
@@ -20,10 +19,10 @@ export interface PaymentParams {
   amount: string;
   /** SPL Token mint address */
   splToken: string;
-  /** Optional merchant ID for Convex transaction record */
-  merchantId?: Id<'merchants'>;
-  /** Optional item ID for Convex transaction record */
-  itemId?: Id<'groupItems'>;
+  /** Optional merchant ID for Convex transaction record (string ID at runtime) */
+  merchantId?: string;
+  /** Optional item ID for Convex transaction record (string ID at runtime) */
+  itemId?: string;
 }
 
 /**
@@ -152,25 +151,37 @@ export function usePayment() {
         // Step 7: Create transaction record in Convex (if merchant and item provided)
         if (params.merchantId && params.itemId) {
           console.log('[usePayment] Creating Convex transaction record...');
+          console.log('[usePayment] IDs:', {
+            merchantId: params.merchantId.toString(),
+            itemId: params.itemId.toString(),
+            customerWallet: sender,
+            amount: params.amount,
+          });
           try {
             // Convert amount from base units to display amount (EVT)
             const amountInEVT = Number(params.amount) / 1e9; // TOKEN_DECIMALS = 9
 
-            await createTransaction({
-              merchantId: params.merchantId,
-              itemId: params.itemId,
+            console.log('[usePayment] Calling createTransaction mutation...');
+            // Type assertion: params.merchantId and params.itemId are string IDs at runtime
+            // The Convex mutation expects Id<> types for type safety, but at runtime these are just strings
+            const transactionId = await createTransaction({
+              merchantId: params.merchantId as any,
+              itemId: params.itemId as any,
               customerWallet: sender,
               amount: amountInEVT,
               signature: txSignature,
             });
-            console.log('[usePayment] Convex transaction record created');
+            console.log('[usePayment] Convex transaction record created:', transactionId);
           } catch (convexError) {
             console.error('[usePayment] Failed to create Convex transaction record:', convexError);
             // Don't fail the payment if Convex write fails
             // The transaction was still successful on-chain
           }
         } else {
-          console.log('[usePayment] Skipping Convex transaction record (no merchantId/itemId)');
+          console.log('[usePayment] Skipping Convex transaction record (no merchantId/itemId)', {
+            hasMerchantId: !!params.merchantId,
+            hasItemId: !!params.itemId,
+          });
         }
 
         console.log('[usePayment] Payment successful:', txSignature);

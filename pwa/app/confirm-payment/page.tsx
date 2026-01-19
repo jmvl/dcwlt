@@ -8,7 +8,6 @@ import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
 import { parseTokenAmount, TOKEN_DECIMALS } from '../../src/utils/transactions';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Inner component that uses useSearchParams
@@ -41,6 +40,24 @@ function ConfirmPaymentContent() {
     api.merchants.getMerchantByWallet,
     recipient ? { walletAddress: recipient } : 'skip'
   );
+
+  // Convex IDs are strings at runtime with type annotations for compile-time safety
+  // The reference parameter from QR code is already a string ID
+  const merchantId: string | undefined = merchant?._id?.toString();
+  const itemId: string | undefined = reference;
+
+  console.log('[ConfirmPayment] Payment parameters:', {
+    recipient,
+    amount,
+    splToken,
+    label,
+    message,
+    reference,
+    merchantId: merchantId?.toString(),
+    itemId: itemId?.toString(),
+    merchantFound: !!merchant,
+    merchantData: merchant,
+  });
 
   // Validate required parameters (useMemo for computed value)
   const isValid = useMemo(() => recipient && amount && splToken, [recipient, amount, splToken]);
@@ -94,8 +111,8 @@ function ConfirmPaymentContent() {
         recipient,
         amount: amountInBaseUnits,
         splToken,
-        merchantId: merchant?._id,
-        itemId: reference as Id<'groupItems'> | undefined,
+        merchantId,
+        itemId,
       });
       console.log('[ConfirmPayment] executePayment returned:', result);
 
