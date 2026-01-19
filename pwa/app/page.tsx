@@ -24,6 +24,11 @@ export default function HomePage() {
               </button>
             </Link>
           </div>
+          <div className="mt-2">
+            <Link href="/merchant/login" className="text-[#9db0b9] hover:text-[#13a4ec] text-sm">
+              Merchant Login →
+            </Link>
+          </div>
         </div>
       </main>
       <InstallPrompt />

@@ -1,24 +1,37 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useWeb3Auth } from '../contexts/Web3AuthContext';
 
 export function LoginScreen() {
   const { login, isLoading } = useWeb3Auth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleLogin = async () => {
+    setIsLoggingIn(true);
     try {
+      console.log('LoginScreen: Initiating login...');
       await login();
+      console.log('LoginScreen: Login completed successfully');
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('LoginScreen: Login failed:', error);
       // In production, show user-friendly error message
+      Alert.alert(
+        'Login Failed',
+        'Unable to complete login. Please check your internet connection and try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoggingIn) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#9945FF" />
-        <Text style={styles.loadingText}>Initializing...</Text>
+        <Text style={styles.loadingText}>
+          {isLoggingIn ? 'Signing in with Google...' : 'Initializing...'}
+        </Text>
       </View>
     );
   }

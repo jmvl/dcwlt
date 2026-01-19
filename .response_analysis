@@ -1,0 +1,17 @@
+{
+  "loop_number": 34,
+  "timestamp": "2026-01-14T00:40:03+00:00",
+  "output_file": "logs/claude_output_2026-01-14_01-36-03.log",
+  "output_format": "text",
+  "analysis": {
+    "has_completion_signal": true,
+    "is_test_only": false,
+    "is_stuck": false,
+    "has_progress": true,
+    "files_modified": 11,
+    "confidence_score": 40,
+    "exit_signal": true,
+    "work_summary": "Output analyzed, no explicit summary found",
+    "output_length": 2912
+  }
+}

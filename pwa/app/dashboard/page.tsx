@@ -7,7 +7,7 @@ import { LoginButton } from '../components/LoginButton';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
 
 export default function DashboardPage() {
-  const { authenticated } = usePrivyAuth();
+  const { authenticated, userEmail } = usePrivyAuth();
 
   return (
     <div className="min-h-screen bg-[#101c22] flex flex-col">
@@ -26,6 +26,12 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="w-full max-w-md">
+            {userEmail && (
+              <div className="mb-4 p-3 bg-[#1a2f38] rounded-lg border border-[#2a4049]">
+                <p className="text-xs text-[#9db0b9] mb-1">Signed in as</p>
+                <p className="text-sm text-white font-medium">{userEmail}</p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <Link
                 href="/topup"

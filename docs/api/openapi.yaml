@@ -1,0 +1,224 @@
+openapi: 3.0.3
+info:
+  title: DCWLT API
+  description: |
+    Digital Currency Wallet with Ledger Technology - API Documentation
+
+    This is a Proof of Concept (POC) API for an Android crypto wallet demonstrating
+    Gmail login → Wallet → Simulated Visa Top-Up → QR Payment flow using Solana Devnet.
+
+    **IMPORTANT**: This is a POC only. All operations use Solana Devnet with fake money.
+  version: 0.1.0
+  contact:
+    name: DCWLT Development Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Backend API (Top-Up Service)
+  - url: http://localhost:3001
+    description: Merchant API (QR Code Generator)
+
+tags:
+  - name: Top-Up
+    description: Token top-up operations
+  - name: Merchant
+    description: Merchant QR code generation
+
+paths:
+  /api/topup:
+    post:
+      tags:
+        - Top-Up
+      summary: Simulate Visa top-up
+      description: |
+        Transfers Event Tokens from the bank wallet to the user's wallet.
+        This simulates a Visa card top-up by performing an SPL token transfer
+        on Solana Devnet.
+      operationId: topup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpRequest'
+            examples:
+              standard:
+                summary: Standard top-up
+                value:
+                  walletAddress: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+                  amount: 50
+              large:
+                summary: Large top-up
+                value:
+                  walletAddress: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+                  amount: 1000
+      responses:
+        '200':
+          description: Transfer successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpResponse'
+              examples:
+                success:
+                  summary: Successful transfer
+                  value:
+                    success: true
+                    signature: "3BZY2qPyno3JjqvNZKQiPG8DVSSvgfMRdKdqcKZmNfVhGNrF6S5j3kEz7QH2vXmPQw8mKjLdNfTgBhCzMvPxRjLk"
+                    amount: 50
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_address:
+                  summary: Invalid wallet address
+                  value:
+                    success: false
+                    error: "Invalid wallet address format"
+                invalid_amount:
+                  summary: Invalid amount
+                  value:
+                    success: false
+                    error: "Amount must be a positive number"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                blockchain_error:
+                  summary: Blockchain transaction failed
+                  value:
+                    success: false
+                    error: "Transaction failed: insufficient funds"
+
+  /:
+    get:
+      tags:
+        - Merchant
+      summary: Merchant dashboard
+      description: Returns the HTML dashboard for generating payment QR codes
+      operationId: getDashboard
+      responses:
+        '200':
+          description: HTML dashboard
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<!DOCTYPE html>..."
+
+  /qr:
+    get:
+      tags:
+        - Merchant
+      summary: Generate payment QR code
+      description: |
+        Generates a Solana Pay QR code for receiving payments.
+        The QR code contains a Solana Pay URL with payment details.
+      operationId: generateQR
+      parameters:
+        - name: amount
+          in: query
+          required: true
+          description: Payment amount in Event Tokens
+          schema:
+            type: number
+            format: double
+            minimum: 0.01
+            example: 50
+        - name: merchant
+          in: query
+          required: true
+          description: Merchant's Solana wallet address (Base58)
+          schema:
+            type: string
+            format: base58
+            example: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+      responses:
+        '200':
+          description: QR code generated
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                success:
+                  summary: QR code page
+                  value: "<!DOCTYPE html><html><body><img src='data:image/png;base64,...'></body></html>"
+        '400':
+          description: Invalid parameters
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                invalid_params:
+                  summary: Missing or invalid parameters
+                  value: "<!DOCTYPE html><html><body><h1>Error: Invalid parameters</h1></body></html>"
+
+components:
+  schemas:
+    TopUpRequest:
+      type: object
+      required:
+        - walletAddress
+        - amount
+      properties:
+        walletAddress:
+          type: string
+          description: Base58-encoded Solana public key
+          format: base58
+          minLength: 32
+          maxLength: 44
+          example: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+        amount:
+          type: number
+          description: Amount of Event Tokens to transfer
+          minimum: 1
+          example: 50
+
+    TopUpResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the transfer was successful
+        signature:
+          type: string
+          description: Solana transaction signature (base58)
+          format: base58
+          example: "3BZY2qPyno3JjqvNZKQiPG8DVSSvgfMRdKdqcKZmNfVhGNrF6S5j3kEz7QH2vXmPQw8mKjLdNfTgBhCzMvPxRjLk"
+        amount:
+          type: number
+          description: Amount of tokens transferred
+          example: 50
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Invalid wallet address format"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for rate limiting (not implemented in POC)
+
+security: []

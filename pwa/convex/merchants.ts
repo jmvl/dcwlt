@@ -6,6 +6,7 @@ export const registerMerchant = mutation({
   args: {
     email: v.string(),
     businessName: v.string(),
+    walletAddress: v.string(),
   },
   handler: async (ctx: any, args: any) => {
     // Check if email already registered
@@ -24,17 +25,19 @@ export const registerMerchant = mutation({
       throw new Error("Invalid email format");
     }
 
-    // Auto-generate Privy embedded wallet address
-    // In production, this would call Privy's embedded wallet API
-    // For now, generate a mock Solana address following the pattern from Phase 2
-    const mockWalletAddress = generateMockWalletAddress(args.email);
+    // Validate wallet address format (basic Solana address validation)
+    // Solana addresses are 32-44 characters in base58 encoding
+    if (!args.walletAddress || args.walletAddress.length < 32 || args.walletAddress.length > 44) {
+      throw new Error("Invalid wallet address format");
+    }
 
     // Create merchant record with pending status
+    // Uses the provided wallet address from Privy embedded wallet
     const merchantId = await ctx.db.insert("merchants", {
       email: args.email,
       businessName: args.businessName,
       status: "pending",
-      walletAddress: mockWalletAddress,
+      walletAddress: args.walletAddress,
       createdAt: Date.now(),
       reviewedAt: undefined,
       reviewedBy: undefined,
@@ -43,7 +46,7 @@ export const registerMerchant = mutation({
 
     return await ctx.db.get(merchantId);
   },
-});
+});;
 
 // Get merchant by email
 export const getMerchantByEmail = query({
@@ -96,47 +99,6 @@ export const getMerchantByWallet = query({
     return merchant;
   },
 });
-
-// Helper function to generate mock wallet address
-// In production, this would be replaced by actual Privy embedded wallet creation
-function generateMockWalletAddress(email: string): string {
-  // Generate a deterministic mock Solana address based on email
-  // This follows the same pattern as user wallets from Phase 2
-  const hash = simpleHash(email);
-  const pubkeyBase58 = encodeBase58(hash);
-  return pubkeyBase58;
-}
-
-// Simple hash function for mock wallet generation
-function simpleHash(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-}
-
-// Base58 encoding for mock Solana address
-function encodeBase58(num: number): string {
-  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  let encoded = "";
-  let n = num;
-
-  while (n > 0) {
-    const remainder = n % 58;
-    encoded = alphabet[remainder] + encoded;
-    n = Math.floor(n / 58);
-  }
-
-  // Pad to typical Solana address length (44 chars)
-  while (encoded.length < 44) {
-    encoded = "1" + encoded;
-  }
-
-  return encoded;
-}
 
 // Approve merchant application
 export const approveMerchant = mutation({
@@ -250,5 +212,36 @@ export const getMerchantWithDetails = query({
     }
 
     return merchant;
+  },
+});
+
+// Update merchant wallet address (for fixing invalid mock addresses)
+export const updateMerchantWalletAddress = mutation({
+  args: {
+    email: v.string(),
+    walletAddress: v.string(),
+  },
+  handler: async (ctx: any, args: any) => {
+    // Find merchant by email
+    const merchant = await ctx.db
+      .query("merchants")
+      .withIndex("by_email", (q: any) => q.eq("email", args.email))
+      .first();
+
+    if (!merchant) {
+      throw new Error("Merchant not found");
+    }
+
+    // Validate wallet address format (basic Solana address validation)
+    if (!args.walletAddress || args.walletAddress.length < 32 || args.walletAddress.length > 44) {
+      throw new Error("Invalid wallet address format");
+    }
+
+    // Update wallet address
+    await ctx.db.patch(merchant._id, {
+      walletAddress: args.walletAddress,
+    });
+
+    return await ctx.db.get(merchant._id);
   },
 });

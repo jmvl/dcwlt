@@ -1,0 +1,223 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const web3_js_1 = require("@solana/web3.js");
+const spl_token_1 = require("@solana/spl-token");
+const fs_1 = __importDefault(require("fs"));
+dotenv_1.default.config();
+const app = (0, express_1.default)();
+exports.app = app;
+app.use((0, cors_1.default)());
+app.use(express_1.default.json());
+// Rate limiting configuration
+const RATE_LIMIT_TOPUP_MAX = parseInt(process.env.RATE_LIMIT_TOPUP_MAX || '10', 10);
+const RATE_LIMIT_TOPUP_WINDOW_MS = parseInt(process.env.RATE_LIMIT_TOPUP_WINDOW_MS || '60000', 10);
+const RATE_LIMIT_HEALTH_MAX = parseInt(process.env.RATE_LIMIT_HEALTH_MAX || '60', 10);
+const RATE_LIMIT_STATUS_MAX = parseInt(process.env.RATE_LIMIT_STATUS_MAX || '60', 10);
+// Health check endpoint rate limiter (less strict)
+const healthLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 60 * 1000, // 1 minute
+    max: RATE_LIMIT_HEALTH_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many health check requests. Please try again later.'
+    }
+});
+// Status endpoint rate limiter (less strict)
+const statusLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 60 * 1000, // 1 minute
+    max: RATE_LIMIT_STATUS_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many status requests. Please try again later.'
+    }
+});
+// Top-up endpoint rate limiter (strict - prevents abuse)
+const topupLimiter = (0, express_rate_limit_1.default)({
+    windowMs: RATE_LIMIT_TOPUP_WINDOW_MS,
+    max: RATE_LIMIT_TOPUP_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        error: 'Too many top-up requests. Please try again later.',
+        retryAfter: Math.ceil(RATE_LIMIT_TOPUP_WINDOW_MS / 1000)
+    },
+    handler: (req, res) => {
+        res.status(429).json({
+            success: false,
+            error: 'Too many top-up requests. Please try again later.',
+            retryAfter: Math.ceil(RATE_LIMIT_TOPUP_WINDOW_MS / 1000)
+        });
+    }
+});
+// Load bank wallet from environment path
+function loadBankWallet() {
+    const walletPath = process.env.BANK_WALLET_PATH || '';
+    if (!walletPath) {
+        throw new Error('BANK_WALLET_PATH not set in .env');
+    }
+    if (!fs_1.default.existsSync(walletPath)) {
+        throw new Error(`Bank wallet file not found: ${walletPath}`);
+    }
+    const secretKey = JSON.parse(fs_1.default.readFileSync(walletPath, 'utf8'));
+    return web3_js_1.Keypair.fromSecretKey(new Uint8Array(secretKey));
+}
+// Initialize bank wallet
+let bankWalletKeypair;
+try {
+    bankWalletKeypair = loadBankWallet();
+    console.log(`✅ Bank wallet loaded: ${bankWalletKeypair.publicKey.toBase58()}`);
+}
+catch (error) {
+    console.error('❌ Failed to load bank wallet:', error);
+    console.error('⚠️  Backend will start but /api/topup will fail until wallet is configured');
+}
+// Top-up endpoint - simulates Visa payment by transferring tokens from bank wallet
+app.post('/api/topup', topupLimiter, async (req, res) => {
+    try {
+        const { walletAddress, amount = 50 } = req.body;
+        // Validation
+        if (!walletAddress) {
+            return res.status(400).json({
+                success: false,
+                error: 'walletAddress is required'
+            });
+        }
+        if (!bankWalletKeypair) {
+            return res.status(500).json({
+                success: false,
+                error: 'Bank wallet not configured. Set BANK_WALLET_PATH in .env'
+            });
+        }
+        const tokenAddress = process.env.TOKEN_ADDRESS;
+        if (!tokenAddress) {
+            return res.status(500).json({
+                success: false,
+                error: 'TOKEN_ADDRESS not set in .env'
+            });
+        }
+        // Validate amount
+        const topUpAmount = parseInt(amount);
+        if (isNaN(topUpAmount) || topUpAmount <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Amount must be a positive number'
+            });
+        }
+        console.log(`📝 Processing top-up: ${topUpAmount} EVT to ${walletAddress}`);
+        // Connect to Solana
+        const rpcUrl = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+        const connection = new web3_js_1.Connection(rpcUrl, 'confirmed');
+        const tokenMint = new web3_js_1.PublicKey(tokenAddress);
+        const toWallet = new web3_js_1.PublicKey(walletAddress);
+        // Get associated token accounts
+        const fromATA = await (0, spl_token_1.getAssociatedTokenAddress)(tokenMint, bankWalletKeypair.publicKey);
+        // Ensure the recipient has an associated token account
+        console.log(`   Ensuring ATA exists for ${toWallet.toBase58()}...`);
+        const toAccount = await (0, spl_token_1.getOrCreateAssociatedTokenAccount)(connection, bankWalletKeypair, tokenMint, toWallet);
+        const toATA = toAccount.address;
+        console.log(`   From: ${fromATA.toBase58()}`);
+        console.log(`   To: ${toATA.toBase58()}`);
+        // Create transfer instruction
+        // SPL Token uses 9 decimals by default
+        const instruction = (0, spl_token_1.createTransferInstruction)(fromATA, toATA, bankWalletKeypair.publicKey, topUpAmount * 1e9 // Convert to smallest unit (9 decimals)
+        );
+        // Create and sign transaction
+        const transaction = new web3_js_1.Transaction().add(instruction);
+        transaction.feePayer = bankWalletKeypair.publicKey;
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        // Sign and send transaction
+        const signature = await connection.sendTransaction(transaction, [bankWalletKeypair]);
+        console.log(`✅ Top-up successful: ${signature}`);
+        res.json({
+            success: true,
+            signature,
+            amount: topUpAmount,
+            message: `Sent ${topUpAmount} Event Tokens`,
+            explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`
+        });
+    }
+    catch (error) {
+        console.error('❌ Top-up error:', error);
+        // Provide detailed error information
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        res.status(500).json({
+            success: false,
+            error: errorMessage,
+            details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
+    }
+});
+// Health check endpoint
+app.get('/health', healthLimiter, (req, res) => {
+    const bankWalletConfigured = !!bankWalletKeypair;
+    const tokenAddressConfigured = !!process.env.TOKEN_ADDRESS;
+    res.json({
+        status: 'ok',
+        service: 'event-wallet-backend',
+        bankWalletConfigured,
+        tokenAddressConfigured,
+        bankWalletAddress: bankWalletConfigured ? bankWalletKeypair.publicKey.toBase58() : null,
+        network: 'solana-devnet'
+    });
+});
+// Get backend status
+app.get('/api/status', statusLimiter, (req, res) => {
+    res.json({
+        service: 'Event Wallet Top-Up Simulation',
+        version: '1.0.0',
+        endpoints: {
+            topup: 'POST /api/topup',
+            health: 'GET /health',
+            status: 'GET /api/status'
+        },
+        configuration: {
+            bankWalletConfigured: !!bankWalletKeypair,
+            tokenAddressConfigured: !!process.env.TOKEN_ADDRESS,
+            network: 'solana-devnet'
+        }
+    });
+});
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        error: 'Endpoint not found',
+        availableEndpoints: ['/api/topup', '/health', '/api/status']
+    });
+});
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({
+        success: false,
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
+// Only start server if this file is run directly (not imported)
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`\n🚀 Event Wallet Backend Server`);
+        console.log(`   Running on http://localhost:${PORT}`);
+        console.log(`   Network: Solana Devnet`);
+        console.log(`\n📚 Endpoints:`);
+        console.log(`   POST /api/topup    - Simulate Visa top-up`);
+        console.log(`   GET  /health        - Health check`);
+        console.log(`   GET  /api/status    - Service status\n`);
+    });
+}

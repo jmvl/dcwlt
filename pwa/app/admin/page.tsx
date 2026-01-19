@@ -46,8 +46,9 @@ export default function AdminDashboard() {
   })();
 
   // Check if user is admin (you can customize this logic)
-  const userEmail = user?.email as string | undefined;
-  const isAdmin = userEmail?.endsWith("@dcwlt.com") || false;
+  // Privy's user.email is an object with .address property
+  const userEmail = user?.email?.address;
+  const isAdmin = userEmail?.endsWith("@dcwlt.com") || userEmail?.endsWith("@accelior.com") || false;
 
   if (!ready) {
     return (

@@ -1,9 +1,11 @@
 'use client';
 
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
+import { useLogout } from '../utils/logout';
 
 export function LoginButton() {
   const { ready, authenticated, user, login } = usePrivyAuth();
+  const { logout } = useLogout('user');
 
   // Show loading state while Privy initializes
   if (!ready) {
@@ -17,9 +19,13 @@ export function LoginButton() {
 
   // Show wallet address when authenticated
   if (authenticated && user) {
-    // Get the embedded wallet (Solana)
-    const wallet = user.wallet;
-    const walletAddress = wallet?.address || 'No wallet found';
+    // Get the embedded wallet (Solana) from linkedAccounts
+    const solanaWallet = user.linkedAccounts?.find(
+      (account: any) => account.type === 'wallet' && account.chainType === 'solana'
+    );
+    const walletAddress = solanaWallet && 'address' in solanaWallet
+      ? solanaWallet.address
+      : 'No wallet found';
 
     // Truncate address: first 7 chars ... last 7 chars
     const truncatedAddress =
@@ -41,10 +47,16 @@ export function LoginButton() {
               <p className="text-white font-mono text-sm">{truncatedAddress}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-[#13a4ec] text-xs">
+          <div className="flex items-center gap-2 text-[#13a4ec] text-xs mb-4">
             <div className="w-2 h-2 bg-green-500 rounded-full" />
             <span>Connected to Solana Devnet</span>
           </div>
+          <button
+            onClick={logout}
+            className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     );

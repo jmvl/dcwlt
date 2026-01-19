@@ -1,15 +1,43 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(gh repo create:*)"
+      "Bash(git:*)",
+      "Bash(gh repo create:*)",
+      "WebSearch",
+      "Skill(using-superpowers)",
+      "Skill(gsd:execute-phase)",
+      "Bash(node:*)",
+      "Bash(pushd:*)",
+      "Bash(popd:*)",
+      "Bash(grep:*)",
+      "Bash(npx convex data:*)",
+      "Bash(npx convex function:*)",
+      "Bash(npx convex run:*)",
+      "mcp__plugin_context7_context7__*",
+      "mcp__plugin_serena_serena__*",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(npm:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(killall:*)",
+      "Bash(tail:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pgrep:*)",
+      "Bash(npx convex dev:*)",
+      "Bash(xargs:*)",
+      "Bash(pkill:*)",
+      "Bash(npx convex deploy:*)",
+      "Bash(CONVEX_DEPLOYMENT=cool-flamingo-776 npx convex deploy:*)",
+      "mcp__ide__getDiagnostics",
+      "Skill(debug-issue)",
+      "mcp__sequential-thinking__sequentialthinking"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "sequential-thinking",
-    "mcp-atlassian"
+    "sequential-thinking"
   ]
 }

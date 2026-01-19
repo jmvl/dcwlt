@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { X, Download, Printer } from 'lucide-react';
+import { X } from 'lucide-react';
 
 // Event Token mint address on Solana Devnet
 const TOKEN_MINT_ADDRESS = '4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq';
@@ -27,83 +27,77 @@ export function QRCodeGenerator({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Build Solana Pay URL
   const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&spl-token=${TOKEN_MINT_ADDRESS}&reference=${itemId}`;
 
+  // Handle slide-up animation
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to allow DOM to render before animating
+      const timer = setTimeout(() => setIsVisible(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
+
   // Generate QR code on mount or when URL changes
   useEffect(() => {
-    if (!isOpen || !canvasRef.current) return;
+    if (!isOpen) return;
 
     setIsLoading(true);
     setError(null);
 
-    const generateQR = async () => {
-      try {
-        const canvas = canvasRef.current;
-        if (!canvas) throw new Error('Canvas element not found');
+    // Small delay to ensure canvas ref is attached
+    const timer = setTimeout(() => {
+      const generateQR = async () => {
+        try {
+          const canvas = canvasRef.current;
+          if (!canvas) throw new Error('Canvas element not found');
 
-        await QRCode.toCanvas(canvas, solanaPayUrl, {
-          width: 256,
-          margin: 2,
-          color: {
-            dark: '#000000',
-            light: '#FFFFFF',
-          },
-        });
+          await QRCode.toCanvas(canvas, solanaPayUrl, {
+            width: 256,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF',
+            },
+          });
 
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error generating QR code:', err);
-        setError('Failed to generate QR code');
-        setIsLoading(false);
-      }
-    };
-
-    generateQR();
-  }, [isOpen, solanaPayUrl]);
-
-  // Handle download
-  const handleDownload = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    try {
-      // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          setError('Failed to create image');
-          return;
+          setIsLoading(false);
+        } catch (err) {
+          console.error('Error generating QR code:', err);
+          setError('Failed to generate QR code');
+          setIsLoading(false);
         }
+      };
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `qr-${itemName.toLowerCase().replace(/\s+/g, '-')}-${itemPrice}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      });
-    } catch (err) {
-      console.error('Error downloading QR code:', err);
-      setError('Failed to download QR code');
-    }
-  };
+      generateQR();
+    }, 0);
 
-  // Handle print
-  const handlePrint = () => {
-    window.print();
-  };
+    return () => clearTimeout(timer);
+  }, [isOpen, solanaPayUrl]);
 
   // Don't render if not open
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-[#1a2f38] rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 transition-opacity duration-200">
+      <div
+        className={`
+          bg-[#1a2f38] rounded-t-lg sm:rounded-lg w-full sm:max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-y-auto
+          transform transition-transform duration-300 ease-out
+          ${isVisible ? 'translate-y-0' : 'translate-y-full'}
+        `}
+      >
+        <div className="p-4 sm:p-6">
+          {/* Drag Handle (mobile only) */}
+          <div className="flex justify-center mb-4 sm:hidden">
+            <div className="w-12 h-1.5 bg-[#9db0b9] rounded-full" />
+          </div>
+
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-white">Payment QR Code</h2>
@@ -126,22 +120,28 @@ export function QRCodeGenerator({
 
           {/* QR Code */}
           <div className="bg-white rounded-lg p-4 mb-4">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13a4ec]" />
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-64">
-                <p className="text-red-500 text-sm">{error}</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <canvas ref={canvasRef} className="rounded" />
+            <div className="flex flex-col items-center">
+              {isLoading && (
+                <div className="flex items-center justify-center h-64 absolute inset-0 bg-white z-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13a4ec]" />
+                </div>
+              )}
+              {error && (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-red-500 text-sm">{error}</p>
+                </div>
+              )}
+              <canvas
+                ref={canvasRef}
+                className="rounded"
+                style={{ opacity: isLoading ? 0 : 1, minHeight: '256px' }}
+              />
+              {!isLoading && !error && (
                 <p className="text-gray-600 text-xs mt-2 text-center">
                   Scan to pay for {itemName}
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Solana Pay URL (for reference) */}
@@ -149,49 +149,6 @@ export function QRCodeGenerator({
             <p className="text-xs text-[#9db0b9] mb-1">Solana Pay URL:</p>
             <p className="text-xs text-[#13a4ec] font-mono break-all">{solanaPayUrl}</p>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleDownload}
-              disabled={isLoading || !!error}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#101c22] hover:bg-[#243b47] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Download className="w-4 h-4" />
-              Download PNG
-            </button>
-            <button
-              onClick={handlePrint}
-              disabled={isLoading || !!error}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#101c22] hover:bg-[#243b47] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Printer className="w-4 h-4" />
-              Print
-            </button>
-          </div>
-
-          {/* Print Styles */}
-          <style jsx global>{`
-            @media print {
-              body * {
-                visibility: hidden;
-              }
-              .canvas-container,
-              .canvas-container * {
-                visibility: visible;
-              }
-              .canvas-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-            }
-          `}</style>
         </div>
       </div>
     </div>

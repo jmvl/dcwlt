@@ -3,6 +3,7 @@ import './globals.css';
 import { Manrope } from 'next/font/google';
 import { PrivyAuthProvider } from './components/PrivyProvider';
 import { ConvexClientProvider } from './components/ConvexProvider';
+import { QueryProvider } from './components/QueryProvider';
 import ServiceWorkerRegister from './components/ServiceWorkerRegister';
 
 const manrope = Manrope({ subsets: ['latin'] });
@@ -10,7 +11,7 @@ const manrope = Manrope({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Event Wallet',
   description: 'Frictionless payments at live events',
-  manifest: '/manifest.webmanifest',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -38,8 +39,10 @@ export default function RootLayout({
       <body className={manrope.className}>
         <PrivyAuthProvider>
           <ConvexClientProvider>
-            <ServiceWorkerRegister />
-            {children}
+            <QueryProvider>
+              <ServiceWorkerRegister />
+              {children}
+            </QueryProvider>
           </ConvexClientProvider>
         </PrivyAuthProvider>
       </body>

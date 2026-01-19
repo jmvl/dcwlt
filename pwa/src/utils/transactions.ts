@@ -8,14 +8,14 @@
 import {
   Connection,
   PublicKey,
-  Transaction,
-  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
 } from '@solana/web3.js';
 
 import {
-  TOKEN_PROGRAM_ID,
   createTransferInstruction,
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountIdempotentInstruction,
 } from '@solana/spl-token';
 
 /**
@@ -45,135 +45,162 @@ export interface BuildTransferParams {
 /**
  * Builds an SPL token transfer transaction
  *
- * Creates a Solana transaction that transfers SPL tokens from sender
- * to recipient. The transaction is unsigned and ready to be signed
- * by a wallet (e.g., Privy).
+ * Creates a Solana VersionedTransaction (v1) that transfers SPL tokens from sender
+ * to recipient. The transaction is unsigned and ready to be signed by a wallet.
  *
- * @param params - Transfer parameters
- * @returns Transaction object ready for signing
- * @throws Error if transaction building fails
+ * Uses VersionedTransaction for compatibility with @solana/kit and Privy.
  *
- * @example
- * ```typescript
- * const transaction = await buildSPLTokenTransfer({
- *   recipient: '9abc...xyz',
- *   amount: '100000000', // 1 token with 9 decimals
- *   splToken: 'TokenMintAddress',
- *   sender: 'senderAddress',
- * });
- * ```
+ * @param params - Transaction parameters including recipient, amount, token mint, and sender
+ * @returns Promise<VersionedTransaction> - Unsigned transaction ready for signing
  */
 export async function buildSPLTokenTransfer(
   params: BuildTransferParams
-): Promise<Transaction> {
+): Promise<VersionedTransaction> {
   const { recipient, amount, splToken, sender } = params;
 
-  try {
-    // Convert string addresses to PublicKey objects
-    const recipientPubkey = new PublicKey(recipient);
-    const senderPubkey = new PublicKey(sender);
-    const tokenMintPubkey = new PublicKey(splToken);
+  // Create connection to fetch latest blockhash
+  const connection = new Connection(DEVNET_RPC, 'confirmed');
 
-    // Convert amount from string to bigint (smallest unit)
-    const amountBigInt = BigInt(amount);
+  // Get the latest blockhash
+  const { blockhash } = await connection.getLatestBlockhash('finalized');
 
-    // Create connection to Devnet
-    const connection = new Connection(DEVNET_RPC, 'confirmed');
+  // Convert addresses to PublicKey objects
+  const senderPubkey = new PublicKey(sender);
+  const recipientPubkey = new PublicKey(recipient);
+  const tokenMintPubkey = new PublicKey(splToken);
 
-    // Fetch latest blockhash for transaction lifetime
-    const { blockhash } = await connection.getLatestBlockhash();
-
-    // Derive Associated Token Account addresses
-    const senderTokenAccount = await getAssociatedTokenAddress(
-      tokenMintPubkey,
-      senderPubkey
-    );
-    const recipientTokenAccount = await getAssociatedTokenAddress(
-      tokenMintPubkey,
-      recipientPubkey
-    );
-
-    // Create transaction
-    const transaction = new Transaction({
-      recentBlockhash: blockhash,
-      feePayer: senderPubkey,
-    });
-
-    // Add transfer instruction
-    const transferInstruction = createTransferInstruction(
-      senderTokenAccount,
-      recipientTokenAccount,
-      senderPubkey,
-      amountBigInt,
-      undefined,
-      TOKEN_PROGRAM_ID
-    );
-
-    transaction.add(transferInstruction);
-
-    return transaction;
-  } catch (error) {
-    console.error('[buildSPLTokenTransfer] Failed to build transaction:', error);
-    throw new Error(
-      `Failed to build transfer transaction: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-  }
-}
-
-/**
- * Converts token amount from smallest unit to decimal (e.g., 100000000 -> 1.0)
- *
- * @param amountSmallestUnit - Amount in smallest unit (lamports)
- * @param decimals - Token decimals (default 9)
- * @returns Formatted decimal amount
- *
- * @example
- * ```typescript
- * const displayAmount = formatTokenAmount('100000000'); // "1.0"
- * ```
- */
-export function formatTokenAmount(
-  amountSmallestUnit: string,
-  decimals: number = TOKEN_DECIMALS
-): string {
-  const amount = BigInt(amountSmallestUnit);
-  const divisor = BigInt(10 ** decimals);
-
-  const whole = amount / divisor;
-  const fraction = amount % divisor;
-
-  if (fraction === BigInt(0)) {
-    return whole.toString();
-  }
-
-  // Pad fraction with leading zeros if needed
-  const fractionStr = fraction.toString().padStart(decimals, '0');
-  return `${whole}.${fractionStr}`.replace(/\.?0+$/, '');
-}
-
-/**
- * Converts decimal token amount to smallest unit (e.g., 1.0 -> 100000000)
- *
- * @param amountDecimal - Amount in decimal (e.g., "1.5")
- * @param decimals - Token decimals (default 9)
- * @returns Amount in smallest unit as string
- *
- * @example
- * ```typescript
- * const smallestUnit = parseTokenAmount('1.5'); // "1500000000"
- * ```
- */
-export function parseTokenAmount(
-  amountDecimal: string,
-  decimals: number = TOKEN_DECIMALS
-): string {
-  const [whole = '0', fraction = ''] = amountDecimal.split('.');
-
-  const wholeBigInt = BigInt(whole);
-  const fractionBigInt = BigInt(
-    fraction.padEnd(decimals, '0').slice(0, decimals)
+  // Get the associated token accounts
+  // These are the token accounts that hold the SPL tokens for each wallet
+  const senderTokenAccount = await getAssociatedTokenAddress(
+    tokenMintPubkey,
+    senderPubkey
+  );
+  const recipientTokenAccount = await getAssociatedTokenAddress(
+    tokenMintPubkey,
+    recipientPubkey
   );
 
-  const multiplier = BigInt(10 ** decimals);
-  return (wholeBigInt * multiplier + fractionBigInt).toString();
+  // Convert amount to bigint (SPL tokens use bigint for amounts)
+  const amountBigInt = BigInt(amount);
+
+  // Build instructions array
+  // Start with an instruction to create the recipient's ATA if it doesn't exist
+  const instructions = [];
+
+  // Check if recipient's ATA exists, if not, add instruction to create it
+  const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount);
+  if (!recipientAccountInfo) {
+    console.log('[buildSPLTokenTransfer] Recipient ATA does not exist, creating it...');
+    // Create the ATA if it doesn't exist (idempotent - safe to run even if it exists)
+    const createATAInstruction = createAssociatedTokenAccountIdempotentInstruction(
+      senderPubkey,           // payer
+      recipientTokenAccount,  // ATA address to create
+      recipientPubkey,        // owner of the ATA
+      tokenMintPubkey         // token mint
+    );
+    instructions.push(createATAInstruction);
+  }
+
+  // Create the SPL token transfer instruction
+  const transferInstruction = createTransferInstruction(
+    senderTokenAccount,     // source
+    recipientTokenAccount,  // destination
+    senderPubkey,           // authority (owner of source account)
+    amountBigInt            // amount
+  );
+  instructions.push(transferInstruction);
+
+  // Create a transaction message with the instruction(s)
+  const messageV0 = new TransactionMessage({
+    payerKey: senderPubkey,
+    recentBlockhash: blockhash,
+    instructions,
+  }).compileToV0Message();
+
+  // Create a VersionedTransaction from the v0 message
+  const transaction = new VersionedTransaction(messageV0);
+
+  return transaction;
+}
+
+/**
+ * Formats a token amount for display
+ * Converts from smallest unit (lamports) to full tokens
+ */
+export function formatTokenAmount(amountLamports: string | number): string {
+  const amount = BigInt(amountLamports);
+  const divisor = BigInt(10 ** TOKEN_DECIMALS);
+  const whole = amount / divisor;
+  const remainder = amount % divisor;
+  const fractional = remainder.toString().padStart(TOKEN_DECIMALS, '0');
+  return `${whole}.${fractional.slice(0, 2)}`;
+}
+
+/**
+ * Parses a token amount from display format
+ * Converts from full tokens to smallest unit (lamports)
+ */
+export function parseTokenAmount(amountTokens: string): bigint {
+  const [whole, fractional = ''] = amountTokens.split('.');
+  const paddedFractional = fractional.padEnd(TOKEN_DECIMALS, '0').slice(0, TOKEN_DECIMALS);
+  return BigInt(whole + paddedFractional);
+}
+
+/**
+ * Fetches the SPL token balance for a wallet
+ *
+ * Gets the balance of SPL tokens held by a wallet for a specific token mint.
+ * Uses the associated token account address derived from wallet + mint.
+ *
+ * @param walletAddress - Solana wallet address to check balance for
+ * @param tokenMintAddress - SPL Token mint address
+ * @returns Promise<number> - Token balance in human-readable format
+ * @throws Error if unable to fetch balance
+ *
+ * @example
+ * ```typescript
+ * const balance = await getSPLTokenBalance(
+ *   '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+ *   '4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq'
+ * );
+ * console.log(balance); // e.g., 50.5
+ * ```
+ */
+export async function getSPLTokenBalance(
+  walletAddress: string,
+  tokenMintAddress: string
+): Promise<number> {
+  const connection = new Connection(DEVNET_RPC, 'confirmed');
+  
+  // Convert addresses to PublicKey objects
+  const walletPubkey = new PublicKey(walletAddress);
+  const mintPubkey = new PublicKey(tokenMintAddress);
+  
+  // Derive the associated token account address
+  const tokenAccount = await getAssociatedTokenAddress(
+    mintPubkey,
+    walletPubkey
+  );
+  
+  try {
+    // Fetch the balance from Solana
+    const balanceInfo = await connection.getTokenAccountBalance(tokenAccount);
+    
+    // Return the human-readable amount
+    if (balanceInfo.value.uiAmount == null) {
+      // Account exists but has no balance
+      return 0;
+    }
+    
+    return balanceInfo.value.uiAmount;
+  } catch (error: any) {
+    // If the token account doesn't exist yet, return 0
+    if (error?.message?.includes('could not find account') ||
+        error?.message?.includes('Invalid account owner')) {
+      return 0;
+    }
+    
+    // Re-throw other errors
+    throw new Error(`Failed to fetch token balance: ${error?.message || error}`);
+  }
 }

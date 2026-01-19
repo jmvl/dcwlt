@@ -3,24 +3,28 @@
 import { ReactNode } from 'react';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 
-// Create a dummy Convex client for SSR
-// This allows useMutation/useQuery to not throw during build
-const getConvexClient = () => {
-  if (typeof window !== 'undefined') {
-    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-    if (convexUrl) {
-      return new ConvexReactClient(convexUrl);
-    }
-  }
-  // Return a minimal client for SSR
-  return new ConvexReactClient('https://dummy.convex.cloud');
-};
-
-const convex = getConvexClient();
+let convexClient: ConvexReactClient | null = null;
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
+  if (!convexClient) {
+    // Only create client in browser with valid URL
+    if (typeof window !== 'undefined') {
+      const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+      console.log('[ConvexClientProvider] NEXT_PUBLIC_CONVEX_URL:', convexUrl);
+      if (convexUrl && convexUrl !== 'https://dummy.convex.cloud') {
+        convexClient = new ConvexReactClient(convexUrl);
+        console.log('[ConvexClientProvider] Created client with URL:', convexUrl);
+      } else {
+        console.log('[ConvexClientProvider] Using dummy client');
+        convexClient = new ConvexReactClient('https://dummy.convex.cloud');
+      }
+    } else {
+      convexClient = new ConvexReactClient('https://dummy.convex.cloud');
+    }
+  }
+
   return (
-    <ConvexProvider client={convex}>
+    <ConvexProvider client={convexClient}>
       {children}
     </ConvexProvider>
   );

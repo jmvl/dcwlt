@@ -4,9 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
-import { useMutation } from 'convex/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { TopUpBundle } from '../components/TopUpBundle';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ExternalLink } from 'lucide-react';
+import { balanceQueryKeys } from '../hooks/useSolanaBalance';
 
 const BUNDLES = [
   { amount: 50, price: 5 },
@@ -17,26 +18,17 @@ const BUNDLES = [
 
 export default function TopUpPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { ready, authenticated, user } = usePrivyAuth();
-  const [successData, setSuccessData] = useState<{ signature: string; amount: number } | null>(null);
+  const [successData, setSuccessData] = useState<{ signature: string; amount: number; explorerUrl?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Get wallet address from Privy user's linked accounts
   const solanaWallet = user?.linkedAccounts?.find(
     (account: any) => account.type === 'wallet' && account.chainType === 'solana'
   );
   const walletAddress = solanaWallet && 'address' in solanaWallet ? solanaWallet.address : undefined;
-
-  // Load mockTopUp mutation dynamically
-  let mockTopUpMutation;
-  try {
-    const { api } = require('../../convex/_generated/api.js');
-    mockTopUpMutation = api?.wallets?.mockTopUp;
-  } catch (e) {
-    console.error('[TopUpPage] Failed to load api:', e);
-  }
-
-  const mockTopUp = useMutation(mockTopUpMutation);
 
   const handlePurchase = async ({ amount, price }: { amount: number; price: number }) => {
     if (!walletAddress) {
@@ -45,24 +37,53 @@ export default function TopUpPage() {
     }
 
     setError(null);
+    setIsLoading(true);
 
     try {
-      const result = await mockTopUp({
-        walletAddress,
-        amount,
+      console.log('[TopUp] Calling backend for token transfer...');
+
+      // Call backend API directly (bypasses Convex sandbox limitation)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/topup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress,
+          amount,
+        }),
       });
 
-      if (result?.success) {
-        setSuccessData({
-          signature: result.signature,
-          amount,
-        });
-      } else {
-        setError('Top-up failed. Please try again.');
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Top-up failed');
       }
+
+      console.log('[TopUp] Backend response:', result);
+
+      // Invalidate the balance query to trigger a refetch from Solana
+      // This ensures the dashboard shows the updated balance
+      if (walletAddress) {
+        console.log('[TopUp] Invalidating balance query to trigger refetch...');
+        queryClient.invalidateQueries({
+          queryKey: balanceQueryKeys.detail(walletAddress),
+        });
+      }
+
+      setSuccessData({
+        signature: result.signature,
+        amount,
+        explorerUrl: result.explorerUrl,
+      });
+
+      console.log('[TopUp] Top-up successful:', result.signature);
     } catch (err) {
-      console.error('Top-up error:', err);
+      console.error('[TopUp] Error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during top-up');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,14 +127,25 @@ export default function TopUpPage() {
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-white mb-2">Top-Up Successful!</h2>
               <p className="text-[#9db0b9] mb-6">
-                Your wallet has been topped up with {successData.amount} EVT
+                Your wallet has been topped up with {successData.amount} EVT on Solana Devnet
               </p>
 
               <div className="bg-[#101c22] rounded-lg p-4 mb-6">
                 <p className="text-[#9db0b9] text-sm mb-2">Transaction Signature</p>
-                <code className="text-xs text-[#13a4ec] break-all">
+                <code className="text-xs text-[#13a4ec] break-all block mb-2">
                   {successData.signature}
                 </code>
+                {successData.explorerUrl && (
+                  <a
+                    href={successData.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-[#9db0b9] hover:text-[#13a4ec] flex items-center gap-1 mt-2 inline-flex"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View on Solana Explorer
+                  </a>
+                )}
               </div>
 
               <button
@@ -160,6 +192,7 @@ export default function TopUpPage() {
                 amount={bundle.amount}
                 price={bundle.price}
                 onPurchase={handlePurchase}
+                isLoading={isLoading}
               />
             ))}
           </div>

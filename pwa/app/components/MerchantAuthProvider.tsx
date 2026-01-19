@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRouter } from 'next/navigation';
 import type { Doc } from '@/convex/_generated/dataModel';
@@ -36,6 +36,7 @@ interface MerchantAuthProviderProps {
 export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
   const { ready, authenticated, user } = usePrivyAuth();
   const router = useRouter();
+  const updateMerchantWallet = useMutation(api.merchants.updateMerchantWalletAddress);
   const [merchantAuth, setMerchantAuth] = useState<MerchantAuthContextType>({
     merchant: null,
     isAuthenticated: false,
@@ -52,6 +53,31 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
     userEmail ? { email: userEmail } : 'skip'
   );
 
+  // Auto-update merchant wallet address on login if it differs from Privy wallet
+  useEffect(() => {
+    if (!authenticated || !user || !merchant || !userEmail) return;
+
+    // Get Solana wallet from Privy user
+    const solanaWallet = user.linkedAccounts?.find(
+      (account: any) => account.type === "wallet" && account.chainType === "solana"
+    );
+
+    if (!solanaWallet || !("address" in solanaWallet)) return;
+
+    const privyWalletAddress = solanaWallet.address as string;
+
+    // If merchant's stored wallet address differs from Privy wallet, update it
+    if (merchant.walletAddress !== privyWalletAddress) {
+      console.log('[MerchantAuthProvider] Updating wallet address from', merchant.walletAddress, 'to', privyWalletAddress);
+      updateMerchantWallet({
+        email: userEmail,
+        walletAddress: privyWalletAddress,
+      }).catch((err) => {
+        console.error('[MerchantAuthProvider] Failed to update wallet address:', err);
+      });
+    }
+  }, [authenticated, user, merchant, userEmail, updateMerchantWallet]);
+
   useEffect(() => {
     // Loading state
     if (!ready || (authenticated && userEmail && merchant === undefined)) {
@@ -64,7 +90,7 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
       return;
     }
 
-    // Not authenticated - redirect to home
+    // Not authenticated - redirect to merchant login
     if (!authenticated) {
       setMerchantAuth({
         merchant: null,
@@ -72,7 +98,7 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
         isLoading: false,
         error: null,
       });
-      router.push('/');
+      router.push('/merchant/login');
       return;
     }
 
@@ -146,10 +172,10 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
           <h1 className="text-2xl font-bold text-white mb-4">Merchant Access</h1>
           <p className="text-[#9db0b9] mb-6">{merchantAuth.error}</p>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/merchant/login')}
             className="px-6 py-3 bg-[#13a4ec] text-white rounded-lg font-medium hover:bg-[#0d8bc4] transition-colors"
           >
-            Back to Home
+            Back to Merchant Login
           </button>
         </div>
       </div>

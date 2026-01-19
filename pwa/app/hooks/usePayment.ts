@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
-import { useMutation } from 'convex/react';
-import { Connection } from '@solana/web3.js';
-import { buildSPLTokenTransfer, DEVNET_RPC, formatTokenAmount } from '../../src/utils/transactions';
-import { api } from '../../convex/_generated';
+import { useWallets, useSignTransaction } from '@privy-io/react-auth/solana';
+import { useQueryClient } from '@tanstack/react-query';
+import { Connection, Transaction } from '@solana/web3.js';
+import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions';
+import { balanceQueryKeys } from './useSolanaBalance';
 
 /**
  * Payment parameters
@@ -34,37 +34,15 @@ export interface PaymentResult {
 /**
  * Hook for executing Solana Pay payments
  *
- * Provides payment execution functionality that:
- * 1. Builds a Solana transaction for SPL token transfer
- * 2. Signs the transaction with Privy wallet
- * 3. Submits the transaction to Solana Devnet
- * 4. Updates Convex balance after confirmation
- * 5. Returns the transaction signature or error
+ * Uses Privy's useSignTransaction hook to sign transactions.
+ * This is the correct approach for Privy embedded wallets.
  *
  * @returns Object with executePayment function and loading state
- *
- * @example
- * ```tsx
- * const { executePayment, loading } = usePayment();
- *
- * const handlePayment = async () => {
- *   const result = await executePayment({
- *     recipient: '9abc...xyz',
- *     amount: '100000000',
- *     splToken: 'TokenMintAddress',
- *   });
- *
- *   if (result.success) {
- *     console.log('Payment successful:', result.signature);
- *   } else {
- *     console.error('Payment failed:', result.error);
- *   }
- * };
- * ```
  */
 export function usePayment() {
-  const { signTransaction, user } = usePrivy();
-  const recordPayment = useMutation(api.wallets.recordPayment);
+  const { wallets } = useWallets();
+  const { signTransaction } = useSignTransaction();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,21 +57,26 @@ export function usePayment() {
       setLoading(true);
       setError(null);
 
+      console.log('[usePayment] Available Solana wallets:', wallets.length);
+      console.log('[usePayment] Wallets:', wallets.map(w => ({
+        address: w.address,
+      })));
+
+      // Check if we have any wallets
+      if (wallets.length === 0) {
+        console.error('[usePayment] No Solana wallets available!');
+        return {
+          success: false,
+          error: 'No wallet found. Please create a wallet in your profile first.',
+        };
+      }
+
+      // Get the first Solana wallet
+      const solanaWallet = wallets[0];
+      const sender = solanaWallet.address;
+      console.log('[usePayment] Using wallet:', sender);
+
       try {
-        // Get sender wallet address from Privy user
-        const solanaWallet = user?.linkedAccounts?.find(
-          (account: any) => account.type === 'wallet' && account.chainType === 'solana'
-        );
-
-        if (!solanaWallet || !('address' in solanaWallet)) {
-          return {
-            success: false,
-            error: 'No Solana wallet found. Please login first.',
-          };
-        }
-
-        const sender = solanaWallet.address as string;
-
         // Step 1: Build the transaction
         console.log('[usePayment] Building transaction...', { ...params, sender });
         const transaction = await buildSPLTokenTransfer({
@@ -101,59 +84,37 @@ export function usePayment() {
           sender,
         });
 
-        // Step 2: Serialize transaction for Privy signing
-        console.log('[usePayment] Serializing transaction...');
-        const transactionSerialized = transaction.serialize({
-          requireAllSignatures: false,
-          verifySignatures: false,
+        console.log('[usePayment] Transaction built, preparing to sign...');
+
+        // Step 2: Serialize the transaction for signing
+        // For VersionedTransaction, we use serialize() which returns the full transaction bytes
+        const transactionBytes = transaction.serialize();
+        console.log('[usePayment] Transaction serialized, length:', transactionBytes.length);
+        console.log('[usePayment] Calling Privy signTransaction...');
+
+        // Step 3: Sign using Privy's useSignTransaction hook
+        const { signedTransaction } = await signTransaction({
+          transaction: transactionBytes,
+          wallet: solanaWallet,
+          chain: 'solana:devnet',
         });
 
-        // Convert to base64 for Privy
-        const transactionBase64 = Buffer.from(transactionSerialized).toString('base64');
+        console.log('[usePayment] Transaction signed successfully!');
+        console.log('[usePayment] Signed transaction length:', signedTransaction.length);
 
-        // Step 3: Sign the transaction with Privy
-        console.log('[usePayment] Signing transaction with Privy...');
-        let signedTransaction;
-
-        try {
-          // Privy's signTransaction for Solana expects an object with chainType and transaction
-          // Using type assertion since Privy types may not match exactly
-          const signRequest: any = {
-            chainType: 'solana',
-            transaction: transactionBase64,
-          };
-          const signed = await signTransaction(signRequest);
-          signedTransaction = signed;
-        } catch (signError) {
-          console.error('[usePayment] Signing failed:', signError);
-          return {
-            success: false,
-            error: 'Failed to sign transaction. Please try again.',
-          };
-        }
-
-        // Step 4: Submit to Solana Devnet
-        console.log('[usePayment] Submitting transaction to Devnet...');
+        // Step 4: Send the signed transaction to Solana
+        console.log('[usePayment] Sending transaction to Solana Devnet...');
         const connection = new Connection(DEVNET_RPC, 'confirmed');
 
-        // Decode signed transaction from base64
-        const signedTransactionBuffer = Buffer.from(signedTransaction, 'base64');
+        // Send to Solana
+        const txSignature = await connection.sendRawTransaction(signedTransaction);
 
-        // Submit transaction
-        const signature = await connection.sendRawTransaction(
-          signedTransactionBuffer,
-          {
-            skipPreflight: false,
-            preflightCommitment: 'confirmed',
-          }
-        );
-
-        console.log('[usePayment] Transaction submitted:', signature);
+        console.log('[usePayment] Transaction sent:', txSignature);
 
         // Step 5: Wait for confirmation
         console.log('[usePayment] Waiting for confirmation...');
         const confirmation = await connection.confirmTransaction(
-          signature,
+          txSignature,
           'confirmed'
         );
 
@@ -165,59 +126,48 @@ export function usePayment() {
           };
         }
 
-        // Step 6: Update Convex balance
-        console.log('[usePayment] Updating Convex balance...');
+        // Step 6: Invalidate balance query to trigger refetch from Solana
+        console.log('[usePayment] Invalidating balance query...');
         try {
-          // Convert amount from smallest unit to EVT
-          const amountEVT = parseFloat(formatTokenAmount(params.amount));
-
-          await recordPayment({
-            walletAddress: sender,
-            amount: amountEVT,
-            signature,
-            type: 'payment',
+          queryClient.invalidateQueries({
+            queryKey: balanceQueryKeys.detail(sender),
           });
-
-          console.log('[usePayment] Convex balance updated');
-        } catch (convexError) {
-          console.error('[usePayment] Failed to update Convex balance:', convexError);
-          // Don't fail the payment if Convex update fails
+          console.log('[usePayment] Balance query invalidated successfully');
+        } catch (queryError) {
+          console.error('[usePayment] Failed to invalidate balance query:', queryError);
+          // Don't fail the payment if query invalidation fails
           // The transaction was still successful on-chain
         }
 
-        console.log('[usePayment] Payment successful:', signature);
+        console.log('[usePayment] Payment successful:', txSignature);
         return {
           success: true,
-          signature,
+          signature: txSignature,
         };
-      } catch (err) {
-        console.error('[usePayment] Payment error:', err);
+      } catch (signError: any) {
+        console.error('[usePayment] Payment failed!');
+        console.error('[usePayment] Error type:', signError?.constructor?.name);
+        console.error('[usePayment] Error message:', signError?.message);
+        console.error('[usePayment] Error stack:', signError?.stack);
+        console.error('[usePayment] Full error:', signError);
 
-        // Provide specific error messages
-        let errorMessage = 'Payment failed. Please try again.';
-
-        if (err instanceof Error) {
-          if (err.message.includes('insufficient')) {
-            errorMessage = 'Insufficient funds for this payment';
-          } else if (err.message.includes('network') || err.message.includes('RPC')) {
-            errorMessage = 'Network error. Please check your connection and try again';
-          } else if (err.message.includes('timeout')) {
-            errorMessage = 'Transaction timed out. Please check if it was processed';
-          } else if (err.message.includes('Invalid')) {
-            errorMessage = 'Invalid transaction details';
-          }
+        // Extract useful error info
+        let errorMsg = 'Failed to sign transaction. ';
+        if (signError?.message) {
+          errorMsg += `Error: ${signError.message}`;
+        } else {
+          errorMsg += `Please try again. Details: ${JSON.stringify(signError)}`;
         }
 
-        setError(errorMessage);
         return {
           success: false,
-          error: errorMessage,
+          error: errorMsg,
         };
       } finally {
         setLoading(false);
       }
     },
-    [signTransaction, user, recordPayment]
+    [wallets, signTransaction, queryClient]
   );
 
   return {

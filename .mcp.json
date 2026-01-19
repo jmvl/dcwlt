@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "adb": {
+      "command": "npx",
+      "args": [
+        "adb-mcp"
+      ]
+    }
+  }
+}

@@ -2,10 +2,8 @@
 export const SOLANA_DEVNET_RPC = 'https://api.devnet.solana.com';
 export const SOLANA_DEVNET_EXPLORER = 'https://explorer.solana.com/?cluster=devnet';
 
-// TODO: Update this with your actual token address from blockchain setup (Task 4)
-// Run: spl-token create-token
-// Then paste the token address here
-export const TOKEN_ADDRESS = 'YOUR_TOKEN_ADDRESS_HERE';
+// Event Token address from blockchain setup
+export const TOKEN_ADDRESS = '4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq';
 
 // Token decimals (SPL tokens typically use 9)
 export const TOKEN_DECIMALS = 9;

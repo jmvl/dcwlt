@@ -1,6 +1,25 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
+/**
+ * @deprecated
+ *
+ * This module contains the LEGACY inventory system where items were
+ * per-merchant (each merchant had their own items).
+ *
+ * The NEW system uses event-level item groups:
+ * - Item groups are shared across all merchants at an event
+ * - See `itemGroups.ts` for the new implementation
+ * - Use `getMerchantItems` from itemGroups.ts for merchant queries
+ *
+ * This file is maintained for backward compatibility during migration.
+ */
+
+/**
+ * @deprecated
+ * Legacy mutation for adding per-merchant items.
+ * Use `addItemToGroup` from itemGroups.ts instead.
+ */
 export const addItem = mutation({
   args: {
     merchantEventId: v.id('merchantEvents'),
@@ -42,6 +61,11 @@ export const addItem = mutation({
   },
 });
 
+/**
+ * @deprecated
+ * Legacy mutation for updating per-merchant items.
+ * Use `updateItemInGroup` from itemGroups.ts instead.
+ */
 export const updateItem = mutation({
   args: {
     itemId: v.id('inventory'),
@@ -87,6 +111,11 @@ export const updateItem = mutation({
   },
 });
 
+/**
+ * @deprecated
+ * Legacy mutation for removing per-merchant items.
+ * Use `removeItemFromGroup` from itemGroups.ts instead.
+ */
 export const removeItem = mutation({
   args: {
     itemId: v.id('inventory'),
@@ -104,6 +133,11 @@ export const removeItem = mutation({
   },
 });
 
+/**
+ * @deprecated
+ * Legacy query for getting per-merchant inventory at an event.
+ * Use `getEventItems` from itemGroups.ts instead.
+ */
 export const getEventInventory = query({
   args: {
     eventId: v.id('events'),
@@ -142,11 +176,17 @@ export const getEventInventory = query({
       })
     );
 
-    // Filter out merchant events with no items
-    return inventoryItems.filter((ie) => ie.items.length > 0);
+    // Return all merchant events for this event, even if they have no items yet
+    // This allows admins to add items to merchants
+    return inventoryItems;
   },
 });
 
+/**
+ * @deprecated
+ * Legacy query for getting items for a specific merchant event.
+ * Use `getMerchantItems` from itemGroups.ts instead.
+ */
 export const getMerchantEventItems = query({
   args: {
     merchantEventId: v.id('merchantEvents'),

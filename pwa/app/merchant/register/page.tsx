@@ -1,19 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import Link from "next/link";
+import { usePrivyAuth } from "../../hooks/usePrivyAuth";
+import { useRouter } from "next/navigation";
 
 export default function MerchantRegisterPage() {
-  const [email, setEmail] = useState("");
+  const { ready, authenticated, user, login } = usePrivyAuth();
+  const router = useRouter();
   const [businessName, setBusinessName] = useState("");
   const [businessDescription, setBusinessDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
 
   const registerMerchant = useMutation(api.merchants.registerMerchant);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (ready && !authenticated) {
+      router.push("/merchant/login");
+    }
+  }, [ready, authenticated, router]);
+
+  // Extract wallet address from authenticated user
+  useEffect(() => {
+    if (authenticated && user) {
+      const solanaWallet = user.linkedAccounts?.find(
+        (account: any) => account.type === "wallet" && account.chainType === "solana"
+      );
+
+      if (solanaWallet && "address" in solanaWallet) {
+        setWalletAddress(solanaWallet.address as string);
+        console.log("[MerchantRegister] Found wallet:", solanaWallet.address);
+      }
+
+      // Check if merchant already registered
+      const emailAccount = user.linkedAccounts?.find(
+        (account: any) => account.type === "email" || account.type === "google"
+      );
+      const email = emailAccount?.address as string | undefined;
+
+      if (email) {
+        // You could add a query here to check if merchant already exists
+        // and redirect them if they're already registered
+      }
+    }
+  }, [authenticated, user]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,14 +61,20 @@ export default function MerchantRegisterPage() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    // Validate email
-    if (!email.trim()) {
-      setErrorMessage("Email is required");
+    // Get email from Privy user
+    const emailAccount = user?.linkedAccounts?.find(
+      (account: any) => account.type === "email" || account.type === "google"
+    );
+    const email = emailAccount?.address as string | undefined;
+
+    if (!email) {
+      setErrorMessage("Could not retrieve email from authentication. Please try logging in again.");
       return;
     }
 
+    // Validate email
     if (!validateEmail(email)) {
-      setErrorMessage("Please enter a valid email address");
+      setErrorMessage("Invalid email address from authentication.");
       return;
     }
 
@@ -42,18 +84,24 @@ export default function MerchantRegisterPage() {
       return;
     }
 
+    // Validate wallet address
+    if (!walletAddress || walletAddress.length < 32 || walletAddress.length > 44) {
+      setErrorMessage("Invalid wallet address. Please ensure you're authenticated with Privy.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const result = await registerMerchant({
         email: email.trim(),
         businessName: businessName.trim(),
+        walletAddress: walletAddress,
       });
 
       console.log("Merchant registered:", result);
       setSuccessMessage("Application submitted! We'll review your application shortly.");
       // Clear form
-      setEmail("");
       setBusinessName("");
       setBusinessDescription("");
     } catch (error: any) {
@@ -70,6 +118,47 @@ export default function MerchantRegisterPage() {
     }
   };
 
+  // Show loading while checking authentication
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101c22]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13a4ec]" />
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#101c22] py-12 px-4">
+        <div className="max-w-md w-full">
+          <div className="bg-[#1a2e38] rounded-lg shadow-xl p-8 text-center">
+            <h1 className="text-2xl font-bold text-white mb-4">Authentication Required</h1>
+            <p className="text-[#9db0b9] mb-6">
+              You must log in first to apply for a merchant account.
+            </p>
+            <button
+              onClick={() => login()}
+              className="w-full bg-[#13a4ec] hover:bg-[#0d8ac4] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            >
+              Log In to Continue
+            </button>
+            <div className="mt-4">
+              <Link href="/" className="text-[#9db0b9] hover:text-[#13a4ec] text-sm">
+                ← Back to Home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Get email from authenticated user for display
+  const userEmail = user?.linkedAccounts?.find(
+    (account: any) => account.type === "email" || account.type === "google"
+  )?.address as string | undefined;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#101c22] py-12 px-4">
       <div className="max-w-md w-full">
@@ -80,6 +169,26 @@ export default function MerchantRegisterPage() {
             <h1 className="text-3xl font-bold text-white mb-2">Merchant Registration</h1>
             <p className="text-[#9db0b9]">Start accepting Event Token payments</p>
           </div>
+
+          {/* Wallet Address Display */}
+          {walletAddress && (
+            <div className="mb-6 p-4 bg-[#101c22] border border-[#13a4ec] rounded-lg">
+              <p className="text-xs text-[#9db0b9] mb-1">Your Wallet Address (from Privy):</p>
+              <p className="text-sm text-[#13a4ec] font-mono break-all">{walletAddress}</p>
+            </div>
+          )}
+
+          {/* Email Display (read-only) */}
+          {userEmail && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[#9db0b9] mb-2">
+                Email Address (from your login)
+              </label>
+              <div className="w-full px-4 py-3 bg-[#101c22] border border-[#2d4452] rounded-lg text-[#9db0b9]">
+                {userEmail}
+              </div>
+            </div>
+          )}
 
           {/* Success Message */}
           {successMessage && (
@@ -98,23 +207,6 @@ export default function MerchantRegisterPage() {
           {/* Form */}
           {!successMessage && (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#9db0b9] mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 bg-[#101c22] border border-[#2d4452] rounded-lg text-white placeholder-[#5a6e7b] focus:outline-none focus:ring-2 focus:ring-[#13a4ec] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-
               {/* Business Name Field */}
               <div>
                 <label htmlFor="businessName" className="block text-sm font-medium text-[#9db0b9] mb-2">
@@ -171,8 +263,8 @@ export default function MerchantRegisterPage() {
 
           {/* Back Link */}
           <div className="mt-6 text-center">
-            <Link href="/" className="text-[#13a4ec] hover:text-[#0d8ac4] text-sm">
-              Back to Home
+            <Link href="/merchant/login" className="text-[#13a4ec] hover:text-[#0d8ac4] text-sm">
+              Back to Merchant Login
             </Link>
           </div>
         </div>

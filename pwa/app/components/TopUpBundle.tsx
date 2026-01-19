@@ -6,24 +6,21 @@ interface TopUpBundleProps {
   amount: number;
   price: number;
   onPurchase: (data: { amount: number; price: number }) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function TopUpBundle({ amount, price, onPurchase }: TopUpBundleProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export function TopUpBundle({ amount, price, onPurchase, isLoading = false }: TopUpBundleProps) {
   const [isPurchased, setIsPurchased] = useState(false);
 
   const handlePurchase = async () => {
     if (isLoading || isPurchased) return;
 
-    setIsLoading(true);
     try {
       await onPurchase({ amount, price });
       setIsPurchased(true);
     } catch (error) {
       console.error('Purchase failed:', error);
       // Allow retry on error
-    } finally {
-      setIsLoading(false);
     }
   };
 

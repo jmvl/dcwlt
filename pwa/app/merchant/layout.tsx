@@ -9,8 +9,11 @@ import {
   LogOut,
   Menu,
   X,
+  Package,
 } from 'lucide-react';
 import { useState } from 'react';
+import MerchantBottomNav from '../components/MerchantBottomNav';
+import { useLogout } from '../utils/logout';
 
 interface NavItem {
   name: string;
@@ -20,6 +23,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/merchant', icon: LayoutDashboard },
+  { name: 'Inventory', href: '/merchant/inventory', icon: Package },
   { name: 'Sales', href: '/merchant/sales', icon: TrendingUp },
   { name: 'Settings', href: '/merchant/settings', icon: Settings },
 ];
@@ -33,11 +37,13 @@ function MerchantLayoutContent({
   const router = useRouter();
   const { merchant } = useMerchantAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { logout: handleLogout } = useLogout('merchant');
 
-  const handleLogout = async () => {
-    // Redirect to home page (merchant auth will handle logout via Provider)
-    router.push('/');
-  };
+  // Skip layout for login/register pages - they should be standalone
+  const isAuthPage = pathname === '/merchant/login' || pathname === '/merchant/register';
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-[#101c22] flex">
@@ -148,8 +154,11 @@ function MerchantLayoutContent({
         )}
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto pb-16 md:pb-0">{children}</main>
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <MerchantBottomNav />
     </div>
   );
 }

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solana POC - Key Sharding Demo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🔐 Solana Key Sharding POC</h1>
+      <p class="subtitle">Secure Private Key Management Using Sharding</p>
+      <div class="network-badge">
+        <span class="indicator"></span>
+        Devnet Only (No Real Money)
+      </div>
+    </header>
+
+    <!-- Security Info Panel -->
+    <div class="security-panel">
+      <h3>🛡️ Security Architecture</h3>
+      <div class="architecture-diagram">
+        <div class="diagram-box browser">
+          <strong>Browser</strong>
+          <div class="arrow">→</div>
+          Shard 1
+          <small>sessionStorage</small>
+        </div>
+        <div class="diagram-box plus">+</div>
+        <div class="diagram-box server">
+          <strong>Backend</strong>
+          <div class="arrow">→</div>
+          Shard 2
+          <small>Encrypted RAM</small>
+        </div>
+        <div class="diagram-box equals">=</div>
+        <div class="diagram-box result">
+          <strong>Full Key</strong>
+          <div class="arrow">→</div>
+          Sign TX
+        </div>
+      </div>
+      <p class="security-note">
+        ✅ Neither location has the complete private key<br>
+        ✅ Both must be compromised to steal funds<br>
+        ✅ Browser shard cleared on tab close<br>
+        ✅ Backend shard cleared on server restart
+      </p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-btn active" data-tab="wallet">
+        💼 Wallet
+      </button>
+      <button class="tab-btn" data-tab="merchants">
+        🏪 Merchants
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Wallet Tab -->
+      <div id="tab-wallet" class="tab-pane active">
+    <!-- Main Content -->
+    <main>
+      <!-- Section 1: Wallet Management -->
+      <section class="card">
+        <h2>1. Wallet Management</h2>
+        <div class="button-group">
+          <button id="btn-generate" class="btn btn-primary">
+            <span class="icon">🔑</span> Generate New Wallet
+          </button>
+          <button id="btn-import" class="btn btn-secondary">
+            <span class="icon">📥</span> Import Existing
+          </button>
+        </div>
+
+        <div id="wallet-info" class="info-box hidden">
+          <h3>Wallet Generated</h3>
+          <div class="field">
+            <label>Public Key (Address):</label>
+            <div class="value-box">
+              <code id="wallet-address">...</code>
+              <button class="copy-btn" onclick="copyToClipboard('wallet-address')">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Shard 1 (Browser):</label>
+            <div class="value-box warning">
+              <code id="shard-1-preview">...</code>
+              <small>Stored in sessionStorage (shown for demo)</small>
+            </div>
+          </div>
+          <div class="field">
+            <label>Shard 2 (Backend):</label>
+            <div class="value-box success">
+              <code id="shard-2-status">✓ Stored securely in encrypted memory</code>
+              <small>Never transmitted, never persisted</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Token Balance -->
+      <section class="card">
+        <h2>2. Token Balance</h2>
+        <p class="hint">View your EVENT token and SOL balance</p>
+        <div class="balance-display">
+          <div class="balance-item">
+            <span class="label">EVENT Tokens</span>
+            <span id="token-balance" class="amount">0.00</span>
+          </div>
+          <div class="balance-item">
+            <span class="label">SOL (Gas)</span>
+            <span id="sol-balance" class="amount">0.00</span>
+          </div>
+        </div>
+        <button id="btn-refresh-balances" class="btn btn-info">
+          <span class="icon">🔄</span> Refresh Balances
+        </button>
+      </section>
+
+      <!-- Section 3: Top-Up EVENT Tokens -->
+      <section class="card">
+        <h2>3. Top-Up EVENT Tokens</h2>
+        <p class="hint">Get EVENT tokens from the pool account. SOL is used only for gas fees.</p>
+        <div class="topup-options">
+          <label>Select Amount:</label>
+          <div class="amount-buttons">
+            <button class="amount-btn" data-amount="10">10</button>
+            <button class="amount-btn" data-amount="25">25</button>
+            <button class="amount-btn" data-amount="50">50</button>
+            <button class="amount-btn" data-amount="100">100</button>
+          </div>
+          <div class="custom-amount">
+            <input type="number" id="custom-amount" placeholder="Custom amount" min="1" max="10000">
+          </div>
+          <button id="btn-topup" class="btn btn-success" disabled>
+            <span class="icon">💰</span> Top-Up EVENT Tokens
+          </button>
+        </div>
+        <div id="topup-result" class="result-box hidden"></div>
+      </section>
+
+      <!-- Section 4: Pay Merchant -->
+      <section class="card">
+        <h2>4. Pay Merchant</h2>
+        <p class="hint">Pay merchants with EVENT tokens. Select from available merchants below.</p>
+        <div class="merchant-selector">
+          <label>Choose Merchant:</label>
+          <select id="pay-merchant-select" class="merchant-dropdown">
+            <option value="">-- Select Merchant --</option>
+          </select>
+        </div>
+        <div class="merchant-info" id="selected-merchant-info">
+          <div class="info-row">
+            <span class="label">Name:</span>
+            <span id="merchant-name-display">-</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Description:</span>
+            <span id="merchant-desc-display">-</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Wallet:</span>
+            <span id="merchant-wallet-display" class="wallet-truncate">-</span>
+          </div>
+        </div>
+        <div class="payment-inputs">
+          <div class="input-group">
+            <label>Amount to Pay:</label>
+            <input type="number" id="pay-amount" placeholder="0.00" step="0.01" min="0.01">
+            <span class="currency">EVENT</span>
+          </div>
+          <button id="btn-pay" class="btn btn-primary" disabled>
+            <span class="icon">→</span> Pay Merchant
+          </button>
+        </div>
+        <div id="pay-result" class="result-box hidden"></div>
+      </section>
+
+      <!-- SOL Airdrop (hidden, for gas fees only) -->
+      <section class="card" style="display:none;">
+        <button id="btn-airdrop" disabled>Airdrop SOL</button>
+        <div id="airdrop-result"></div>
+      </section>
+
+      <!-- SOL Transfer (hidden, for testing) -->
+      <section class="card" style="display:none;">
+        <input type="text" id="transfer-to" placeholder="Transfer to">
+        <input type="number" id="transfer-amount" placeholder="Amount">
+        <button id="btn-transfer" disabled>Transfer</button>
+        <div id="transfer-result"></div>
+      </section>
+
+      <!-- Clear Button -->
+      <section class="card">
+        <button id="btn-clear" class="btn btn-danger">
+          <span class="icon">🗑️</span> Clear All Data (Logout)
+        </button>
+      </section>
+    </main>
+    </div>
+    <!-- End Wallet Tab -->
+
+    <!-- Merchants Tab -->
+    <div id="tab-merchants" class="tab-pane">
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-subtab="list">
+          📋 Merchant List
+        </button>
+        <button class="sub-tab-btn" data-subtab="create">
+          ➕ Add Merchant
+        </button>
+      </div>
+
+      <!-- Sub-tab: Merchant List -->
+      <div id="subtab-list" class="sub-tab-pane active">
+        <section class="card">
+          <h2>All Merchants</h2>
+          <div id="merchant-list" class="merchant-grid">
+            <!-- Merchant cards populated here -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Sub-tab: Create Merchant -->
+      <div id="subtab-create" class="sub-tab-pane">
+        <section class="card">
+          <h2>Add New Merchant</h2>
+          <form id="create-merchant-form">
+            <div class="field">
+              <label>Merchant Name *</label>
+              <input type="text" name="name" required placeholder="e.g., Coffee Shop">
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea name="description" rows="3" placeholder="Location, hours, etc."></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">
+              <span class="icon">➕</span> Create Merchant
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+    <!-- End Merchants Tab -->
+    </div>
+    <!-- End Tab Content -->
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span id="connection-status">
+        <span class="dot"></span> Connecting to backend...
+      </span>
+      <span id="wallet-status" class="hidden">
+        <span class="dot"></span> Wallet Active
+      </span>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Transaction History Modal -->
+  <div id="history-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Transaction History</h2>
+        <button class="close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="merchant-summary">
+          <h3 id="history-merchant-name">Merchant Name</h3>
+          <div class="summary-stats">
+            <div class="stat">
+              <span class="label">Total Payments:</span>
+              <span id="total-payments" class="value">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Total Received:</span>
+              <span id="total-received" class="value">0 EVENT</span>
+            </div>
+          </div>
+        </div>
+        <div class="transaction-list">
+          <table class="tx-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>From</th>
+                <th>Amount</th>
+                <th>Signature</th>
+              </tr>
+            </thead>
+            <tbody id="tx-table-body">
+              <!-- Transactions loaded here -->
+            </tbody>
+          </table>
+          <div id="no-transactions" class="empty-state hidden">
+            <p>No transactions yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Merchant Modal -->
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Merchant</h2>
+        <button class="close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-merchant-form">
+          <input type="hidden" name="merchantId">
+          <div class="field">
+            <label>Merchant Name *</label>
+            <input type="text" name="name" required>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea name="description" rows="3"></textarea>
+          </div>
+          <div class="wallet-display">
+            <label>Wallet Address:</label>
+            <code id="edit-wallet-address">...</code>
+            <small>Cannot be changed</small>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary close-modal-btn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/payment.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

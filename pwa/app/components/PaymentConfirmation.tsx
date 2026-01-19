@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, X, Check, AlertCircle } from 'lucide-react';
+import { Loader2, Check, AlertCircle } from 'lucide-react';
 
 /**
  * Props for PaymentConfirmation component
@@ -9,7 +9,7 @@ import { Loader2, X, Check, AlertCircle } from 'lucide-react';
 export interface PaymentConfirmationProps {
   /** Recipient wallet address */
   recipient: string;
-  /** Amount to transfer in smallest unit (lamports) */
+  /** Amount to transfer in display format (e.g., "5" for 5 EVT) */
   amount: string;
   /** SPL Token mint address */
   splToken: string;
@@ -39,23 +39,21 @@ function formatAddress(address: string): string {
 }
 
 /**
- * Converts amount from smallest unit to display format
+ * Formats amount for display
+ * Since amount is now in display format, just validate and return it
  *
- * @param amountSmallestUnit - Amount in smallest unit (9 decimals)
+ * @param amountDisplay - Amount in display format (e.g., "5" or "5.5")
  * @returns Formatted amount string
  */
-function formatAmount(amountSmallestUnit: string): string {
-  const amount = BigInt(amountSmallestUnit);
-  const divisor = BigInt(10 ** 9);
-  const whole = amount / divisor;
-  const fraction = amount % divisor;
-
-  if (fraction === BigInt(0)) {
-    return whole.toString();
+function formatAmount(amountDisplay: string): string {
+  // Parse the amount to validate it
+  const parsed = parseFloat(amountDisplay);
+  if (isNaN(parsed)) {
+    return '0';
   }
 
-  const fractionStr = fraction.toString().padStart(9, '0');
-  return `${whole}.${fractionStr.replace(/0+$/, '')}`;
+  // Format with up to 2 decimal places if needed
+  return parsed.toFixed(2).replace(/\.00$/, '');
 }
 
 /**
@@ -68,7 +66,7 @@ function formatAmount(amountSmallestUnit: string): string {
  * ```tsx
  * <PaymentConfirmation
  *   recipient="9abc...xyz"
- *   amount="100000000"
+ *   amount="5.50"
  *   splToken="TokenMintAddress"
  *   label="Test Merchant"
  *   onConfirm={() => executePayment()}

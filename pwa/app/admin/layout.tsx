@@ -12,7 +12,8 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLogout, getStoredUserType, clearStoredUserType, storeUserType } from '../utils/logout';
 
 interface NavItem {
   name: string;
@@ -35,13 +36,31 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { ready, user, logout } = usePrivyAuth();
+  const { ready, user, login } = usePrivyAuth();
+  const { logout: handleLogout } = useLogout('admin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Check if user is admin (DCWLT email domain)
-  // Cast email to string to handle Privy's Email type
-  const userEmail = user?.email as string | undefined;
-  const isAdmin = userEmail?.endsWith('@dcwlt.com') || false;
+  // Privy's user.email is an object with .address property
+  const userEmail = user?.email?.address;
+  const isAdmin = userEmail?.endsWith('@dcwlt.com') || userEmail?.endsWith('@accelior.com') || false;
+
+  // Check for session type mismatch
+  useEffect(() => {
+    if (user && isAdmin) {
+      const storedUserType = getStoredUserType();
+      if (storedUserType && storedUserType !== 'admin') {
+        // User is authenticated but stored type doesn't match admin route
+        console.log('[AdminLayout] Session type mismatch:', storedUserType, '!= admin');
+        // Clear the mismatched session and redirect
+        clearStoredUserType();
+        router.push('/admin');
+      } else if (!storedUserType) {
+        // Store admin type for session tracking
+        storeUserType('admin');
+      }
+    }
+  }, [user, isAdmin, router]);
 
   // Loading state
   if (!ready) {
@@ -53,22 +72,51 @@ export default function AdminLayout({
     );
   }
 
-  // Not authenticated or not admin
-  if (!user || !isAdmin) {
+  // Not authenticated
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#101c22]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-400 mb-2">Access Denied</h1>
-          <p className="text-[#9db0b9]">You don't have permission to access this page.</p>
+          <h1 className="text-2xl font-bold text-white mb-4">Admin Login Required</h1>
+          <button
+            onClick={() => login()}
+            className="px-6 py-3 bg-[#13a4ec] text-white rounded-lg font-medium hover:bg-[#0d8bc4] transition-colors"
+          >
+            Login with Privy
+          </button>
+          <p className="mt-4 text-[#9db0b9]">You must be logged in with an approved email to access this page.</p>
         </div>
       </div>
     );
   }
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/');
-  };
+  // Authenticated but not admin
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#101c22]">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-2">Access Denied</h1>
+          <p className="text-[#9db0b9]">You don't have permission to access this page.</p>
+          <p className="mt-2 text-sm text-[#9db0b9]">Logged in as: {userEmail}</p>
+          <p className="mt-3 text-sm text-[#13a4ec]">Please log in with an admin account (@dcwlt.com or @accelior.com)</p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-[#13a4ec] text-white rounded-lg hover:bg-[#0d8bc4] transition-colors font-medium"
+            >
+              Logout and Login as Admin
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 bg-[#243b47] text-white rounded-lg hover:bg-[#1a2f38] transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#101c22] flex">

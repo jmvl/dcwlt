@@ -63,6 +63,7 @@ export const getUser = query({
 export const createFromPrivy = mutation({
   args: {
     walletAddress: v.string(),
+    email: v.optional(v.string()),
   },
   handler: async (ctx: any, args: any) => {
     const existing = await ctx.db
@@ -78,6 +79,7 @@ export const createFromPrivy = mutation({
     const userId = await ctx.db.insert("users", {
       walletAddress: args.walletAddress,
       oauthProvider: "privy",
+      email: args.email,
       createdAt: now,
       lastActiveAt: now,
     });
@@ -92,4 +94,4 @@ export const createFromPrivy = mutation({
 
     return await ctx.db.get(userId);
   },
-});
+});;

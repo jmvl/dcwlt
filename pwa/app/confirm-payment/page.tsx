@@ -1,37 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PaymentConfirmation } from '../components/PaymentConfirmation';
 import { usePayment } from '../hooks/usePayment';
 import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
+import { parseTokenAmount, TOKEN_DECIMALS } from '../../src/utils/transactions';
 
 /**
- * Payment confirmation page for Solana Pay
+ * Inner component that uses useSearchParams
+ * Must be wrapped in Suspense to avoid static generation issues
  *
- * Displays payment details from URL parameters and handles
- * transaction signing/submission via usePayment hook.
- *
- * URL Parameters:
- * - recipient: (required) Wallet address to send tokens to
- * - amount: (required) Amount in smallest unit (lamports)
- * - splToken: (required) SPL Token mint address
- * - label: (optional) Merchant/recipient name
- * - message: (optional) Payment note/message
- *
- * @example
- * ```
- * /confirm-payment?recipient=abc...&amount=100000000&splToken=def...&label=Test+Merchant
- * ```
+ * CRITICAL: All hooks must be called BEFORE any conditional returns
+ * to follow React's Rules of Hooks.
  */
-export default function ConfirmPaymentPage() {
-  const searchParams = useSearchParams();
+function ConfirmPaymentContent() {
   const router = useRouter();
-  const { executePayment, loading } = usePayment();
+  const searchParams = useSearchParams();
 
+  // Call ALL hooks unconditionally at the top (Rules of Hooks)
+  const { executePayment, loading } = usePayment();
   const [success, setSuccess] = useState<boolean | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   // Parse URL parameters
   const recipient = searchParams.get('recipient');
@@ -40,9 +32,15 @@ export default function ConfirmPaymentPage() {
   const label = searchParams.get('label') || undefined;
   const message = searchParams.get('message') || undefined;
 
-  // Validate required parameters
-  const isValid = recipient && amount && splToken;
+  // Validate required parameters (useMemo for computed value)
+  const isValid = useMemo(() => recipient && amount && splToken, [recipient, amount, splToken]);
 
+  // Client-side hydration effect
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Validate parameters on mount/change
   useEffect(() => {
     if (!isValid) {
       setError('Invalid payment request: Missing required parameters');
@@ -53,17 +51,41 @@ export default function ConfirmPaymentPage() {
    * Handle payment confirmation
    */
   const handleConfirm = async () => {
+    console.log('[ConfirmPayment] handleConfirm called');
+    console.log('[ConfirmPayment] Params:', { recipient, amount, splToken });
+
     if (!recipient || !amount || !splToken) {
+      console.error('[ConfirmPayment] Missing parameters');
       setError('Missing required payment parameters');
       return;
     }
 
+    // CRITICAL FIX: Convert display amount to base units
+    // The QR code encodes display amount (e.g., "5" for 5 EVT)
+    // But SPL token transfers need base units (5 * 10^9 = 5000000000 for 9 decimals)
+    let amountInBaseUnits: string;
+    try {
+      const amountBigInt = parseTokenAmount(amount);
+      amountInBaseUnits = amountBigInt.toString();
+      console.log('[ConfirmPayment] Amount conversion:', {
+        displayAmount: amount,
+        decimals: TOKEN_DECIMALS,
+        baseUnits: amountInBaseUnits,
+      });
+    } catch (err) {
+      console.error('[ConfirmPayment] Failed to parse amount:', err);
+      setError(`Invalid amount format: ${amount}`);
+      return;
+    }
+
+    console.log('[ConfirmPayment] About to call executePayment...');
     try {
       const result = await executePayment({
         recipient,
-        amount,
+        amount: amountInBaseUnits,
         splToken,
       });
+      console.log('[ConfirmPayment] executePayment returned:', result);
 
       if (result.success) {
         setSuccess(true);
@@ -101,6 +123,17 @@ export default function ConfirmPaymentPage() {
       window.open(`https://explorer.solana.com/tx/${signature}?cluster=devnet`, '_blank');
     }
   };
+
+  // ===== CONDITIONAL RENDERING (all hooks already called) =====
+
+  // Don't render payment UI until client-side hydrated
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-[#0a1216] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   // Show validation error
   if (!isValid) {
@@ -174,7 +207,16 @@ export default function ConfirmPaymentPage() {
             <div className="text-center">
               <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-white mb-2">Payment Failed</h1>
-              <p className="text-[#9db0b9] mb-6">{error || 'An error occurred'}</p>
+              <p className="text-[#9db0b9] mb-4">{error || 'An error occurred'}</p>
+
+              {/* Technical details for debugging */}
+              <div className="bg-[#0a1216] rounded-lg p-3 mb-6 text-left">
+                <p className="text-[#9db0b9] text-xs mb-1">Error Details:</p>
+                <p className="text-red-400 text-xs break-all font-mono">{error || 'Unknown error'}</p>
+                <p className="text-[#9db0b9] text-xs mt-3">
+                  Check browser console (F12) for more details
+                </p>
+              </div>
 
               {/* Try Again */}
               <button
@@ -214,5 +256,32 @@ export default function ConfirmPaymentPage() {
       loading={loading}
       error={error}
     />
+  );
+}
+
+/**
+ * Payment confirmation page for Solana Pay
+ *
+ * Displays payment details from URL parameters and handles
+ * transaction signing/submission via usePayment hook.
+ *
+ * URL Parameters:
+ * - recipient: (required) Wallet address to send tokens to
+ * - amount: (required) Amount in smallest unit (lamports)
+ * - splToken: (required) SPL Token mint address
+ * - label: (optional) Merchant/recipient name
+ * - message: (optional) Payment note/message
+ *
+ * Wraps ConfirmPaymentContent in Suspense to handle useSearchParams
+ */
+export default function ConfirmPaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a1216] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <ConfirmPaymentContent />
+    </Suspense>
   );
 }
