@@ -43,7 +43,7 @@ function ConfirmPaymentContent() {
 
   // Convex IDs are strings at runtime with type annotations for compile-time safety
   // The reference parameter from QR code is already a string ID
-  const merchantId: string | undefined = merchant?._id?.toString();
+  const merchantId: string | undefined = merchant?._id?.toString() || undefined;
   const itemId: string | undefined = reference;
 
   console.log('[ConfirmPayment] Payment parameters:', {
