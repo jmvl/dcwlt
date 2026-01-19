@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** Frictionless payments at scale
-**Current focus:** Ready for Phase 3 Top-Up + Payments
+**Current focus:** Planning Phase 4.2 (User App Payment Workflow UX)
 
 ## Current Position
 
-Phase: 4.1 of 5 (Merchant Notifications)
-Plan: 01 of 1 (Real-Time Notifications)
-Status: Completed
-Last activity: 2026-01-19 — Completed Phase 04.1 (Merchant Notifications)
+Phase: 4.2 of 6 (User App Payment Workflow UX)
+Plan: 01 of 1 (Payment Confirmation UX Improvements)
+Status: Complete
+Last activity: 2026-01-20 — Completed Phase 04.2-01
 
-Progress: ███████████ 100%
+Progress: ██████████░ 91.7%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
-- Average duration: 9.7 min
-- Total execution time: 3.38 hours
+- Total plans completed: 23
+- Average duration: 9.4 min
+- Total execution time: 3.59 hours
 
 **By Phase:**
 
@@ -29,14 +29,16 @@ Progress: ███████████ 100%
 |-------|-------|-------|----------|
 | 1-pwa-foundation | 3 | 3 | 11.5 min |
 | 2-auth-wallet-core-ui | 4 | 7 | 12.0 min |
-| 3-topup-payments | 2 | 2 | 24.5 min |
+| 3-topup-payments | 3 | 3 | 24.5 min |
 | 3.5-merchant-management | 6 | 7 | 5.9 min |
 | 4-merchant-experience | 4 | 7 | 8.5 min |
 | 4.1-merchant-notifications | 1 | 1 | 2.0 min |
+| 4.2-user-app-ux | 1 | 1 | 2.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 2 min (04.1-01), 15 min (04-04), 8 min (04-03)
-- Trend: Phase 4.1 complete, all merchant features functional with real-time notifications
+- Last 3 plans: 2 min (04.2-01), 2 min (04.1-01), 15 min (04-04)
+- Trend: Phase 5 (Referral System) planned - user referral rewards and tracking
+- Next: Plan and execute Phase 5-01 for referral system foundation
 
 ## Accumulated Context
 
@@ -102,6 +104,14 @@ Recent decisions affecting current work:
 38. Always-render scanner element - never conditionally render to maintain stable DOM reference
 39. Separate parse/validate functions - isValidSolanaPayURL() returns boolean, parseSolanaPayURL() throws errors
 40. Camera permission handling with retry UI - user-friendly error states for permission denial
+
+**From Plan 3-03:**
+95. Used @solana/web3.js directly for transaction building instead of @solana/kit - complete functionality with better documentation
+96. VersionedTransaction (v0) for modern Solana transaction format - future-proof and compatible with Privy signing
+97. Amount conversion between display and base units - parseTokenAmount() converts display → base units for SPL transfers (9 decimals)
+98. Convex transaction record created as PENDING before on-chain submission - provides audit trail even if Solana transaction fails
+99. ATA created idempotently for recipient if needed - createAssociatedTokenAccountIdempotentInstruction() checks and creates ATA if missing
+100. Balance query invalidated after successful payment - queryClient.invalidateQueries() triggers real-time balance update
 
 **From Plan 3.5-01:**
 41. Mock wallet generation for POC - deterministic base58 encoding from email hash
@@ -179,6 +189,12 @@ Recent decisions affecting current work:
 93. Toast notifications use sonner library for modern, React 19-compatible alerts with custom styling matching merchant portal theme
 94. Limited live query to last 100 transactions for performance while covering reasonable event volume - balances data transfer with real-time responsiveness
 
+**From Plan 04.2-01:**
+95. Removed countdown timer from payment confirmation - users already scanned QR code intentionally, countdown adds unnecessary friction
+96. Merchant name from Convex lookup - use businessName from merchants table instead of "Unknown Merchant" placeholder
+97. Mobile-responsive button layout - stack buttons vertically on mobile (< 640px) with min-height 44px for better thumb reach and accessibility
+98. Privy action sheet is necessary security UX - cannot be disabled, part of non-custodial wallet security model
+
 ### Pending Todos
 
 None yet.
@@ -197,10 +213,10 @@ None yet.
 
 **Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing. **RESOLVED**: Plan 03-01 completed - mock top-up flow now adds tokens to balance.
 
-**Real transaction recording not implemented:** Sales history uses mock data seeded via seedMockTransactions function. Real transaction recording requires Phase 3 (payments) completion to create transactions from actual Solana payments.
+**Real transaction recording not implemented:** Sales history uses mock data seeded via seedMockTransactions function. Real transaction recording requires Phase 3 (payments) completion to create transactions from actual Solana payments. **RESOLVED**: Plan 03-03 completed - transactions now recorded in Convex with PENDING → CONFIRMED/FAILED lifecycle when users make payments via QR codes.
 
 ## Session Continuity
 
-Last session: 2026-01-19
-Stopped at: Completed Plan 04.1-01 (Merchant Real-Time Notifications)
+Last session: 2026-01-20
+Stopped at: Completed Plan 04.2-01 (User App Payment Workflow UX)
 Resume file: None
