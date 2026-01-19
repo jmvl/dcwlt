@@ -190,8 +190,22 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
             </button>
             <button
               onClick={() => {
-                // Clear Privy auth and redirect to home
-                window.location.href = '/';
+                // Clear all browser storage to force logout
+                if (typeof window !== 'undefined') {
+                  // Clear all Privy-related storage
+                  Object.keys(localStorage).forEach(key => {
+                    if (key.toLowerCase().includes('privy')) {
+                      localStorage.removeItem(key);
+                    }
+                  });
+                  Object.keys(sessionStorage).forEach(key => {
+                    if (key.toLowerCase().includes('privy') || key.toLowerCase().includes('dcwlt')) {
+                      sessionStorage.removeItem(key);
+                    }
+                  });
+                  // Force hard refresh to home - this clears all React state
+                  window.location.href = '/';
+                }
               }}
               className="w-full px-6 py-3 border border-[#2d4452] rounded-lg text-[#9db0b9] hover:text-white hover:bg-[#243b47] transition-colors"
             >

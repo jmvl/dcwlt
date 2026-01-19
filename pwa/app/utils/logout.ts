@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 
 /**
@@ -83,7 +82,6 @@ export async function performLogout(
  * ```
  */
 export function useLogout(userType: UserType) {
-  const router = useRouter();
   const { logout: privyLogout } = usePrivy();
 
   const logout = async () => {
@@ -94,15 +92,19 @@ export function useLogout(userType: UserType) {
       // Clear the Privy session
       await privyLogout();
 
-      // Redirect to appropriate login page
+      // Use hard refresh to clear all React state and memory
       const destination = LOGOUT_ROUTES[userType];
-      router.push(destination);
+      if (typeof window !== 'undefined') {
+        window.location.href = destination;
+      }
     } catch (error) {
       console.error(`[useLogout] Error during ${userType} logout:`, error);
       // Still redirect even if logout fails
       clearStoredUserType();
       const destination = LOGOUT_ROUTES[userType];
-      router.push(destination);
+      if (typeof window !== 'undefined') {
+        window.location.href = destination;
+      }
     }
   };
 
