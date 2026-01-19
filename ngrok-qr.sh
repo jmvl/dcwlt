@@ -32,8 +32,10 @@ else
   PORT=$(read_port)
 fi
 
-# Create log directory
+# Create directories
 mkdir -p /tmp/ngrok
+QR_DIR="/tmp/ngrok-qr"
+mkdir -p "$QR_DIR"
 
 # Kill any existing ngrok processes
 pkill -f "ngrok.*http.*$PORT" 2>/dev/null
@@ -56,7 +58,10 @@ sleep 5
 URL=$(grep -o 'https://[a-z0-9]\{8,\}\.ngrok[^"]*' /tmp/ngrok/tunnel.log | head -1)
 
 if [ -n "$URL" ]; then
-  # Don't clear - let user see the URL first
+  # Generate QR code filename
+  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+  QR_FILE="$QR_DIR/ngrok-qr-$TIMESTAMP.png"
+
   echo ""
   echo "═══════════════════════════════════════════════"
   echo "  NGROK TUNNEL ACTIVE"
@@ -65,11 +70,30 @@ if [ -n "$URL" ]; then
   echo "  🌐 Local Port: $PORT"
   echo "  🔗 Tunnel URL: $URL"
   echo ""
+
+  # Save QR code to file
+  echo "$URL" | qrencode -o "$QR_FILE" -s 10 2>/dev/null
+
+  if [ -f "$QR_FILE" ]; then
+    echo "  ✓ QR code saved to: $QR_FILE"
+    echo ""
+
+    # Try to open the QR code image
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS
+      open "$QR_FILE" 2>/dev/null && echo "  ✓ QR code opened in Preview"
+    elif command -v xdg-open &> /dev/null; then
+      # Linux
+      xdg-open "$QR_FILE" 2>/dev/null && echo "  ✓ QR code opened in image viewer"
+    fi
+    echo ""
+  fi
+
   echo "  Scan QR code to access from your phone:"
   echo ""
 
-  # Generate QR code
-  echo "$URL" | qrencode -t ANSIUTF8
+  # Also display in terminal if supported
+  echo "$URL" | qrencode -t ANSIUTF8 2>/dev/null || echo "  [QR code display not supported in terminal]"
 
   echo ""
   echo "═══════════════════════════════════════════════"
@@ -78,6 +102,7 @@ if [ -n "$URL" ]; then
   echo ""
   echo "  Tunnel log: /tmp/ngrok/tunnel.log"
   echo "  Direct URL: $URL"
+  echo "  QR image:   $QR_FILE"
   echo "═══════════════════════════════════════════════"
   echo ""
 
