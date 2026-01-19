@@ -138,6 +138,7 @@ export default function MerchantInventory({ merchantEventId, merchantId }: Merch
         itemPrice={qrModalState.itemPrice}
         itemName={qrModalState.itemName}
         itemId={qrModalState.itemId}
+        merchantId={merchant!._id}
       />
     )}
   </>

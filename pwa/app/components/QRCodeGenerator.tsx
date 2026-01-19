@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import QRCode from 'qrcode';
-import { X } from 'lucide-react';
+import { X, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Event Token mint address on Solana Devnet
 const TOKEN_MINT_ADDRESS = '4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq';
@@ -14,6 +17,7 @@ interface QRCodeGeneratorProps {
   itemPrice: number;
   itemName: string;
   itemId: string;
+  merchantId: string;
 }
 
 export function QRCodeGenerator({
@@ -23,11 +27,46 @@ export function QRCodeGenerator({
   itemPrice,
   itemName,
   itemId,
+  merchantId,
 }: QRCodeGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [paymentReceived, setPaymentReceived] = useState(false);
+
+  // Real-time subscription to merchant transactions
+  const transactions = useQuery(
+    api.transactions.listLiveMerchantTransactions,
+    merchantId ? { merchantId: merchantId as any } : 'skip'
+  );
+
+  // Track if this specific item was just paid for
+  const latestTransaction = transactions?.[0];
+  const isThisItemPaid = latestTransaction?.itemId === itemId && latestTransaction?.status === 'confirmed';
+
+  // Update UI when payment is received
+  useEffect(() => {
+    if (isThisItemPaid && !paymentReceived) {
+      setPaymentReceived(true);
+      console.log('[QRCodeGenerator] Payment received for item:', itemName);
+
+      // Auto-dismiss after 5 seconds to show success
+      const timer = setTimeout(() => {
+        onClose();
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isThisItemPaid, paymentReceived, itemName, onClose]);
+
+  // Reset payment received state when modal reopens
+  useEffect(() => {
+    if (isOpen) {
+      setPaymentReceived(false);
+    }
+  }, [isOpen]);
 
   // Build Solana Pay URL
   const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&spl-token=${TOKEN_MINT_ADDRESS}&reference=${itemId}`;
@@ -110,45 +149,69 @@ export function QRCodeGenerator({
             </button>
           </div>
 
-          {/* Item Details */}
-          <div className="mb-6 text-center">
-            <h3 className="text-2xl font-bold text-white mb-2">{itemName}</h3>
-            <p className="text-3xl font-bold text-[#13a4ec]">
-              {itemPrice.toFixed(2)} <span className="text-lg">EVT</span>
-            </p>
-          </div>
+          {/* Payment Received Success State */}
+          {paymentReceived ? (
+            <div className="py-12 text-center">
+              <CheckCircle2 className="w-20 h-20 text-green-400 mx-auto mb-6 animate-[scale-in_0.3s_ease-out]" />
+              <h3 className="text-2xl font-bold text-white mb-3">Payment Received!</h3>
+              <p className="text-[#9db0b9] mb-2">
+                <span className="font-semibold text-[#13a4ec]">{itemName}</span> - {itemPrice.toFixed(2)} EVT
+              </p>
+              <p className="text-sm text-[#9db0b9] mb-8">
+                Transaction confirmed on Solana
+              </p>
 
-          {/* QR Code */}
-          <div className="bg-white rounded-lg p-4 mb-4">
-            <div className="flex flex-col items-center">
-              {isLoading && (
-                <div className="flex items-center justify-center h-64 absolute inset-0 bg-white z-10">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13a4ec]" />
-                </div>
-              )}
-              {error && (
-                <div className="flex items-center justify-center h-64">
-                  <p className="text-red-500 text-sm">{error}</p>
-                </div>
-              )}
-              <canvas
-                ref={canvasRef}
-                className="rounded"
-                style={{ opacity: isLoading ? 0 : 1, minHeight: '256px' }}
-              />
-              {!isLoading && !error && (
-                <p className="text-gray-600 text-xs mt-2 text-center">
-                  Scan to pay for {itemName}
-                </p>
-              )}
+              <button
+                onClick={() => router.push('/merchant/sales')}
+                className="inline-flex items-center gap-2 bg-[#13a4ec] hover:bg-[#0d8ac4] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                View in Sales
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Item Details */}
+              <div className="mb-6 text-center">
+                <h3 className="text-2xl font-bold text-white mb-2">{itemName}</h3>
+                <p className="text-3xl font-bold text-[#13a4ec]">
+                  {itemPrice.toFixed(2)} <span className="text-lg">EVT</span>
+                </p>
+              </div>
 
-          {/* Solana Pay URL (for reference) */}
-          <div className="bg-[#101c22] rounded-lg p-3 mb-6">
-            <p className="text-xs text-[#9db0b9] mb-1">Solana Pay URL:</p>
-            <p className="text-xs text-[#13a4ec] font-mono break-all">{solanaPayUrl}</p>
-          </div>
+              {/* QR Code */}
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <div className="flex flex-col items-center">
+                  {isLoading && (
+                    <div className="flex items-center justify-center h-64 absolute inset-0 bg-white z-10">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13a4ec]" />
+                    </div>
+                  )}
+                  {error && (
+                    <div className="flex items-center justify-center h-64">
+                      <p className="text-red-500 text-sm">{error}</p>
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvasRef}
+                    className="rounded"
+                    style={{ opacity: isLoading ? 0 : 1, minHeight: '256px' }}
+                  />
+                  {!isLoading && !error && (
+                    <p className="text-gray-600 text-xs mt-2 text-center">
+                      Scan to pay for {itemName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Solana Pay URL (for reference) */}
+              <div className="bg-[#101c22] rounded-lg p-3 mb-6">
+                <p className="text-xs text-[#9db0b9] mb-1">Solana Pay URL:</p>
+                <p className="text-xs text-[#13a4ec] font-mono break-all">{solanaPayUrl}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
