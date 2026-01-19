@@ -200,29 +200,21 @@ export default function MerchantSalesPage() {
 
         <div className="p-4">
           {/* Loading state */}
-          if (transactions === undefined) {
-            return (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13a4ec]" />
-              </div>
-            );
-          }
-
-          {/* Empty state */}
-          if (transactions.length === 0) {
-            return (
-              <div className="text-center py-12">
-                <ShoppingBag className="w-16 h-16 text-[#9db0b9] mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No transactions yet</h3>
-                <p className="text-sm text-[#9db0b9]">
-                  Transactions will appear here when customers pay using your QR codes.
-                </p>
-              </div>
-            );
-          }
-
-          {/* Transactions table */}
-          return (
+          {transactions === undefined ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13a4ec]" />
+            </div>
+          ) : transactions.length === 0 ? (
+            /* Empty state */
+            <div className="text-center py-12">
+              <ShoppingBag className="w-16 h-16 text-[#9db0b9] mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No transactions yet</h3>
+              <p className="text-sm text-[#9db0b9]">
+                Transactions will appear here when customers pay using your QR codes.
+              </p>
+            </div>
+          ) : (
+            /* Transactions table */
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -307,8 +299,8 @@ export default function MerchantSalesPage() {
                 </tbody>
               </table>
             </div>
-          );
-        }}
+          )}
+        </div>
       </div>
     </div>
   );
