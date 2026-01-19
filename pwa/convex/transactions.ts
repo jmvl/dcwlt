@@ -268,7 +268,9 @@ export const createTransaction = mutation({
       throw new Error("Amount must be greater than 0");
     }
 
-    // Create transaction with pending status
+    // Create transaction with status based on whether we have a signature
+    // If signature is provided, transaction is confirmed on Solana
+    // Otherwise, it's pending (for future use cases like pre-authorization)
     const transactionId = await ctx.db.insert("transactions", {
       merchantId: args.merchantId,
       itemId: args.itemId,
@@ -276,7 +278,7 @@ export const createTransaction = mutation({
       amount: args.amount,
       timestamp: Date.now(),
       signature: args.signature,
-      status: "pending",
+      status: args.signature ? "confirmed" : "pending",
     });
 
     return transactionId;
