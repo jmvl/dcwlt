@@ -1,0 +1,51 @@
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
+import { Manrope } from 'next/font/google';
+import { PrivyAuthProvider } from './components/PrivyProvider';
+import { ConvexClientProvider } from './components/ConvexProvider';
+import { QueryProvider } from './components/QueryProvider';
+import ServiceWorkerRegister from './components/ServiceWorkerRegister';
+
+const manrope = Manrope({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'Event Wallet',
+  description: 'Frictionless payments at live events',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Event Wallet',
+  },
+  other: {
+    'theme-color': '#13a4ec',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#13a4ec',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className="dark">
+      <body className={manrope.className}>
+        <PrivyAuthProvider>
+          <ConvexClientProvider>
+            <QueryProvider>
+              <ServiceWorkerRegister />
+              {children}
+            </QueryProvider>
+          </ConvexClientProvider>
+        </PrivyAuthProvider>
+      </body>
+    </html>
+  );
+}
