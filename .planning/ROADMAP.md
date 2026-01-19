@@ -15,10 +15,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: PWA Foundation** - Installable PWA with service worker caching
 - [x] **Phase 2: Auth + Wallet + Core UI** - Social login, embedded wallet, real-time balance display
-- [ ] **Phase 3: Top-Up + Payments** - Mock top-up flow, QR scanning, payment execution
+- [x] **Phase 3: Top-Up + Payments** - Mock top-up flow, QR scanning, payment execution
 - [x] **Phase 3.5: Merchant Registration & Management** - Merchant self-registration with approval, admin-controlled events and item pricing
 - [x] **Phase 4: Merchant Experience** - Merchant dashboard, inventory management, QR generation, sales history
-- [ ] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
+- [x] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
+- [ ] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
 - [ ] **Phase 5: History + Offline** - Transaction history, offline support
 
 ## Phase Details
@@ -82,10 +83,9 @@ Plans:
 
 Plans:
 
-- [ ] 03-01: Mock top-up flow (no Stripe yet)
-- [ ] 03-02: QR code scanner with camera access
-- [ ] 03-03: Solana Pay URL parsing
-- [ ] 03-04: Payment signing and transaction submission
+- [x] 03-01: Mock top-up flow (no Stripe yet)
+- [x] 03-02: QR code scanner with camera access
+- [x] 03-03: Payment signing and transaction submission (includes Solana Pay URL parsing)
 
 ### Phase 3.5: Merchant Registration & Management
 
@@ -157,18 +157,37 @@ Plans:
 
 - [x] 04.1-01: Real-time transaction subscriptions with client-side filtering
 
+### Phase 4.2: User App Payment Workflow UX (INSERTED)
+
+**Goal**: Streamline payment confirmation flow with mobile-responsive design and reduced friction
+**Depends on**: Phase 3 (payment flow must exist), Phase 3.5 (merchant data must exist)
+**Requirements**: UX improvements for user payment workflow (new requirement)
+**Success Criteria** (what must be TRUE):
+
+1. Payment confirmation screen has no countdown delay
+2. Merchant name displayed from Convex lookup (not "Unknown Merchant")
+3. Confirm/Cancel buttons are mobile-responsive with proper touch targets
+4. Users understand Privy action sheet is necessary security UX
+   **Research**: Unlikely (well-understood components and patterns)
+   **Plans**: TBD
+
+Plans:
+
+- [x] 04.2-01: Remove countdown, show merchant name, mobile-responsive buttons
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 5
 
-Decimal phases (like 3.5, 4.1) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 5).
+Decimal phases (like 3.5, 4.1, 4.2) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 5).
 
 | Phase                                   | Plans Complete | Status      | Completed  |
 | --------------------------------------- | -------------- | ----------- | ---------- |
 | 1. PWA Foundation                       | 3/3            | Complete    | 2026-01-16 |
 | 2. Auth + Wallet + Core UI              | 4/4            | Complete    | 2026-01-16 |
-| 3. Top-Up + Payments                    | 0/4            | Not started | -          |
+| 3. Top-Up + Payments                    | 3/3            | Complete    | 2026-01-17 |
 | 3.5. Merchant Registration & Management | 6/6            | Complete    | 2026-01-18 |
 | 4. Merchant Experience                 | 4/4            | Complete    | 2026-01-19 |
 | 4.1. Merchant Payment Notifications    | 1/1            | Complete    | 2026-01-19 |
+| 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
