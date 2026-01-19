@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import { LoginButton } from '../../components/LoginButton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePrivyAuth } from '../../hooks/usePrivyAuth';
+import { useLogout } from '../../utils/logout';
 
 export default function MerchantLoginPage() {
   const { ready, authenticated } = usePrivyAuth();
   const router = useRouter();
+  const { logout: handleLogout } = useLogout('merchant');
 
   // Redirect to /merchant after successful login
   // MerchantAuthProvider will handle the validation there
@@ -40,6 +42,19 @@ export default function MerchantLoginPage() {
               </div>
             </div>
           </div>
+
+          {/* Logout Button - Show if already authenticated */}
+          {authenticated && (
+            <div className="mb-6">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-[#2d4452] rounded-lg text-[#9db0b9] hover:text-white hover:bg-[#243b47] transition-colors text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                Switch Account
+              </button>
+            </div>
+          )}
 
           {/* Login Button */}
           <div className="mb-6">

@@ -1,0 +1,24 @@
+{
+  "name": "react-native-fast-base64",
+  "version": "0.1.4",
+  "summary": "Just another native implementation of Base64 in C++ for React-Native. Inspired and enhanced from @craftzdog/eact-native-quick-base64",
+  "homepage": "https://github.com/alexdonh/react-native-fast-base64#readme",
+  "license": "MIT",
+  "authors": "Alex Do <alex.donh@gmail.com> (https://github.com/alexdonh)",
+  "platforms": {
+    "ios": "11.0"
+  },
+  "source": {
+    "git": "https://github.com/alexdonh/react-native-fast-base64.git",
+    "tag": "0.1.4"
+  },
+  "source_files": [
+    "ios/**/*.{h,m,mm}",
+    "cpp/**/*.{h,cpp}"
+  ],
+  "dependencies": {
+    "React-Core": [
+
+    ]
+  }
+}

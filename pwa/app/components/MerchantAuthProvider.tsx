@@ -171,12 +171,33 @@ export function MerchantAuthProvider({ children }: MerchantAuthProviderProps) {
         <div className="text-center max-w-md p-8">
           <h1 className="text-2xl font-bold text-white mb-4">Merchant Access</h1>
           <p className="text-[#9db0b9] mb-6">{merchantAuth.error}</p>
-          <button
-            onClick={() => router.push('/merchant/login')}
-            className="px-6 py-3 bg-[#13a4ec] text-white rounded-lg font-medium hover:bg-[#0d8bc4] transition-colors"
-          >
-            Back to Merchant Login
-          </button>
+
+          {merchantAuth.error.includes('not found') && (
+            <p className="text-sm text-[#9db0b9] mb-6">
+              Don't have a merchant account?{' '}
+              <button onClick={() => router.push('/merchant/register')} className="text-[#13a4ec] hover:underline">
+                Apply here
+              </button>
+            </p>
+          )}
+
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push('/merchant/login')}
+              className="w-full px-6 py-3 bg-[#13a4ec] text-white rounded-lg font-medium hover:bg-[#0d8bc4] transition-colors"
+            >
+              Back to Merchant Login
+            </button>
+            <button
+              onClick={() => {
+                // Clear Privy auth and redirect to home
+                window.location.href = '/';
+              }}
+              className="w-full px-6 py-3 border border-[#2d4452] rounded-lg text-[#9db0b9] hover:text-white hover:bg-[#243b47] transition-colors"
+            >
+              Logout and Switch Account
+            </button>
+          </div>
         </div>
       </div>
     );
