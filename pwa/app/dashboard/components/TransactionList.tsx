@@ -24,7 +24,7 @@ export function TransactionList() {
         <h3 className="text-white text-lg font-bold mb-4">Recent Activities</h3>
         <div className="flex flex-col gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#1c2a31]/40 rounded-2xl h-[88px] animate-pulse shadow-elevation-sm" />
+            <div key={i} className="bg-[#0F192E] rounded-2xl h-[88px] animate-pulse shadow-elevation-sm" />
           ))}
         </div>
       </div>
@@ -36,10 +36,10 @@ export function TransactionList() {
     return (
       <div className="px-4 pt-4 pb-4">
         <h3 className="text-white text-lg font-bold mb-4">Recent Activities</h3>
-        <div className="bg-[#1c2a31]/40 rounded-2xl p-6 text-center shadow-elevation-sm">
-          <span className="material-symbols-outlined text-[#9db0b9] text-4xl mb-2">receipt_long</span>
-          <p className="text-[#9db0b9] text-sm">No transactions yet</p>
-          <p className="text-[#6b7d85] text-xs mt-1">Scan a QR code to make your first payment</p>
+        <div className="bg-[#0F192E] rounded-2xl p-6 text-center shadow-elevation-sm">
+          <span className="material-symbols-outlined text-[#8E9ABB] text-4xl mb-2">receipt_long</span>
+          <p className="text-[#8E9ABB] text-sm">No transactions yet</p>
+          <p className="text-[#6B7D8F] text-xs mt-1">Scan a QR code to make your first payment</p>
         </div>
       </div>
     );
@@ -63,7 +63,6 @@ export function TransactionList() {
             itemName={tx.itemName}
             timestamp={tx.timestamp}
             amount={tx.amount}
-            category={tx.category}
           />
         ))}
       </div>

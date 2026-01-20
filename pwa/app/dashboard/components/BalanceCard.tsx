@@ -30,7 +30,7 @@ export function BalanceCard() {
     >
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="absolute inset-0 bg-[#1c2a31] animate-pulse" />
+        <div className="absolute inset-0 bg-[#0F192E] animate-pulse" />
       )}
 
       <div className="flex w-full items-end justify-between gap-4 p-8 relative z-10">
