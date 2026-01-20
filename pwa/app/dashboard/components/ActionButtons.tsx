@@ -11,13 +11,13 @@ export function ActionButtons() {
   };
 
   return (
-    <div className="flex justify-center items-center gap-12 bg-[#1c2a31]/50 rounded-2xl p-6 border border-white/5">
+    <div className="flex justify-center items-center gap-12 py-6">
       {/* Top Up Button */}
       <Link
         href="/topup"
         className="flex flex-col items-center gap-2 cursor-pointer group"
       >
-        <div className="action-button-circle group-active:scale-95 transition-transform">
+        <div className="action-button-circle group-hover:scale-105 group-active:scale-95 transition-transform duration-200">
           <span className="material-symbols-outlined font-bold">add</span>
         </div>
         <p className="text-white text-xs font-bold">Top Up</p>
@@ -28,7 +28,7 @@ export function ActionButtons() {
         onClick={handleCashOut}
         className="flex flex-col items-center gap-2 cursor-pointer group"
       >
-        <div className="action-button-circle group-active:scale-95 transition-transform">
+        <div className="action-button-circle group-hover:scale-105 group-active:scale-95 transition-transform duration-200">
           <span className="material-symbols-outlined font-bold">account_balance</span>
         </div>
         <p className="text-white text-xs font-bold">Cash Out</p>
