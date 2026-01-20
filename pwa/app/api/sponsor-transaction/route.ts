@@ -26,7 +26,7 @@ import {
   VersionedTransaction,
   SystemProgram,
 } from '@solana/web3.js';
-import bs58 from 'bs58';
+import * as bs58 from 'bs58';
 
 /**
  * Environment variables for fee payer wallet
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     checkForUnauthorizedTransfers(transaction);
 
     // Step 6: Load fee payer keypair
-    const feePayerKeypair = Keypair.fromSecretKey(bs58.decode(FEE_PAYER_PRIVATE_KEY!));
+    const feePayerKeypair = Keypair.fromSecretKey((bs58 as any).default.decode(FEE_PAYER_PRIVATE_KEY!));
     console.log('[SponsorTransaction] Fee payer loaded:', feePayerKeypair.publicKey.toBase58());
 
     // Verify the loaded keypair matches the expected address
@@ -235,35 +235,53 @@ export async function POST(request: NextRequest) {
 
     console.log('[SponsorTransaction] Transaction sent:', signature);
 
-    // Step 9: Wait for confirmation (optional but recommended)
+    // Step 9: Wait for confirmation
     console.log('[SponsorTransaction] Waiting for confirmation...');
 
-    // Use the newer confirmation API
-    const status = await connection.getSignatureStatus(signature);
+    // Poll for transaction confirmation with timeout
+    const CONFIRMATION_TIMEOUT = 30000; // 30 seconds
+    const POLL_INTERVAL = 1000; // 1 second
+    const startTime = Date.now();
 
-    if (!status.value) {
-      console.error('[SponsorTransaction] Transaction confirmation not found');
+    let confirmed = false;
+
+    while (Date.now() - startTime < CONFIRMATION_TIMEOUT) {
+      const status = await connection.getSignatureStatus(signature);
+
+      if (status.value) {
+        // We have a status response
+        if (status.value.err) {
+          console.error('[SponsorTransaction] Transaction failed:', status.value.err);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Transaction failed: ${JSON.stringify(status.value.err)}`,
+            },
+            { status: 400 }
+          );
+        }
+
+        // Transaction confirmed successfully
+        confirmed = true;
+        console.log('[SponsorTransaction] Transaction confirmed successfully');
+        break;
+      }
+
+      // Status is null, transaction still pending, wait and retry
+      console.log('[SponsorTransaction] Transaction pending, waiting...');
+      await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+    }
+
+    if (!confirmed) {
+      console.error('[SponsorTransaction] Transaction confirmation timeout');
       return NextResponse.json(
         {
           success: false,
-          error: 'Transaction confirmation not found',
+          error: 'Transaction confirmation timeout - please check if transaction was submitted',
         },
-        { status: 400 }
+        { status: 408 }
       );
     }
-
-    if (status.value.err) {
-      console.error('[SponsorTransaction] Transaction failed:', status.value.err);
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Transaction failed: ${JSON.stringify(status.value.err)}`,
-        },
-        { status: 400 }
-      );
-    }
-
-    console.log('[SponsorTransaction] Transaction confirmed successfully');
 
     // Step 10: Return success response
     const response: SponsorTransactionResponse = {
