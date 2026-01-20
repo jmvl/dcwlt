@@ -4,24 +4,24 @@
 :root {
   /* Background Colors */
   --bg-primary: #0A1229;
-  --bg-card: #0F192E;
-  --bg-elevated: #141E33;
+  --bg-card: #1A202C;
+  --bg-elevated: #1A202C;
 
   /* Primary Colors */
-  --primary: #00BCD4;
-  --primary-dark: #0086A8;
-  --primary-light: rgba(0, 188, 212, 0.15);
-  --primary-glow: rgba(0, 188, 212, 0.3);
+  --primary: #0EA5E9;
+  --primary-dark: #0284C7;
+  --primary-light: rgba(14, 165, 233, 0.15);
+  --primary-glow: rgba(14, 165, 233, 0.3);
 
   /* Text Colors */
   --text-primary: #FFFFFF;
-  --text-secondary: #8E9ABB;
-  --text-tertiary: #6B7D8F;
+  --text-secondary: #9CA3AF;
+  --text-tertiary: #6B7280;
 
   /* Semantic Colors */
-  --semantic-positive: #00BCD4;
+  --semantic-positive: #0EA5E9;
   --semantic-negative: #FF6B35;
-  --semantic-neutral: #8E9ABB;
+  --semantic-neutral: #9CA3AF;
 
   /* Category Colors */
   --category-food: #FB8C00;
@@ -31,8 +31,8 @@
   --category-default: #9E9E9E;
 
   /* Gradients */
-  --gradient-balance: linear-gradient(180deg, rgba(0, 188, 212, 0.4) 0%, rgba(10, 18, 41, 0.95) 100%);
-  --gradient-button: linear-gradient(135deg, #00BCD4 0%, #0086A8 100%);
+  --gradient-balance: linear-gradient(180deg, #4299E1 0%, #2B6CB0 100%);
+  --gradient-button: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
 
   /* Typography - Font Families */
   --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;

@@ -9,18 +9,18 @@ interface TransactionItemProps {
 }
 
 export function TransactionItem({ itemName, timestamp, amount }: TransactionItemProps) {
-  // Color code amounts: cyan for positive, red-orange for negative
-  const amountColor = amount >= 0 ? 'text-[#00BCD4]' : 'text-[#FF6B35]';
+  // Color code amounts: teal for positive, red-orange for negative
+  const amountColor = amount >= 0 ? 'text-[#0EA5E9]' : 'text-[#FF6B35]';
   const amountPrefix = amount >= 0 ? '+' : '';
 
   const timeAgo = formatTransactionTime(timestamp);
 
   return (
-    <div className="flex items-center gap-4 bg-[#0F192E] rounded-2xl px-5 min-h-[88px] py-2 justify-between shadow-elevation-sm">
+    <div className="flex items-center gap-4 bg-[#1A202C] rounded-2xl px-5 min-h-[88px] py-2 justify-between shadow-elevation-sm">
       <div className="flex items-center gap-4">
         {/* Transaction icon */}
-        <div className="text-white flex items-center justify-center rounded-xl bg-[#141E33] shrink-0 size-12">
-          <span className="material-symbols-outlined text-[#00BCD4]">
+        <div className="text-white flex items-center justify-center rounded-xl bg-[#1A202C] shrink-0 size-12">
+          <span className="material-symbols-outlined text-[#0EA5E9]">
             payments
           </span>
         </div>
@@ -28,7 +28,7 @@ export function TransactionItem({ itemName, timestamp, amount }: TransactionItem
         {/* Transaction details */}
         <div className="flex flex-col justify-center">
           <p className="text-white text-lg font-bold leading-normal">{itemName}</p>
-          <p className="text-[#8E9ABB] text-sm font-medium">{timeAgo}</p>
+          <p className="text-[#9CA3AF] text-sm font-medium">{timeAgo}</p>
         </div>
       </div>
 

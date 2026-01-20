@@ -24,13 +24,13 @@ export function BalanceCard() {
     <div
       className="flex flex-col items-stretch justify-end rounded-2xl shadow-lg relative overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, rgba(0, 188, 212, 0.4) 0%, rgba(10, 18, 41, 0.95) 100%)',
+        background: 'linear-gradient(180deg, #4299E1 0%, #2B6CB0 100%)',
         minHeight: '220px'
       }}
     >
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="absolute inset-0 bg-[#0F192E] animate-pulse" />
+        <div className="absolute inset-0 bg-[#1A202C] animate-pulse" />
       )}
 
       <div className="flex w-full items-end justify-between gap-4 p-8 relative z-10">
