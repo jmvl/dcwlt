@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 4.3 of 6 (User Dashboard UX)
-Plan: 02 of 4 (Dashboard Components)
-Status: In progress
-Last activity: 2026-01-20 — Completed Plan 04.3-02 (Dashboard Components)
+Plan: 01 of 4 (User Transaction Index and Query)
+Status: Complete
+Last activity: 2026-01-20 — Completed Plan 04.3-01 (User Transaction Index and Query)
 
-Progress: ███████████ 93.6%
+Progress: ███████████ 92.2%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 24
 - Average duration: 9.1 min
-- Total execution time: 3.62 hours
+- Total execution time: 3.66 hours
 
 **By Phase:**
 
@@ -34,12 +34,12 @@ Progress: ███████████ 93.6%
 | 4-merchant-experience | 4 | 7 | 8.5 min |
 | 4.1-merchant-notifications | 1 | 1 | 2.0 min |
 | 4.2-user-app-ux | 1 | 1 | 2.0 min |
-| 4.3-user-dashboard-ux | 2 | 4 | 1.5 min |
+| 4.3-user-dashboard-ux | 1 | 4 | 4.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 2 min (04.3-02), 2 min (04.2-01), 2 min (04.1-01)
-- Trend: Phase 4.3 (User Dashboard UX) in progress - building dashboard components, navigation, and activity list
-- Next: Plan 04.3-03 (Bottom Navigation)
+- Last 3 plans: 4 min (04.3-01), 2 min (04.2-01), 2 min (04.1-01)
+- Trend: Phase 4.3 (User Dashboard UX) starting - building transaction history foundation
+- Next: Plan 04.3-02 (Dashboard Components)
 
 ## Accumulated Context
 
@@ -196,15 +196,20 @@ Recent decisions affecting current work:
 97. Mobile-responsive button layout - stack buttons vertically on mobile (< 640px) with min-height 44px for better thumb reach and accessibility
 98. Privy action sheet is necessary security UX - cannot be disabled, part of non-custodial wallet security model
 
+**From Plan 04.3-01:**
+99. User transaction queries mirror merchant queries - byCustomerByTime index follows same pattern as byMerchantByTime for consistency
+100. Real-time hooks use "skip" token when required params unavailable - useUserTransactions passes "skip" when walletAddress is undefined
+101. Item name lookup via join query - listUserTransactions fetches item names from groupItems table for display
+
 **From Plan 04.3-02:**
-99. User initials extracted from email for profile avatar - no image upload required, shows first 2 characters of email username
-100. Balance masked by default for privacy - shows ••••••• until user taps eye icon to reveal actual amount
-101. Cash Out shows 'Coming Soon' toast - feature not implemented, toast notifies users of future availability
-102. Mobile-width container (480px max) for consistent mobile UX - ensures dashboard looks correct on all screen sizes
-103. pb-24 padding reserved for bottom navigation - space allocated for navigation bar (will be added in plan 04.3-03)
-104. Action buttons use shared CSS utility class (action-button-circle) - consistent styling for Top Up and Cash Out buttons
-105. Material Symbols Outlined used for dashboard icons - notifications, add, account_balance (already loaded via layout.tsx)
-106. Lucide-react icons used for toggle states - Eye/EyeOff for balance visibility toggle
+102. User initials extracted from email for profile avatar - no image upload required, shows first 2 characters of email username
+103. Balance masked by default for privacy - shows ••••••• until user taps eye icon to reveal actual amount
+104. Cash Out shows 'Coming Soon' toast - feature not implemented, toast notifies users of future availability
+105. Mobile-width container (480px max) for consistent mobile UX - ensures dashboard looks correct on all screen sizes
+106. pb-24 padding reserved for bottom navigation - space allocated for navigation bar (will be added in plan 04.3-03)
+107. Action buttons use shared CSS utility class (action-button-circle) - consistent styling for Top Up and Cash Out buttons
+108. Material Symbols Outlined used for dashboard icons - notifications, add, account_balance (already loaded via layout.tsx)
+109. Lucide-react icons used for toggle states - Eye/EyeOff for balance visibility toggle
 
 ### Pending Todos
 
@@ -229,5 +234,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed Plan 04.3-02 (Dashboard Components)
+Stopped at: Completed Plan 04.3-01 (User Transaction Index and Query)
 Resume file: None
