@@ -45,9 +45,17 @@ Progress: ██████████ 100%
 
 ## Session Continuity
 
-Last session: 2026-01-20T21:07:00Z
+Last session: 2026-01-20T21:08:00Z
 Stopped at: Completed Quick task 003 (Fix Inventory Card Layout and Tabs)
 Resume file: None
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Refactor merchant sales screen ui | 2026-01-20 | ddce6b33f | [001-refactor-merchant-sales-screen-ui](./quick/001-refactor-merchant-sales-screen-ui/) |
+| 002 | Refactor merchant inventory to 2-column grid | 2026-01-20 | 7385971c1 | [002-refactor-merchant-inventory-grid-layout](./quick/002-refactor-merchant-inventory-grid-layout/) |
+| 003 | Fix inventory card layout with category tabs | 2026-01-20 | f4aadf1bd | [003-fix-inventory-card-layout-tabs](./quick/003-fix-inventory-card-layout-tabs/) |
 
 ---
 
