@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: Quick task
-Plan: 001 (Refactor Merchant Sales Screen UI)
+Plan: 003 (Fix Inventory Card Layout and Tabs)
 Status: Complete
-Last activity: 2026-01-20 — Completed Quick task 001 (Merchant Sales UI Refactor)
+Last activity: 2026-01-20 — Completed Quick task 003 (Category tabs, EVT blue, per-card colors)
 
 Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
-- Average duration: 8.0 min
+- Total plans completed: 32
+- Average duration: 7.8 min
 - Total execution time: 4.2 hours
 
 **By Phase:**
@@ -36,17 +36,17 @@ Progress: ██████████ 100%
 | 4.2-user-app-ux | 1 | 1 | 2.0 min |
 | 4.3-user-dashboard-ux | 3 | 4 | 3.3 min |
 | 04.4-dashboard-refactor | 4 | 4 | 1.5 min |
-| quick-tasks | 1 | 1 | 3.0 min |
+| quick-tasks | 2 | 2 | 2.0 min |
 
 **Recent Trend:**
-- Last 3 plans: 3 min (quick-001), 3 min (04.4-04), 1 min (04.4-03)
-- Trend: Quick task to apply design system to merchant sales screen
+- Last 3 plans: 1 min (quick-003), 3 min (quick-001), 3 min (04.4-04)
+- Trend: Quick task to add category tabs and fix inventory card styling
 - Next: Phase 5 or future enhancements
 
 ## Session Continuity
 
-Last session: 2026-01-20T20:48:00Z
-Stopped at: Completed Quick task 001 (Refactor Merchant Sales Screen UI)
+Last session: 2026-01-20T21:07:00Z
+Stopped at: Completed Quick task 003 (Fix Inventory Card Layout and Tabs)
 Resume file: None
 
 ---
@@ -255,3 +255,11 @@ Recent decisions affecting current work:
 
 **From Quick Task 001:**
 132. Custom gradient utility class (.custom-gradient) for merchant portal cards — CSS utility in globals.css with gradient rgba(35,48,56,1) to rgba(16,28,34,1) for consistent dark theme styling across sales and inventory screens
+
+**From Quick Task 003:**
+133. Category tabs UI pattern — sticky header with border-b-2 active indicator (#13a4ec) for inventory filtering
+134. Per-card color schema field — optional hex color field on itemGroups table with fallback DEFAULT_GROUP_COLORS mapping
+135. EVT currency styling — primary blue (#13a4ec) color for EVT text in price labels
+136. useMemo for performance optimization — category extraction and filtered items computed once per data change
+137. Dynamic inline styles for card backgrounds — linear-gradient with hex color opacity (dd to aa) for depth
+138. Price positioning bottom-right — absolute positioning with text-right alignment for card price display
