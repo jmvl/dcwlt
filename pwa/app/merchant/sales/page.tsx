@@ -279,8 +279,8 @@ export default function MerchantSalesPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-sm font-bold text-red-400">
-                            -{tx.amount.toFixed(2)} EVT
+                          <span className="text-sm font-bold text-[#13a4ec]">
+                            +{tx.amount.toFixed(2)} EVT
                           </span>
                         </td>
                         <td className="py-3 px-4">
