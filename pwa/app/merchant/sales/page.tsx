@@ -175,7 +175,7 @@ export default function MerchantSalesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-[#1a2f38] rounded-lg border border-[#1a2f38] p-4 mb-6">
+      <div className="custom-gradient rounded-lg border border-[#1a2f38] p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           {/* Date Range Filter */}
           <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function MerchantSalesPage() {
       </div>
 
       {/* Transactions List */}
-      <div className="bg-[#1a2f38] rounded-lg border border-[#1a2f38]">
+      <div className="custom-gradient rounded-lg border border-[#1a2f38]">
         <div className="p-4 border-b border-[#1a2f38]">
           <h2 className="text-lg font-semibold text-white">Transactions</h2>
         </div>
