@@ -214,26 +214,24 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
       onClick={() => onGenerateQR(effectivePrice, item)}
       className="aspect-square rounded-xl border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-transform p-4 relative text-left w-full overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${color}dd 0%, ${color}aa 100%)`,
+        background: `linear-gradient(180deg, ${color}aa 0%, ${color}dd 100%)`,
       }}
     >
       {/* Top content */}
-      <div className="z-10 flex flex-col justify-between h-full">
-        {/* Top row: name (left) + stock (right) */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-extrabold text-white text-lg tracking-tight">{item.name}</h3>
-            {item.description && (
-              <p className="text-xs text-slate-400 font-medium mt-1 line-clamp-2">{item.description}</p>
-            )}
-          </div>
-          <span className={`bg-[#13a4ec]/20 text-[#13a4ec] px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest shrink-0`}>
-            {getStockDisplay(effectiveStock)}
-          </span>
+      <div className="z-10 flex flex-col h-full">
+        {/* Top: name and description */}
+        <div>
+          <h3 className="font-extrabold text-white text-lg tracking-tight">{item.name}</h3>
+          {item.description && (
+            <p className="text-xs text-slate-400 font-medium mt-1 line-clamp-2">{item.description}</p>
+          )}
         </div>
 
-        {/* Bottom: price (bottom-right) */}
-        <div className="flex justify-end">
+        {/* Bottom: stock (left) + price (right) */}
+        <div className="flex items-end justify-between mt-auto">
+          <span className={`bg-[#13a4ec]/20 text-[#13a4ec] px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest`}>
+            {getStockDisplay(effectiveStock)}
+          </span>
           <div className="text-base font-bold text-white">
             {effectivePrice.toFixed(2)} <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
           </div>
