@@ -19,7 +19,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3.5: Merchant Registration & Management** - Merchant self-registration with approval, admin-controlled events and item pricing
 - [x] **Phase 4: Merchant Experience** - Merchant dashboard, inventory management, QR generation, sales history
 - [x] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
-- [ ] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
+- [x] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
+- [ ] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
 - [ ] **Phase 5: History + Offline** - Transaction history, offline support
 
 ## Phase Details
@@ -175,12 +176,35 @@ Plans:
 
 - [x] 04.2-01: Remove countdown, show merchant name, mobile-responsive buttons
 
+### Phase 4.3: User Dashboard UX (INSERTED)
+
+**Goal**: Complete user-facing dashboard with balance display, recent activities, and bottom navigation
+**Depends on**: Phase 2 (auth + balance must exist), Phase 3 (payments must create transactions)
+**Requirements**: User dashboard with balance card, transaction list, navigation (new requirement)
+**Success Criteria** (what must be TRUE):
+
+1. User sees large balance card with EVT amount after login
+2. Top Up and Cash Out action buttons visible and functional
+3. Recent Activities list shows last 5 transactions with icons, amounts, timestamps
+4. Bottom navigation with Home, Scan QR, History tabs
+5. Dashboard is mobile-responsive with proper touch targets
+6. User name and profile displayed in header
+   **Research**: Likely (new dashboard design patterns, bottom navigation in PWA)
+   **Research topics**: Mobile dashboard patterns, bottom navigation UX, transaction list design, balance masking UX
+   **Plans**: 3 plans in 2 waves
+
+Plans:
+
+- [ ] 04.3-01: Convex index and query for user transactions
+- [ ] 04.3-02: Dashboard header, balance card, action buttons
+- [ ] 04.3-03: Recent Activities list and bottom navigation
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 5
 
-Decimal phases (like 3.5, 4.1, 4.2) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 5).
+Decimal phases (like 3.5, 4.1, 4.2, 4.3) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 5).
 
 | Phase                                   | Plans Complete | Status      | Completed  |
 | --------------------------------------- | -------------- | ----------- | ---------- |
@@ -191,3 +215,4 @@ Decimal phases (like 3.5, 4.1, 4.2) execute between their surrounding integers (
 | 4. Merchant Experience                 | 4/4            | Complete    | 2026-01-19 |
 | 4.1. Merchant Payment Notifications    | 1/1            | Complete    | 2026-01-19 |
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
+| 4.3. User Dashboard UX                 | 0/3            | Pending     | - |
