@@ -5,6 +5,8 @@ import { usePrivyAuth } from '../hooks/usePrivyAuth';
 import { DashboardHeader } from './components/DashboardHeader';
 import { BalanceCard } from './components/BalanceCard';
 import { ActionButtons } from './components/ActionButtons';
+import { TransactionList } from './components/TransactionList';
+import { DashboardBottomNav } from './components/DashboardBottomNav';
 
 export default function DashboardPage() {
   const { authenticated } = usePrivyAuth();
@@ -20,12 +22,15 @@ export default function DashboardPage() {
             <LoginButton />
           </div>
         ) : (
-          <div className="p-4 flex flex-col gap-4">
+          <div className="flex flex-col">
             <BalanceCard />
             <ActionButtons />
+            <TransactionList />
           </div>
         )}
       </main>
+
+      <DashboardBottomNav />
     </div>
   );
 }
