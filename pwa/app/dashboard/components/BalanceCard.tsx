@@ -22,9 +22,9 @@ export function BalanceCard() {
 
   return (
     <div
-      className="bg-cover bg-center flex flex-col items-stretch justify-end rounded-2xl pt-[100px] shadow-lg relative overflow-hidden"
+      className="flex flex-col items-stretch justify-end rounded-2xl shadow-lg relative overflow-hidden"
       style={{
-        backgroundImage: 'linear-gradient(to bottom, rgba(19, 164, 236, 0.4), rgba(16, 28, 34, 0.95)), url(/images/card-bg.png)',
+        background: 'linear-gradient(180deg, rgba(0, 188, 212, 0.4) 0%, rgba(10, 18, 41, 0.95) 100%)',
         minHeight: '220px'
       }}
     >
@@ -33,19 +33,19 @@ export function BalanceCard() {
         <div className="absolute inset-0 bg-[#1c2a31] animate-pulse" />
       )}
 
-      <div className="flex w-full items-end justify-between gap-4 p-5 relative z-10">
+      <div className="flex w-full items-end justify-between gap-4 p-8 relative z-10">
         <div className="flex max-w-[440px] flex-1 flex-col gap-1">
-          <p className="text-white/80 text-sm font-medium leading-normal">Total Balance</p>
-          <p className="text-white tracking-tight text-4xl font-extrabold leading-tight">
+          <p className="text-white/80 text-lg font-medium leading-normal">Total Balance</p>
+          <p className="text-white tracking-tight text-[56px] font-extrabold leading-none">
             {displayBalance} EVT
           </p>
         </div>
         <button
           onClick={() => setIsMasked(!isMasked)}
-          className="flex min-w-[56px] cursor-pointer items-center justify-center rounded-xl h-10 px-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-sm font-bold transition-all"
+          className="flex min-w-[48px] h-12 cursor-pointer items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white transition-all active:scale-95"
           aria-label={isMasked ? 'Show balance' : 'Hide balance'}
         >
-          {isMasked ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          {isMasked ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
         </button>
       </div>
     </div>
