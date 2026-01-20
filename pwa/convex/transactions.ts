@@ -161,17 +161,25 @@ export const listUserTransactions = query({
   },
   handler: async (ctx, args) => {
     // Query transactions by customer wallet using new index
+    // Fetch more than requested to account for filtering non-confirmed transactions
+    const fetchLimit = (args.limit ?? 5) * 3;
     const transactions = await ctx.db
       .query("transactions")
       .withIndex("byCustomerByTime", (q) =>
         q.eq("customerWallet", args.walletAddress)
       )
       .order("desc")
-      .take(args.limit ?? 5);
+      .take(fetchLimit);
+
+    // Filter to only show confirmed transactions (pending/failed should not appear in user's history)
+    const confirmedTransactions = transactions.filter((tx) => tx.status === "confirmed");
+
+    // Slice to the requested limit after filtering
+    const limitedTransactions = confirmedTransactions.slice(0, args.limit ?? 5);
 
     // Fetch item names for display
     const transactionsWithItems = await Promise.all(
-      transactions.map(async (tx) => {
+      limitedTransactions.map(async (tx) => {
         const item = await ctx.db.get(tx.itemId);
         return {
           ...tx,
