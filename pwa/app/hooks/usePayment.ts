@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react';
 import { useWallets, useSignTransaction } from '@privy-io/react-auth/solana';
 import { useQueryClient } from '@tanstack/react-query';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions';
+import { Connection, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { DEVNET_RPC } from '../../src/utils/transactions';
 import { balanceQueryKeys } from './useSolanaBalance';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -35,15 +35,19 @@ export interface PaymentResult {
   signature?: string;
   /** Error message (if failed) */
   error?: string;
-  /** Whether an airdrop was performed */
-  airdropped?: boolean;
 }
 
 /**
- * Hook for executing Solana Pay payments
+ * Hook for executing Solana Pay payments with gas sponsorship
  *
- * Uses Privy's useSignTransaction hook to sign transactions.
- * This is the correct approach for Privy embedded wallets.
+ * This hook implements sponsored transactions where the backend pays gas fees.
+ * Users can transact without needing SOL in their wallet.
+ *
+ * Flow:
+ * 1. Client creates transaction with backend fee payer address
+ * 2. Client signs the transaction message (not full transaction)
+ * 3. Client sends partially signed transaction to backend
+ * 4. Backend adds fee payer signature and broadcasts to Solana
  *
  * @returns Object with executePayment function and loading state
  */
@@ -53,14 +57,21 @@ export function usePayment() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [airdropStatus, setAirdropStatus] = useState<string | null>(null);
+
+  // Get fee payer address from environment variable
+  const feePayerAddress = process.env.NEXT_PUBLIC_FEE_PAYER_ADDRESS;
 
   // Convex mutations for transaction records
   const createTransaction = useMutation(api.transactions.createTransaction);
   const updateTransactionStatus = useMutation(api.transactions.updateTransactionStatus);
 
   /**
-   * Execute a payment transaction
+   * Execute a payment transaction with gas sponsorship
+   *
+   * This implements a sponsored transaction flow where the backend pays gas fees:
+   * 1. Creates transaction with backend fee payer address
+   * 2. Signs the transaction message (not full transaction)
+   * 3. Sends to backend API for fee payer signature and broadcast
    *
    * @param params - Payment parameters
    * @returns Payment result with success status and signature/error
@@ -69,6 +80,16 @@ export function usePayment() {
     async (params: PaymentParams): Promise<PaymentResult> => {
       setLoading(true);
       setError(null);
+
+      // Validate fee payer address is configured
+      if (!feePayerAddress) {
+        const errorMsg = 'Fee payer address not configured. Please check environment variables.';
+        console.error('[usePayment]', errorMsg);
+        return {
+          success: false,
+          error: errorMsg,
+        };
+      }
 
       console.log('[usePayment] Available Solana wallets:', wallets.length);
       console.log('[usePayment] Wallets:', wallets.map(w => ({
@@ -90,117 +111,106 @@ export function usePayment() {
       console.log('[usePayment] Using wallet:', sender);
 
       try {
-        // Step 0: Check SOL balance before attempting transaction
-        console.log('[usePayment] Checking SOL balance and recipient ATA...');
-        const connection = new Connection(DEVNET_RPC, 'confirmed');
-        const senderPubkey = new PublicKey(sender);
-        const solBalance = await connection.getBalance(senderPubkey);
-        console.log('[usePayment] SOL balance:', solBalance / 1e9, 'SOL');
-
-        // Check if recipient's ATA exists to determine SOL requirement
-        const recipientPubkey = new PublicKey(params.recipient);
-        const tokenMintPubkey = new PublicKey(params.splToken);
-        const { getAssociatedTokenAddress } = await import('@solana/spl-token');
-        const recipientATA = await getAssociatedTokenAddress(tokenMintPubkey, recipientPubkey);
-        const recipientATAInfo = await connection.getAccountInfo(recipientATA);
-        const recipientATAExists = recipientATAInfo !== null;
-        console.log('[usePayment] Recipient ATA exists:', recipientATAExists);
-
-        // Calculate minimum SOL required
-        // If recipient ATA exists: only need transaction fee (~0.000005 SOL)
-        // If recipient ATA doesn't exist: need transaction fee + ATA rent (~0.002 SOL)
-        const TRANSACTION_FEE = 0.00001 * 1e9; // 0.00001 SOL buffer for transaction fee
-        const ATA_RENT = 0.00203928 * 1e9; // Rent for ATA
-        const minSolRequired = recipientATAExists
-          ? TRANSACTION_FEE
-          : TRANSACTION_FEE + ATA_RENT;
-
-        console.log('[usePayment] Minimum SOL required:', minSolRequired / 1e9, 'SOL');
-
-        if (solBalance < minSolRequired) {
-          console.log('[usePayment] Insufficient SOL balance, requesting airdrop...');
-          setAirdropStatus('Requesting SOL from Devnet faucet...');
-          // Auto-airdrop SOL from Devnet faucet when user has insufficient balance
-          // This is a devnet-only feature - on mainnet, users would need to acquire SOL
-          try {
-            const airdropSignature = await connection.requestAirdrop(
-              senderPubkey,
-              0.01 * 1e9 // Airdrop 0.01 SOL (enough for ~100 transactions)
-            );
-            console.log('[usePayment] Airdrop requested:', airdropSignature);
-            setAirdropStatus('Confirming airdrop...');
-
-            // Wait for airdrop confirmation
-            await connection.confirmTransaction(airdropSignature, 'confirmed');
-
-            // Refresh SOL balance after airdrop
-            const newSolBalance = await connection.getBalance(senderPubkey);
-            console.log('[usePayment] New SOL balance after airdrop:', newSolBalance / 1e9, 'SOL');
-
-            if (newSolBalance < minSolRequired) {
-              setAirdropStatus(null);
-              return {
-                success: false,
-                airdropped: true,
-                error: `Airdrop received but still insufficient SOL. Please wait a moment and try again.`,
-              };
-            }
-            setAirdropStatus(null);
-          } catch (airdropError: any) {
-            console.error('[usePayment] Airdrop failed:', airdropError);
-            setAirdropStatus(null);
-            return {
-              success: false,
-              error: `Failed to airdrop SOL for gas fees. Error: ${airdropError?.message || 'Unknown error'}. Please try again.`,
-            };
-          }
-        }
-
-        // Step 1: Build the transaction
-        console.log('[usePayment] Building transaction...', {
+        // Step 1: Build the transaction with backend fee payer
+        console.log('[usePayment] Building transaction with sponsored gas...', {
           recipient: params.recipient,
           amount: params.amount,
           splToken: params.splToken,
-          sender
-        });
-        console.log('[usePayment] Recipient address validation:', {
-          length: params.recipient?.length,
-          startsWith: params.recipient?.substring(0, 10),
-          isValidBase58: /^[1-9A-HJ-NP-Za-km-z]+$/.test(params.recipient || '')
-        });
-        const transaction = await buildSPLTokenTransfer({
-          ...params,
           sender,
+          feePayer: feePayerAddress,
         });
 
-        console.log('[usePayment] Transaction built, preparing to sign...');
+        const connection = new Connection(DEVNET_RPC, 'confirmed');
 
-        // Step 2: Serialize the transaction for signing
-        // For VersionedTransaction, we use serialize() which returns the full transaction bytes
-        const transactionBytes = transaction.serialize();
-        console.log('[usePayment] Transaction serialized, length:', transactionBytes.length);
-        console.log('[usePayment] Calling Privy signTransaction...');
+        // Import required utilities
+        const {
+          createTransferInstruction,
+          getAssociatedTokenAddress,
+          createAssociatedTokenAccountIdempotentInstruction,
+        } = await import('@solana/spl-token');
 
-        // Step 3: Sign using Privy's useSignTransaction hook
-        // showWalletUIs: false bypasses Privy's action sheet since we have custom UI
-        const { signedTransaction } = await signTransaction({
-          transaction: transactionBytes,
-          wallet: solanaWallet,
-          chain: 'solana:devnet',
-          options: {
-            uiOptions: {
-              showWalletUIs: false,
-            },
-          },
+        // Get the latest blockhash
+        const { blockhash } = await connection.getLatestBlockhash('finalized');
+
+        // Convert addresses to PublicKey objects
+        const senderPubkey = new PublicKey(sender);
+        const recipientPubkey = new PublicKey(params.recipient);
+        const tokenMintPubkey = new PublicKey(params.splToken);
+        const feePayerPubkey = new PublicKey(feePayerAddress);
+
+        // Get the associated token accounts
+        const senderTokenAccount = await getAssociatedTokenAddress(
+          tokenMintPubkey,
+          senderPubkey
+        );
+        const recipientTokenAccount = await getAssociatedTokenAddress(
+          tokenMintPubkey,
+          recipientPubkey
+        );
+
+        // Convert amount to bigint
+        const amountBigInt = BigInt(params.amount);
+
+        // Build instructions array
+        const instructions = [];
+
+        // Check if recipient's ATA exists, if not, add instruction to create it
+        const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount);
+        if (!recipientAccountInfo) {
+          console.log('[usePayment] Recipient ATA does not exist, creating it...');
+          const createATAInstruction = createAssociatedTokenAccountIdempotentInstruction(
+            feePayerPubkey,         // payer (backend fee payer)
+            recipientTokenAccount,  // ATA address to create
+            recipientPubkey,        // owner of the ATA
+            tokenMintPubkey         // token mint
+          );
+          instructions.push(createATAInstruction);
+        }
+
+        // Create the SPL token transfer instruction
+        const transferInstruction = createTransferInstruction(
+          senderTokenAccount,     // source
+          recipientTokenAccount,  // destination
+          senderPubkey,           // authority (owner of source account)
+          amountBigInt            // amount
+        );
+        instructions.push(transferInstruction);
+
+        // Create a transaction message with the backend fee payer
+        const messageV0 = new TransactionMessage({
+          payerKey: feePayerPubkey,      // Backend pays gas fees
+          recentBlockhash: blockhash,
+          instructions,
+        }).compileToV0Message();
+
+        // Create a VersionedTransaction from the v0 message
+        const transaction = new VersionedTransaction(messageV0);
+
+        console.log('[usePayment] Transaction built with sponsored gas');
+
+        // Step 2: Sign the transaction message (not full transaction)
+        // Following Privy's sponsored transaction pattern
+        console.log('[usePayment] Signing transaction message...');
+
+        // Serialize the message (not the full transaction) as Uint8Array
+        const messageBytes = transaction.message.serialize();
+
+        // Sign the message using Privy (expects Uint8Array)
+        const { signature: userSignature } = await solanaWallet.signMessage({
+          message: messageBytes,
         });
 
-        console.log('[usePayment] Transaction signed successfully!');
-        console.log('[usePayment] Signed transaction length:', signedTransaction.length);
+        console.log('[usePayment] Message signed, adding signature to transaction...');
+
+        // Add the user's signature to the transaction
+        transaction.addSignature(senderPubkey, userSignature);
+
+        console.log('[usePayment] User signature added to transaction');
 
         // Initialize transaction ID for tracking
         let convexTransactionId: string | null = null;
 
-        // Step 4: Create transaction record in Convex as PENDING (before sending to Solana)
+        // Step 3: Create transaction record in Convex as PENDING (before sending to backend)
         // This provides audit trail even if Solana transaction fails
         if (params.merchantId && params.itemId) {
           console.log('[usePayment] Creating Convex transaction record as PENDING...');
@@ -237,24 +247,24 @@ export function usePayment() {
           });
         }
 
-        // Step 5: Send the signed transaction to Solana
-        console.log('[usePayment] Sending transaction to Solana Devnet...');
-        // Reuse the connection created earlier for SOL balance check
+        // Step 4: Send partially signed transaction to backend for fee payer signature and broadcast
+        console.log('[usePayment] Sending to backend for gas sponsorship...');
 
-        // Send to Solana
-        const txSignature = await connection.sendRawTransaction(signedTransaction);
+        const serializedTransaction = Buffer.from(transaction.serialize()).toString('base64');
 
-        console.log('[usePayment] Transaction sent:', txSignature);
+        const backendResponse = await fetch('/api/sponsor-transaction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            transaction: serializedTransaction,
+          }),
+        });
 
-        // Step 6: Wait for confirmation
-        console.log('[usePayment] Waiting for confirmation...');
-        const confirmation = await connection.confirmTransaction(
-          txSignature,
-          'confirmed'
-        );
-
-        if (confirmation.value.err) {
-          console.error('[usePayment] Transaction failed:', confirmation.value.err);
+        if (!backendResponse.ok) {
+          const errorData = await backendResponse.json();
+          console.error('[usePayment] Backend error:', errorData);
 
           // Update Convex transaction to FAILED status
           if (convexTransactionId) {
@@ -271,11 +281,37 @@ export function usePayment() {
 
           return {
             success: false,
-            error: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
+            error: errorData.error || 'Backend failed to sponsor transaction',
           };
         }
 
-        // Step 7: Update transaction to CONFIRMED in Convex
+        const { success, signature: txSignature, error: backendError } = await backendResponse.json();
+
+        if (!success || backendError) {
+          console.error('[usePayment] Transaction failed:', backendError);
+
+          // Update Convex transaction to FAILED status
+          if (convexTransactionId) {
+            try {
+              await updateTransactionStatus({
+                transactionId: convexTransactionId as any,
+                status: 'failed',
+              });
+              console.log('[usePayment] Convex transaction updated to: failed');
+            } catch (updateError) {
+              console.error('[usePayment] Failed to update transaction status:', updateError);
+            }
+          }
+
+          return {
+            success: false,
+            error: backendError || 'Transaction failed',
+          };
+        }
+
+        console.log('[usePayment] Transaction successful:', txSignature);
+
+        // Step 5: Update transaction to CONFIRMED in Convex
         if (convexTransactionId) {
           try {
             await updateTransactionStatus({
@@ -291,7 +327,7 @@ export function usePayment() {
           }
         }
 
-        // Step 8: Invalidate balance query to trigger refetch from Solana
+        // Step 6: Invalidate balance query to trigger refetch from Solana
         console.log('[usePayment] Invalidating balance query...');
         try {
           queryClient.invalidateQueries({
@@ -332,13 +368,12 @@ export function usePayment() {
         setLoading(false);
       }
     },
-    [wallets, signTransaction, queryClient, createTransaction, updateTransactionStatus]
+    [wallets, signTransaction, queryClient, createTransaction, updateTransactionStatus, feePayerAddress]
   );
 
   return {
     executePayment,
     loading,
     error,
-    airdropStatus,
   };
 }

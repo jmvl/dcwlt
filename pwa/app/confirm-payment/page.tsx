@@ -21,7 +21,7 @@ function ConfirmPaymentContent() {
   const searchParams = useSearchParams();
 
   // Call ALL hooks unconditionally at the top (Rules of Hooks)
-  const { executePayment, loading, airdropStatus } = usePayment();
+  const { executePayment, loading } = usePayment();
   const [success, setSuccess] = useState<boolean | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -285,7 +285,6 @@ function ConfirmPaymentContent() {
       onConfirm={handleConfirm}
       onCancel={handleCancel}
       loading={loading}
-      airdropStatus={airdropStatus}
       error={error}
     />
   );
