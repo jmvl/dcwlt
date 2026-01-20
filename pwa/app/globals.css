@@ -2,8 +2,85 @@
 @import "qr-scanner/qr-scanner-worker.min.js";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background Colors */
+  --bg-primary: #0A1229;
+  --bg-card: #0F192E;
+  --bg-elevated: #141E33;
+
+  /* Primary Colors */
+  --primary: #00BCD4;
+  --primary-dark: #0086A8;
+  --primary-light: rgba(0, 188, 212, 0.15);
+  --primary-glow: rgba(0, 188, 212, 0.3);
+
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E9ABB;
+  --text-tertiary: #6B7D8F;
+
+  /* Semantic Colors */
+  --semantic-positive: #00BCD4;
+  --semantic-negative: #FF6B35;
+  --semantic-neutral: #8E9ABB;
+
+  /* Category Colors */
+  --category-food: #FB8C00;
+  --category-tech: #42A5F5;
+  --category-income: #66BB6A;
+  --category-transport: #AB47BC;
+  --category-default: #9E9E9E;
+
+  /* Gradients */
+  --gradient-balance: linear-gradient(180deg, rgba(0, 188, 212, 0.4) 0%, rgba(10, 18, 41, 0.95) 100%);
+  --gradient-button: linear-gradient(135deg, #00BCD4 0%, #0086A8 100%);
+
+  /* Typography - Font Families */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+
+  /* Typography - Type Scale */
+  --text-display-hero: 3.5rem;
+  --text-heading-lg: 1.125rem;
+  --text-heading-md: 1rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-label: 0.75rem;
+  --text-caption: 0.625rem;
+
+  /* Typography - Font Weights */
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Typography - Line Heights */
+  --leading-tight: 1;
+  --leading-normal: 1.5;
+
+  /* Typography - Letter Spacing */
+  --tracking-tight: -0.02em;
+
+  /* Spacing Scale (8px base unit) */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Shadow Elevation System */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.20), 0 4px 12px rgba(0, 0, 0, 0.16);
+
+  /* Border Radius */
+  --radius-full: 9999px;
+
+  /* Touch Targets */
+  --touch-target-large: 64px;
+
+  /* Animation Timing */
+  --ease-out: cubic-bezier(0.0, 0, 0.2, 1);
+  --duration-short: 200ms;
 }
 
 @theme inline {
@@ -45,12 +122,36 @@ body {
 
 /* Action button circle for dashboard */
 .action-button-circle {
-  width: 56px;
-  height: 56px;
+  width: var(--touch-target-large);
+  height: var(--touch-target-large);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  background-color: rgba(19, 164, 236, 0.15);
-  color: #13a4ec;
+  border-radius: var(--radius-full);
+  background: var(--gradient-button);
+  box-shadow: var(--shadow-sm), 0 0 20px var(--primary-glow);
+  color: var(--text-primary);
+  transition: all var(--duration-short) var(--ease-out);
+}
+
+.action-button-circle:hover {
+  box-shadow: var(--shadow-md), 0 0 24px var(--primary-glow);
+  transform: scale(1.05);
+}
+
+.action-button-circle:active {
+  transform: scale(0.95);
+}
+
+/* Shadow elevation utility classes */
+.shadow-elevation-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-elevation-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-elevation-lg {
+  box-shadow: var(--shadow-lg);
 }
