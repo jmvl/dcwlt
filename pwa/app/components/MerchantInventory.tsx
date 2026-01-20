@@ -214,7 +214,7 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
       onClick={() => onGenerateQR(effectivePrice, item)}
       className="aspect-square rounded-xl border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-transform p-4 relative text-left w-full overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${color}aa 0%, ${color}dd 100%)`,
+        background: `linear-gradient(180deg, ${color}00 0%, ${color}99 60%)`,
       }}
     >
       {/* Top content */}
