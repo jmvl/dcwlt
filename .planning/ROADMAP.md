@@ -195,9 +195,9 @@ Plans:
 
 Plans:
 
-- [ ] 04.3-01: Convex index and query for user transactions
-- [ ] 04.3-02: Dashboard header, balance card, action buttons
-- [ ] 04.3-03: Recent Activities list and bottom navigation
+- [x] 04.3-01: Convex index and query for user transactions
+- [x] 04.3-02: Dashboard header, balance card, action buttons
+- [x] 04.3-03: Recent Activities list and bottom navigation
 
 ## Progress
 
@@ -215,4 +215,4 @@ Decimal phases (like 3.5, 4.1, 4.2, 4.3) execute between their surrounding integ
 | 4. Merchant Experience                 | 4/4            | Complete    | 2026-01-19 |
 | 4.1. Merchant Payment Notifications    | 1/1            | Complete    | 2026-01-19 |
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
-| 4.3. User Dashboard UX                 | 0/3            | Pending     | - |
+| 4.3. User Dashboard UX                 | 3/3            | Complete    | 2026-01-20 |

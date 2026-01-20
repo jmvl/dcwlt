@@ -14,7 +14,7 @@ Plan: 03 of 4 (Recent Activities and Bottom Navigation)
 Status: Complete
 Last activity: 2026-01-20 — Completed Plan 04.3-03 (Recent Activities and Bottom Navigation)
 
-Progress: ███████████ 93.9%
+Progress: ██████████ 97.1%
 
 ## Performance Metrics
 
@@ -191,57 +191,26 @@ Recent decisions affecting current work:
 94. Limited live query to last 100 transactions for performance while covering reasonable event volume - balances data transfer with real-time responsiveness
 
 **From Plan 04.2-01:**
-95. Removed countdown timer from payment confirmation - users already scanned QR code intentionally, countdown adds unnecessary friction
-96. Merchant name from Convex lookup - use businessName from merchants table instead of "Unknown Merchant" placeholder
-97. Mobile-responsive button layout - stack buttons vertically on mobile (< 640px) with min-height 44px for better thumb reach and accessibility
-98. Privy action sheet is necessary security UX - cannot be disabled, part of non-custodial wallet security model
+95. Removed countdown timer from payment confirmation — users already scanned QR code intentionally, countdown adds unnecessary friction
+96. Merchant name from Convex lookup — use businessName from merchants table instead of "Unknown Merchant" placeholder
+97. Mobile-responsive button layout — stack buttons vertically on mobile (< 640px) with min-height 44px for better thumb reach and accessibility
+98. Privy action sheet is necessary security UX — cannot be disabled, part of non-custodial wallet security model
 
 **From Plan 04.3-01:**
-99. User transaction queries mirror merchant queries - byCustomerByTime index follows same pattern as byMerchantByTime for consistency
-100. Real-time hooks use "skip" token when required params unavailable - useUserTransactions passes "skip" when walletAddress is undefined
-101. Item name lookup via join query - listUserTransactions fetches item names from groupItems table for display
+99. Added byCustomerByTime index on transactions table — efficient customer wallet lookups ordered by timestamp
+100. listUserTransactions query joins with groupItems table — fetches item names without N+1 queries
+101. useUserTransactions hook uses "skip" token pattern — prevents query execution when wallet unavailable
 
 **From Plan 04.3-02:**
-102. User initials extracted from email for profile avatar - no image upload required, shows first 2 characters of email username
-103. Balance masked by default for privacy - shows ••••••• until user taps eye icon to reveal actual amount
-104. Cash Out shows 'Coming Soon' toast - feature not implemented, toast notifies users of future availability
-105. Mobile-width container (480px max) for consistent mobile UX - ensures dashboard looks correct on all screen sizes
-106. pb-24 padding reserved for bottom navigation - space allocated for navigation bar (will be added in plan 04.3-03)
-107. Action buttons use shared CSS utility class (action-button-circle) - consistent styling for Top Up and Cash Out buttons
-108. Material Symbols Outlined used for dashboard icons - notifications, add, account_balance (already loaded via layout.tsx)
-109. Lucide-react icons used for toggle states - Eye/EyeOff for balance visibility toggle
+102. User initials extracted from email — DashboardHeader shows first character of email as avatar
+103. BalanceCard visibility toggle masks balance by default — eye icon button to show/hide balance
+104. Gradient background on BalanceCard — purple-to-pink gradient for visual prominence
+105. Top Up links to /topup page — reuses existing top-up flow from Phase 3
+106. Cash Out shows "Coming Soon" toast — placeholder for future cash-out feature
 
 **From Plan 04.3-03:**
-110. Amount displayed in white (not red) for transactions - all customer transactions are expenses from user perspective, no income vs expense distinction
-111. Category label optional in TransactionItem - transactions may not have category data yet, UI handles missing data gracefully
-112. Elevated scan button at 56px (size-14) - matches action button size for consistency, larger than standard tabs for visual prominence
-113. Safe-area-inset-bottom class reused - uses existing utility from globals.css for notched device compatibility
-114. "See All" link placeholder in TransactionList - currently non-functional, will link to full History page in future phase
-115. Relative time formatting without external library - formatTransactionTime uses native Date API and Intl for lightweight time formatting
-116. Material Symbols filled icon variant for active tabs - fontVariationSettings 'FILL 1' for active, 'FILL 0' for inactive
-
-### Pending Todos
-
-None yet.
-
-### Blockers/Concerns
-
-**Privy app ID required:** Need to create Privy app and configure NEXT_PUBLIC_PRIVY_APP_ID before testing OAuth flow. See .planning/phases/2-auth-wallet-core-ui/2-01-SUMMARY.md for setup instructions.
-
-**Convex deployment not configured:** Convex backend initialized but deployment requires interactive authentication (npx convex dev). Stub types allow build to proceed. Full type generation and deployment setup needed before production. See .planning/phases/2-auth-wallet-core-ui/2-02-SUMMARY.md for details.
-
-**Turbopack incompatibility:** @serwist/next plugin doesn't work with Turbopack in development mode. Service worker only generated in production builds. May need to revisit if SW debugging becomes difficult.
-
-**Install prompt not yet tested:** Install prompt components created but not verified in browser. Should test on both Chrome/Edge (native prompt) and iOS Safari (manual instructions).
-
-**Production QR code:** Current QR code points to local network URL (192.168.1.172:3000). Must regenerate with production domain before deployment.
-
-**Balance display shows zero:** Current balance display shows 0 EVT for all users. Needs Phase 3 top-up flow to add tokens, or manual use of setMockBalance mutation for testing. **RESOLVED**: Plan 03-01 completed - mock top-up flow now adds tokens to balance.
-
-**Real transaction recording not implemented:** Sales history uses mock data seeded via seedMockTransactions function. Real transaction recording requires Phase 3 (payments) completion to create transactions from actual Solana payments. **RESOLVED**: Plan 03-03 completed - transactions now recorded in Convex with PENDING → CONFIRMED/FAILED lifecycle when users make payments via QR codes.
-
-## Session Continuity
-
-Last session: 2026-01-20
-Stopped at: Completed Plan 04.3-03 (Recent Activities and Bottom Navigation)
-Resume file: None
+107. formatTransactionTime utility — relative time formatting (Just now, 2m ago, Today, Yesterday)
+108. TransactionItem color-coded amounts — red color for expenses (payments), primary color for income
+109. TransactionList with 5 transaction limit — shows recent activities without overwhelming dashboard
+110. DashboardBottomNav with elevated center scan button — 56px touch targets, safe-area-inset-bottom for notched devices
+111. Loading skeleton with pulse animation — improves perceived performance during data fetch
