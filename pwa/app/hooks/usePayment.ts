@@ -103,10 +103,16 @@ export function usePayment() {
         console.log('[usePayment] Calling Privy signTransaction...');
 
         // Step 3: Sign using Privy's useSignTransaction hook
+        // showWalletUIs: false bypasses Privy's action sheet since we have custom UI
         const { signedTransaction } = await signTransaction({
           transaction: transactionBytes,
           wallet: solanaWallet,
           chain: 'solana:devnet',
+          options: {
+            uiOptions: {
+              showWalletUIs: false,
+            },
+          },
         });
 
         console.log('[usePayment] Transaction signed successfully!');
