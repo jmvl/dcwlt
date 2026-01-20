@@ -35,6 +35,8 @@ export function QRCodeGenerator({
   const [error, setError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [paymentReceived, setPaymentReceived] = useState(false);
+  // Track the initial transaction ID to only show success for NEW payments
+  const initialTransactionId = useRef<string | null>(null);
 
   // Real-time subscription to merchant transactions
   const transactions = useQuery(
@@ -42,9 +44,12 @@ export function QRCodeGenerator({
     merchantId ? { merchantId: merchantId as any } : 'skip'
   );
 
-  // Track if this specific item was just paid for
+  // Track if this specific item was just paid for (exclude the initial transaction to prevent false positives)
   const latestTransaction = transactions?.[0];
-  const isThisItemPaid = latestTransaction?.itemId === itemId && latestTransaction?.status === 'confirmed';
+  const isThisItemPaid =
+    latestTransaction?.itemId === itemId &&
+    latestTransaction?.status === 'confirmed' &&
+    latestTransaction?._id !== initialTransactionId.current;
 
   // Update UI when payment is received
   useEffect(() => {
@@ -61,12 +66,14 @@ export function QRCodeGenerator({
     }
   }, [isThisItemPaid, paymentReceived, itemName, onClose]);
 
-  // Reset payment received state when modal reopens
+  // Reset payment received state and record initial transaction ID when modal reopens
   useEffect(() => {
     if (isOpen) {
       setPaymentReceived(false);
+      // Record the current latest transaction ID so we only show success for NEW payments
+      initialTransactionId.current = transactions?.[0]?._id || null;
     }
-  }, [isOpen]);
+  }, [isOpen, transactions]);
 
   // Build Solana Pay URL
   const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&spl-token=${TOKEN_MINT_ADDRESS}&reference=${itemId}`;
