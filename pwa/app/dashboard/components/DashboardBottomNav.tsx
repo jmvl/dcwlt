@@ -13,7 +13,7 @@ export function DashboardBottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-[#1A202C] safe-area-inset-bottom z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
-      <div className="flex justify-around items-center px-4 pt-3 pb-8">
+      <div className="flex justify-around items-center px-4 pt-2 pb-4">
         {/* Left tab - Home */}
         <Link
           href="/dashboard"
@@ -22,7 +22,7 @@ export function DashboardBottomNav() {
           }`}
         >
           <span
-            className="material-symbols-outlined !text-2xl"
+            className="material-symbols-outlined !text-xl"
             style={{
               fontVariationSettings: pathname === '/dashboard' ? 'FILL 1' : 'FILL 0',
             }}
@@ -33,16 +33,16 @@ export function DashboardBottomNav() {
         </Link>
 
         {/* Center - Elevated Scan Button */}
-        <div className="relative -top-6">
+        <div className="relative -top-4">
           <div className="flex items-center justify-center p-1 rounded-full bg-primary/20">
             <Link
               href="/scan"
-              className="flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40"
+              className="flex size-12 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40"
             >
-              <span className="material-symbols-outlined !text-3xl">qr_code_scanner</span>
+              <span className="material-symbols-outlined !text-2xl">qr_code_scanner</span>
             </Link>
           </div>
-          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#9db0b9]">
+          <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#9db0b9]">
             Scan
           </span>
         </div>
@@ -55,7 +55,7 @@ export function DashboardBottomNav() {
           }`}
         >
           <span
-            className="material-symbols-outlined !text-2xl"
+            className="material-symbols-outlined !text-xl"
             style={{
               fontVariationSettings: pathname === '/history' ? 'FILL 1' : 'FILL 0',
             }}

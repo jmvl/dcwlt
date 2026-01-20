@@ -11,7 +11,6 @@ interface TransactionItemProps {
 export function TransactionItem({ itemName, timestamp, amount }: TransactionItemProps) {
   // Color code amounts: teal for positive, red-orange for negative
   const amountColor = amount >= 0 ? 'text-[#0EA5E9]' : 'text-[#FF6B35]';
-  const amountPrefix = amount >= 0 ? '+' : '';
 
   const timeAgo = formatTransactionTime(timestamp);
 
@@ -35,7 +34,7 @@ export function TransactionItem({ itemName, timestamp, amount }: TransactionItem
       {/* Amount */}
       <div className="shrink-0 text-right">
         <p className={`${amountColor} text-lg font-bold`}>
-          {amountPrefix}{amount.toFixed(2)} EVT
+          {amount.toFixed(2)} EVT
         </p>
       </div>
     </div>
