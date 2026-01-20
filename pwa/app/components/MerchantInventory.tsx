@@ -13,7 +13,7 @@ interface MerchantInventoryProps {
   merchantId: Id<'merchants'>;
 }
 
-export default function MerchantInventory({ merchantEventId, merchantId }: MerchantInventoryProps) {
+export default function MerchantInventory({ merchantEventId }: MerchantInventoryProps) {
   const { merchant } = useMerchantAuth();
   const [qrModalState, setQrModalState] = useState<{
     isOpen: boolean;
