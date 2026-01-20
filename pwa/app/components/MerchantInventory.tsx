@@ -201,20 +201,9 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
   const effectivePrice = item.effectivePrice ?? item.defaultPrice;
   const effectiveStock = item.effectiveStock ?? item.defaultStock;
 
-  // Determine stock badge color
-  const getStockBadgeColor = (stock: number | null | undefined) => {
-    if (stock === null || stock === undefined || stock > 5) {
-      return 'bg-green-100 text-green-800';
-    } else if (stock >= 1) {
-      return 'bg-yellow-100 text-yellow-800';
-    } else {
-      return 'bg-red-100 text-red-800';
-    }
-  };
-
   // Get stock display text
   const getStockDisplay = (stock: number | null | undefined) => {
-    if (stock === null || stock === undefined) {
+    if (stock === null || stock === undefined || stock > 5) {
       return 'In Stock';
     }
     return stock.toString();
@@ -223,29 +212,31 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
   return (
     <button
       onClick={() => onGenerateQR(effectivePrice, item)}
-      className="aspect-square rounded-lg border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-all p-4 relative text-left w-full"
+      className="aspect-square rounded-xl border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-transform p-4 relative text-left w-full overflow-hidden"
       style={{
-        backgroundColor: color,
         background: `linear-gradient(180deg, ${color}dd 0%, ${color}aa 100%)`,
       }}
     >
-      {/* Top row: name (left) + stock (right) */}
-      <div className="flex justify-between items-start">
-        <h3 className="font-bold text-white text-lg leading-tight">{item.name}</h3>
-        <span className={`text-xs px-2 py-1 rounded ${getStockBadgeColor(effectiveStock)} shrink-0`}>
-          {getStockDisplay(effectiveStock)}
-        </span>
-      </div>
+      {/* Top content */}
+      <div className="z-10 flex flex-col justify-between h-full">
+        {/* Top row: name (left) + stock (right) */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-extrabold text-white text-lg tracking-tight">{item.name}</h3>
+            {item.description && (
+              <p className="text-xs text-slate-400 font-medium mt-1 line-clamp-2">{item.description}</p>
+            )}
+          </div>
+          <span className={`bg-[#13a4ec]/20 text-[#13a4ec] px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest shrink-0`}>
+            {getStockDisplay(effectiveStock)}
+          </span>
+        </div>
 
-      {/* Description */}
-      {item.description && (
-        <p className="text-sm text-[#9db0b9] mt-2 line-clamp-2">{item.description}</p>
-      )}
-
-      {/* Bottom: price (bottom-right) */}
-      <div className="absolute bottom-4 right-4 text-right">
-        <div className="text-lg font-bold text-white">
-          {effectivePrice.toFixed(2)} <span className="text-[#13a4ec] text-sm">EVT</span>
+        {/* Bottom: price (bottom-right) */}
+        <div className="flex justify-end">
+          <div className="text-base font-bold text-white">
+            {effectivePrice.toFixed(2)} <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
+          </div>
         </div>
       </div>
     </button>
