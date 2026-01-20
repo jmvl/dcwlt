@@ -12,7 +12,7 @@ export function DashboardBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#1c2a31] border-t border-white/5 safe-area-inset-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0F192E] border-t border-white/5 safe-area-inset-bottom z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
       <div className="flex justify-around items-center px-4 pt-3 pb-8">
         {/* Left tab - Home */}
         <Link
