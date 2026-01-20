@@ -139,6 +139,52 @@ export const listMerchantTransactions = query({
 });
 
 /**
+ * List transactions for a user by wallet address.
+ *
+ * Returns the user's last N transactions with item names, newest first.
+ * Uses byCustomerByTime index for efficient lookups.
+ *
+ * @param walletAddress - The customer's wallet address
+ * @param limit - Maximum number of transactions to return (default: 5)
+ * @returns Array of transactions with item details
+ *
+ * @example
+ * const transactions = await listUserTransactions({
+ *   walletAddress: "5xK3...9aB2",
+ *   limit: 5
+ * });
+ */
+export const listUserTransactions = query({
+  args: {
+    walletAddress: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Query transactions by customer wallet using new index
+    const transactions = await ctx.db
+      .query("transactions")
+      .withIndex("byCustomerByTime", (q) =>
+        q.eq("customerWallet", args.walletAddress)
+      )
+      .order("desc")
+      .take(args.limit ?? 5);
+
+    // Fetch item names for display
+    const transactionsWithItems = await Promise.all(
+      transactions.map(async (tx) => {
+        const item = await ctx.db.get(tx.itemId);
+        return {
+          ...tx,
+          itemName: item?.name || "Unknown Item",
+        };
+      })
+    );
+
+    return transactionsWithItems;
+  },
+});
+
+/**
  * Get sales statistics for a merchant.
  *
  * @param merchantId - The merchant to get stats for
