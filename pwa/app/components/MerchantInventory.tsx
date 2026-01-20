@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { Loader2, Package, QrCode } from 'lucide-react';
+import { Loader2, Package } from 'lucide-react';
 import { QRCodeGenerator } from './QRCodeGenerator';
 import { useMerchantAuth } from './MerchantAuthProvider';
 
@@ -150,7 +150,10 @@ function InventoryItemCard({ item, onGenerateQR }: InventoryItemCardProps) {
   };
 
   return (
-    <div className="custom-gradient aspect-square rounded-lg border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-all p-4 relative">
+    <button
+      onClick={() => onGenerateQR(effectivePrice, item)}
+      className="custom-gradient aspect-square rounded-lg border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-all p-4 relative text-left w-full"
+    >
       {/* Top row: name (left) + stock (right) */}
       <div className="flex justify-between items-start">
         <h3 className="font-bold text-white text-lg leading-tight">{item.name}</h3>
@@ -164,19 +167,12 @@ function InventoryItemCard({ item, onGenerateQR }: InventoryItemCardProps) {
         <p className="text-sm text-[#9db0b9] mt-2 line-clamp-2">{item.description}</p>
       )}
 
-      {/* Bottom: price + QR button */}
-      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+      {/* Bottom: price */}
+      <div className="absolute bottom-4 left-4">
         <div className="text-lg font-bold text-white">
           {effectivePrice.toFixed(2)} <span className="text-sm">EVT</span>
         </div>
-        <button
-          onClick={() => onGenerateQR(effectivePrice, item)}
-          className="bg-[#13a4ec] hover:bg-[#0d8ac4] p-2 rounded-lg transition-colors"
-          title="Generate QR code"
-        >
-          <QrCode className="w-5 h-5 text-white" />
-        </button>
       </div>
-    </div>
+    </button>
   );
 }
