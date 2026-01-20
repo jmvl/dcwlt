@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
@@ -13,8 +13,18 @@ interface MerchantInventoryProps {
   merchantId: Id<'merchants'>;
 }
 
+// Default colors for item groups (fallback if not set in schema)
+const DEFAULT_GROUP_COLORS: Record<string, string> = {
+  'Beverages': '#42A5F5', // tech blue
+  'Beverage': '#42A5F5',
+  'Food': '#FB8C00', // orange
+  'Snacks': '#66BB6A', // green
+};
+
 export default function MerchantInventory({ merchantEventId }: MerchantInventoryProps) {
   const { merchant } = useMerchantAuth();
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
   const [qrModalState, setQrModalState] = useState<{
     isOpen: boolean;
     merchantAddress: string;
@@ -59,24 +69,63 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
     );
   }
 
-  // Flatten all items from all groups into a single array
-  const allItems = merchantItems.flatMap((groupData) =>
-    groupData.items.map((itemData: any) => ({
-      ...itemData.groupItem,
-      effectivePrice: itemData.effectivePrice,
-      effectiveStock: itemData.effectiveStock,
-    }))
-  );
+  // Extract unique categories (group names) from merchant items
+  const categories = useMemo(() => {
+    const uniqueNames = new Set(merchantItems.map((g) => g.group.name));
+    return ['All', ...Array.from(uniqueNames).sort()];
+  }, [merchantItems]);
 
-  if (allItems.length === 0) {
+  // Flatten all items with their group info for filtering
+  const allItemsWithGroup = useMemo(() => {
+    return merchantItems.flatMap((groupData) =>
+      groupData.items.map((itemData: any) => ({
+        ...itemData.groupItem,
+        effectivePrice: itemData.effectivePrice,
+        effectiveStock: itemData.effectiveStock,
+        groupName: groupData.group.name,
+        groupColor: groupData.group.color || DEFAULT_GROUP_COLORS[groupData.group.name] || '#1a2f38',
+      }))
+    );
+  }, [merchantItems]);
+
+  // Filter items based on selected category
+  const filteredItems = useMemo(() => {
+    if (selectedCategory === 'All') {
+      return allItemsWithGroup;
+    }
+    return allItemsWithGroup.filter((item) => item.groupName === selectedCategory);
+  }, [allItemsWithGroup, selectedCategory]);
+
+  if (filteredItems.length === 0) {
     return (
-      <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
-        <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">No Items Available</h2>
-        <p className="text-[#9db0b9]">
-          No items found in your assigned groups.
-        </p>
-      </div>
+      <>
+        {/* Category Tabs */}
+        <div className="mb-6 overflow-x-auto pb-2">
+          <div className="flex gap-8 min-w-max">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 transition-colors ${
+                  selectedCategory === category
+                    ? 'border-[#13a4ec] text-[#13a4ec]'
+                    : 'border-transparent text-[#9db0b9]'
+                }`}
+              >
+                <span className="text-sm font-bold leading-normal tracking-wide">{category}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
+          <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">No Items Available</h2>
+          <p className="text-[#9db0b9]">
+            No items found in the {selectedCategory} category.
+          </p>
+        </div>
+      </>
     );
   }
 
@@ -94,12 +143,33 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
 
   return (
     <>
+      {/* Category Tabs */}
+      <div className="mb-6 overflow-x-auto pb-2">
+        <div className="flex gap-8 min-w-max">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 transition-colors ${
+                selectedCategory === category
+                  ? 'border-[#13a4ec] text-[#13a4ec]'
+                  : 'border-transparent text-[#9db0b9]'
+              }`}
+            >
+              <span className="text-sm font-bold leading-normal tracking-wide">{category}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Inventory Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {allItems.map((item: any) => (
+        {filteredItems.map((item: any) => (
           <InventoryItemCard
             key={item._id}
             item={item}
             onGenerateQR={handleGenerateQR}
+            color={item.groupColor}
           />
         ))}
       </div>
@@ -123,9 +193,10 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
 interface InventoryItemCardProps {
   item: any;
   onGenerateQR: (effectivePrice: number, item: any) => void;
+  color?: string;
 }
 
-function InventoryItemCard({ item, onGenerateQR }: InventoryItemCardProps) {
+function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryItemCardProps) {
   // effectivePrice and effectiveStock are already on the item from the query
   const effectivePrice = item.effectivePrice ?? item.defaultPrice;
   const effectiveStock = item.effectiveStock ?? item.defaultStock;
@@ -152,7 +223,11 @@ function InventoryItemCard({ item, onGenerateQR }: InventoryItemCardProps) {
   return (
     <button
       onClick={() => onGenerateQR(effectivePrice, item)}
-      className="custom-gradient aspect-square rounded-lg border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-all p-4 relative text-left w-full"
+      className="aspect-square rounded-lg border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-all p-4 relative text-left w-full"
+      style={{
+        backgroundColor: color,
+        background: `linear-gradient(180deg, ${color}dd 0%, ${color}aa 100%)`,
+      }}
     >
       {/* Top row: name (left) + stock (right) */}
       <div className="flex justify-between items-start">
@@ -167,10 +242,10 @@ function InventoryItemCard({ item, onGenerateQR }: InventoryItemCardProps) {
         <p className="text-sm text-[#9db0b9] mt-2 line-clamp-2">{item.description}</p>
       )}
 
-      {/* Bottom: price */}
-      <div className="absolute bottom-4 left-4">
+      {/* Bottom: price (bottom-right) */}
+      <div className="absolute bottom-4 right-4 text-right">
         <div className="text-lg font-bold text-white">
-          {effectivePrice.toFixed(2)} <span className="text-sm">EVT</span>
+          {effectivePrice.toFixed(2)} <span className="text-[#13a4ec] text-sm">EVT</span>
         </div>
       </div>
     </button>
