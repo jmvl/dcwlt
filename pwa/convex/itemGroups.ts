@@ -40,6 +40,7 @@ export const createGroup = mutation({
     eventId: v.id("events"),
     name: v.string(),
     description: v.optional(v.string()),
+    color: v.optional(v.string()),
     order: v.number(),
   },
   handler: async (ctx, args) => {
@@ -57,6 +58,14 @@ export const createGroup = mutation({
     // Validate order is non-negative
     if (args.order < 0) {
       throw new Error("Order must be non-negative");
+    }
+
+    // Validate hex color format if provided
+    if (args.color !== undefined) {
+      const hexColorRegex = /^#([0-9A-F]{3}){1,2}$/i;
+      if (!hexColorRegex.test(args.color)) {
+        throw new Error("Color must be a valid hex color code (e.g., #13a4ec, #FB8C00)");
+      }
     }
 
     // Check for duplicate group name within this event
@@ -81,6 +90,7 @@ export const createGroup = mutation({
       eventId: args.eventId,
       name: args.name.trim(),
       description: args.description?.trim(),
+      color: args.color,
       order: args.order,
       createdAt: now,
       updatedAt: now,
@@ -111,6 +121,7 @@ export const updateGroup = mutation({
     groupId: v.id("itemGroups"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
+    color: v.optional(v.string()),
     order: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -156,6 +167,16 @@ export const updateGroup = mutation({
 
     if (updates.description !== undefined) {
       patch.description = updates.description?.trim() || undefined;
+    }
+
+    if (updates.color !== undefined) {
+      if (updates.color !== null) {
+        const hexColorRegex = /^#([0-9A-F]{3}){1,2}$/i;
+        if (!hexColorRegex.test(updates.color)) {
+          throw new Error("Color must be a valid hex color code (e.g., #13a4ec, #FB8C00)");
+        }
+      }
+      patch.color = updates.color;
     }
 
     if (updates.order !== undefined) {

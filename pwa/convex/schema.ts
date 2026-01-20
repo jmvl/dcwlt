@@ -122,6 +122,8 @@ export default defineSchema({
     name: v.string(),
     // Optional group description
     description: v.optional(v.string()),
+    // Optional color for card backgrounds (hex code)
+    color: v.optional(v.string()),
     // Display order for sorting
     order: v.number(),
     // Creation timestamp
