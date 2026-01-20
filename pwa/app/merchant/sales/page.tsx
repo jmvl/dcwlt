@@ -115,7 +115,7 @@ export default function MerchantSalesPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Total Sales */}
-        <div className="bg-[#1a2f38] rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
+        <div className="custom-gradient rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <DollarSign className="w-5 h-5 text-[#13a4ec]" />
             <span className="text-xs text-[#9db0b9]">Total</span>
@@ -130,7 +130,7 @@ export default function MerchantSalesPage() {
         </div>
 
         {/* Transactions */}
-        <div className="bg-[#1a2f38] rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
+        <div className="custom-gradient rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <ShoppingBag className="w-5 h-5 text-[#13a4ec]" />
             <span className="text-xs text-[#9db0b9]">Count</span>
@@ -144,7 +144,7 @@ export default function MerchantSalesPage() {
         </div>
 
         {/* Average Transaction */}
-        <div className="bg-[#1a2f38] rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
+        <div className="custom-gradient rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-5 h-5 text-[#13a4ec]" />
             <span className="text-xs text-[#9db0b9]">Average</span>
@@ -159,7 +159,7 @@ export default function MerchantSalesPage() {
         </div>
 
         {/* Today's Sales */}
-        <div className="bg-[#1a2f38] rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
+        <div className="custom-gradient rounded-lg p-6 border border-[#1a2f38] hover:border-[#13a4ec]/50 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <Calendar className="w-5 h-5 text-[#13a4ec]" />
             <span className="text-xs text-[#9db0b9]">Today</span>
