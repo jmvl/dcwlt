@@ -143,6 +143,11 @@ body {
   transform: scale(0.95);
 }
 
+/* Material Symbols Outlined */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 /* Shadow elevation utility classes */
 .shadow-elevation-sm {
   box-shadow: var(--shadow-sm);

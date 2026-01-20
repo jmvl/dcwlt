@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: 'Event Wallet',
   description: 'Frictionless payments at live events',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -37,6 +40,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+      </head>
       <body className={manrope.className}>
         <PrivyAuthProvider>
           <ConvexClientProvider>
