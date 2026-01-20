@@ -4,7 +4,7 @@
   "description": "Frictionless payments at live events",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#101c22",
+  "background_color": "#0A1229",
   "theme_color": "#13a4ec",
   "orientation": "portrait",
   "icons": [

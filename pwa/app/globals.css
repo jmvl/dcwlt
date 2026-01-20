@@ -160,3 +160,8 @@ body {
 .shadow-elevation-lg {
   box-shadow: var(--shadow-lg);
 }
+
+/* Background utility class using CSS variable */
+.bg-primary {
+  background-color: var(--bg-primary);
+}
