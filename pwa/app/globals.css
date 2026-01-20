@@ -42,3 +42,15 @@ body {
 .safe-area-inset-right {
   padding-right: env(safe-area-inset-right);
 }
+
+/* Action button circle for dashboard */
+.action-button-circle {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: rgba(19, 164, 236, 0.15);
+  color: #13a4ec;
+}
