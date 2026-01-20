@@ -20,7 +20,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Merchant Experience** - Merchant dashboard, inventory management, QR generation, sales history
 - [x] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
 - [x] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
-- [ ] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
+- [x] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
+- [ ] **Phase 4.4: Dashboard Visual Refactor** - Visual polish to match design reference (INSERTED)
 - [ ] **Phase 5: History + Offline** - Transaction history, offline support
 
 ## Phase Details
@@ -199,12 +200,60 @@ Plans:
 - [x] 04.3-02: Dashboard header, balance card, action buttons
 - [x] 04.3-03: Recent Activities list and bottom navigation
 
+### Phase 4.4: Dashboard Visual Refactor (INSERTED)
+
+**Goal**: Visual polish to match design reference with systematic color palette, typography, and elevation
+**Depends on**: Phase 4.3 (functional dashboard must exist)
+**Requirements**: Visual refinement for production-ready dashboard (new requirement)
+**Success Criteria** (what must be TRUE):
+
+1. Balance text is 56px (hero size) instead of 36px
+2. All colors use systematic CSS variables from design system
+3. Balance card uses pure CSS gradient (no external image)
+4. All spacing follows 8px grid system
+5. Shadows provide elevation (no visible borders)
+6. Transaction items have color-coded categories
+7. Transaction amounts show semantic colors (positive/negative)
+   **Research**: Unlikely (extensive research complete, all specs defined)
+   **Plans**: 4 plans in 2 waves
+
+Plans:
+
+- [ ] 04.4-01: Design system foundation (CSS variables for colors, typography, shadows, spacing)
+- [ ] 04.4-02: BalanceCard and ActionButtons visual updates
+- [ ] 04.4-03: TransactionItem and TransactionList visual updates
+- [ ] 04.4-04: Final consistency pass (colors, borders, shadows, Material Symbols font)
+
+### Phase 5: History + Offline
+
+**Goal**: Transaction history and offline support
+**Depends on**: Phase 4 (user dashboard with transactions)
+**Requirements**: HISTORY-01, HISTORY-02, HISTORY-03, HISTORY-04, HISTORY-05, OFFLINE-01, OFFLINE-02, OFFLINE-03
+**Success Criteria** (what must be TRUE):
+
+1. User can view full transaction history
+2. Transactions are filterable by date range
+3. User can search transactions by merchant/item
+4. App works offline with cached data
+5. Offline changes sync when connection restored
+   **Research**: Likely (Convex offline patterns, history UI patterns)
+   **Research topics**: Convex offline mutation queuing, infinite scroll pagination, date range filtering UI
+   **Plans**: TBD
+
+Plans:
+
+- [ ] 05-01: History page with transaction list
+- [ ] 05-02: Date range filtering
+- [ ] 05-03: Search functionality
+- [ ] 05-04: Offline service worker caching
+- [ ] 05-05: Offline mutation queuing and sync
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5
 
-Decimal phases (like 3.5, 4.1, 4.2, 4.3) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 5).
+Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5).
 
 | Phase                                   | Plans Complete | Status      | Completed  |
 | --------------------------------------- | -------------- | ----------- | ---------- |
@@ -216,3 +265,4 @@ Decimal phases (like 3.5, 4.1, 4.2, 4.3) execute between their surrounding integ
 | 4.1. Merchant Payment Notifications    | 1/1            | Complete    | 2026-01-19 |
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
 | 4.3. User Dashboard UX                 | 3/3            | Complete    | 2026-01-20 |
+| 4.4. Dashboard Visual Refactor         | 0/4            | Pending     | - |
