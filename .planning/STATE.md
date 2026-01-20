@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 4.3 of 6 (User Dashboard UX)
-Plan: 01 of 4 (User Transaction Index and Query)
+Plan: 03 of 4 (Recent Activities and Bottom Navigation)
 Status: Complete
-Last activity: 2026-01-20 — Completed Plan 04.3-01 (User Transaction Index and Query)
+Last activity: 2026-01-20 — Completed Plan 04.3-03 (Recent Activities and Bottom Navigation)
 
-Progress: ███████████ 92.2%
+Progress: ███████████ 93.9%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
-- Average duration: 9.1 min
-- Total execution time: 3.66 hours
+- Total plans completed: 26
+- Average duration: 8.8 min
+- Total execution time: 3.82 hours
 
 **By Phase:**
 
@@ -34,12 +34,12 @@ Progress: ███████████ 92.2%
 | 4-merchant-experience | 4 | 7 | 8.5 min |
 | 4.1-merchant-notifications | 1 | 1 | 2.0 min |
 | 4.2-user-app-ux | 1 | 1 | 2.0 min |
-| 4.3-user-dashboard-ux | 1 | 4 | 4.0 min |
+| 4.3-user-dashboard-ux | 3 | 4 | 3.3 min |
 
 **Recent Trend:**
-- Last 3 plans: 4 min (04.3-01), 2 min (04.2-01), 2 min (04.1-01)
-- Trend: Phase 4.3 (User Dashboard UX) starting - building transaction history foundation
-- Next: Plan 04.3-02 (Dashboard Components)
+- Last 3 plans: 1 min (04.3-03), 2 min (04.3-02), 4 min (04.3-01)
+- Trend: Phase 4.3 (User Dashboard UX) - dashboard now complete with transaction list and bottom nav
+- Next: Plan 04.3-04 (History page implementation)
 
 ## Accumulated Context
 
@@ -211,6 +211,15 @@ Recent decisions affecting current work:
 108. Material Symbols Outlined used for dashboard icons - notifications, add, account_balance (already loaded via layout.tsx)
 109. Lucide-react icons used for toggle states - Eye/EyeOff for balance visibility toggle
 
+**From Plan 04.3-03:**
+110. Amount displayed in white (not red) for transactions - all customer transactions are expenses from user perspective, no income vs expense distinction
+111. Category label optional in TransactionItem - transactions may not have category data yet, UI handles missing data gracefully
+112. Elevated scan button at 56px (size-14) - matches action button size for consistency, larger than standard tabs for visual prominence
+113. Safe-area-inset-bottom class reused - uses existing utility from globals.css for notched device compatibility
+114. "See All" link placeholder in TransactionList - currently non-functional, will link to full History page in future phase
+115. Relative time formatting without external library - formatTransactionTime uses native Date API and Intl for lightweight time formatting
+116. Material Symbols filled icon variant for active tabs - fontVariationSettings 'FILL 1' for active, 'FILL 0' for inactive
+
 ### Pending Todos
 
 None yet.
@@ -234,5 +243,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed Plan 04.3-01 (User Transaction Index and Query)
+Stopped at: Completed Plan 04.3-03 (Recent Activities and Bottom Navigation)
 Resume file: None
