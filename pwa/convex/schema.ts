@@ -209,5 +209,6 @@ export default defineSchema({
     status: v.union(v.literal("pending"), v.literal("confirmed"), v.literal("failed")),
   })
     .index("byMerchant", ["merchantId"])
-    .index("byMerchantByTime", ["merchantId", "timestamp"]),
+    .index("byMerchantByTime", ["merchantId", "timestamp"])
+    .index("byCustomerByTime", ["customerWallet", "timestamp"]),
 });
