@@ -233,7 +233,7 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
             {getStockDisplay(effectiveStock)}
           </span>
           <div className="text-base font-bold text-white">
-            {effectivePrice.toFixed(2)} <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
+            {Math.round(effectivePrice)} <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
           </div>
         </div>
       </div>
