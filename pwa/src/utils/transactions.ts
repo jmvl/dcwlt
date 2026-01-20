@@ -58,6 +58,15 @@ export async function buildSPLTokenTransfer(
 ): Promise<VersionedTransaction> {
   const { recipient, amount, splToken, sender } = params;
 
+  console.log('[buildSPLTokenTransfer] Input validation:', {
+    recipient,
+    sender,
+    amount,
+    splToken,
+    recipientLength: recipient?.length,
+    senderLength: sender?.length
+  });
+
   // Create connection to fetch latest blockhash
   const connection = new Connection(DEVNET_RPC, 'confirmed');
 

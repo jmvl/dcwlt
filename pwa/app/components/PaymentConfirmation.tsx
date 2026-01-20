@@ -22,6 +22,8 @@ export interface PaymentConfirmationProps {
   onCancel: () => void;
   /** Whether payment is currently processing */
   loading?: boolean;
+  /** Airdrop status message (e.g., "Requesting SOL from Devnet faucet...") */
+  airdropStatus?: string | null;
   /** Error message to display */
   error?: string | null;
 }
@@ -83,6 +85,7 @@ export function PaymentConfirmation({
   onConfirm,
   onCancel,
   loading = false,
+  airdropStatus = null,
   error = null,
 }: PaymentConfirmationProps) {
   const displayAmount = formatAmount(amount);
@@ -136,6 +139,17 @@ export function PaymentConfirmation({
             </div>
           </div>
 
+          {/* Airdrop Info Message */}
+          {airdropStatus && (
+            <div className="mb-4 p-3 bg-blue-500 bg-opacity-10 border border-blue-500 rounded-lg flex items-start gap-2">
+              <Loader2 className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5 animate-spin" />
+              <div>
+                <p className="text-blue-400 text-sm font-medium">Getting SOL for gas fees...</p>
+                <p className="text-blue-300 text-xs mt-1">{airdropStatus}</p>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-500 bg-opacity-10 border border-red-500 rounded-lg flex items-start gap-2">
@@ -162,7 +176,7 @@ export function PaymentConfirmation({
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Processing...
+                  {airdropStatus || 'Processing...'}
                 </>
               ) : (
                 'Confirm Payment'

@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useWallets, useSignTransaction } from '@privy-io/react-auth/solana';
 import { useQueryClient } from '@tanstack/react-query';
-import { Connection, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { buildSPLTokenTransfer, DEVNET_RPC } from '../../src/utils/transactions';
 import { balanceQueryKeys } from './useSolanaBalance';
 import { useMutation } from 'convex/react';
@@ -35,6 +35,8 @@ export interface PaymentResult {
   signature?: string;
   /** Error message (if failed) */
   error?: string;
+  /** Whether an airdrop was performed */
+  airdropped?: boolean;
 }
 
 /**
@@ -51,6 +53,7 @@ export function usePayment() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [airdropStatus, setAirdropStatus] = useState<string | null>(null);
 
   // Convex mutations for transaction records
   const createTransaction = useMutation(api.transactions.createTransaction);
@@ -87,8 +90,84 @@ export function usePayment() {
       console.log('[usePayment] Using wallet:', sender);
 
       try {
+        // Step 0: Check SOL balance before attempting transaction
+        console.log('[usePayment] Checking SOL balance and recipient ATA...');
+        const connection = new Connection(DEVNET_RPC, 'confirmed');
+        const senderPubkey = new PublicKey(sender);
+        const solBalance = await connection.getBalance(senderPubkey);
+        console.log('[usePayment] SOL balance:', solBalance / 1e9, 'SOL');
+
+        // Check if recipient's ATA exists to determine SOL requirement
+        const recipientPubkey = new PublicKey(params.recipient);
+        const tokenMintPubkey = new PublicKey(params.splToken);
+        const { getAssociatedTokenAddress } = await import('@solana/spl-token');
+        const recipientATA = await getAssociatedTokenAddress(tokenMintPubkey, recipientPubkey);
+        const recipientATAInfo = await connection.getAccountInfo(recipientATA);
+        const recipientATAExists = recipientATAInfo !== null;
+        console.log('[usePayment] Recipient ATA exists:', recipientATAExists);
+
+        // Calculate minimum SOL required
+        // If recipient ATA exists: only need transaction fee (~0.000005 SOL)
+        // If recipient ATA doesn't exist: need transaction fee + ATA rent (~0.002 SOL)
+        const TRANSACTION_FEE = 0.00001 * 1e9; // 0.00001 SOL buffer for transaction fee
+        const ATA_RENT = 0.00203928 * 1e9; // Rent for ATA
+        const minSolRequired = recipientATAExists
+          ? TRANSACTION_FEE
+          : TRANSACTION_FEE + ATA_RENT;
+
+        console.log('[usePayment] Minimum SOL required:', minSolRequired / 1e9, 'SOL');
+
+        if (solBalance < minSolRequired) {
+          console.log('[usePayment] Insufficient SOL balance, requesting airdrop...');
+          setAirdropStatus('Requesting SOL from Devnet faucet...');
+          // Auto-airdrop SOL from Devnet faucet when user has insufficient balance
+          // This is a devnet-only feature - on mainnet, users would need to acquire SOL
+          try {
+            const airdropSignature = await connection.requestAirdrop(
+              senderPubkey,
+              0.01 * 1e9 // Airdrop 0.01 SOL (enough for ~100 transactions)
+            );
+            console.log('[usePayment] Airdrop requested:', airdropSignature);
+            setAirdropStatus('Confirming airdrop...');
+
+            // Wait for airdrop confirmation
+            await connection.confirmTransaction(airdropSignature, 'confirmed');
+
+            // Refresh SOL balance after airdrop
+            const newSolBalance = await connection.getBalance(senderPubkey);
+            console.log('[usePayment] New SOL balance after airdrop:', newSolBalance / 1e9, 'SOL');
+
+            if (newSolBalance < minSolRequired) {
+              setAirdropStatus(null);
+              return {
+                success: false,
+                airdropped: true,
+                error: `Airdrop received but still insufficient SOL. Please wait a moment and try again.`,
+              };
+            }
+            setAirdropStatus(null);
+          } catch (airdropError: any) {
+            console.error('[usePayment] Airdrop failed:', airdropError);
+            setAirdropStatus(null);
+            return {
+              success: false,
+              error: `Failed to airdrop SOL for gas fees. Error: ${airdropError?.message || 'Unknown error'}. Please try again.`,
+            };
+          }
+        }
+
         // Step 1: Build the transaction
-        console.log('[usePayment] Building transaction...', { ...params, sender });
+        console.log('[usePayment] Building transaction...', {
+          recipient: params.recipient,
+          amount: params.amount,
+          splToken: params.splToken,
+          sender
+        });
+        console.log('[usePayment] Recipient address validation:', {
+          length: params.recipient?.length,
+          startsWith: params.recipient?.substring(0, 10),
+          isValidBase58: /^[1-9A-HJ-NP-Za-km-z]+$/.test(params.recipient || '')
+        });
         const transaction = await buildSPLTokenTransfer({
           ...params,
           sender,
@@ -160,7 +239,7 @@ export function usePayment() {
 
         // Step 5: Send the signed transaction to Solana
         console.log('[usePayment] Sending transaction to Solana Devnet...');
-        const connection = new Connection(DEVNET_RPC, 'confirmed');
+        // Reuse the connection created earlier for SOL balance check
 
         // Send to Solana
         const txSignature = await connection.sendRawTransaction(signedTransaction);
@@ -260,5 +339,6 @@ export function usePayment() {
     executePayment,
     loading,
     error,
+    airdropStatus,
   };
 }
