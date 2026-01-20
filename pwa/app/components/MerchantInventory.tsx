@@ -1,29 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { Loader2, Package } from 'lucide-react';
-import { QRCodeGenerator } from './QRCodeGenerator';
-import { useMerchantAuth } from './MerchantAuthProvider';
+import { useState, useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { Loader2, Package } from "lucide-react";
+import { QRCodeGenerator } from "./QRCodeGenerator";
+import { useMerchantAuth } from "./MerchantAuthProvider";
 
 interface MerchantInventoryProps {
-  merchantEventId: Id<'merchantEvents'>;
-  merchantId: Id<'merchants'>;
+  merchantEventId: Id<"merchantEvents">;
+  merchantId: Id<"merchants">;
 }
 
 // Default colors for item groups (fallback if not set in schema)
 const DEFAULT_GROUP_COLORS: Record<string, string> = {
-  'Beverages': '#42A5F5', // tech blue
-  'Beverage': '#42A5F5',
-  'Food': '#FB8C00', // orange
-  'Snacks': '#66BB6A', // green
+  Beverages: "#42A5F5", // tech blue
+  Beverage: "#42A5F5",
+  Food: "#FB8C00", // orange
+  Snacks: "#66BB6A", // green
 };
 
-export default function MerchantInventory({ merchantEventId }: MerchantInventoryProps) {
+export default function MerchantInventory({
+  merchantEventId,
+}: MerchantInventoryProps) {
   const { merchant } = useMerchantAuth();
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   const [qrModalState, setQrModalState] = useState<{
     isOpen: boolean;
@@ -33,16 +35,16 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
     itemId: string;
   }>({
     isOpen: false,
-    merchantAddress: '',
+    merchantAddress: "",
     itemPrice: 0,
-    itemName: '',
-    itemId: '',
+    itemName: "",
+    itemId: "",
   });
 
   // Query merchant items with overrides - returns groups with items
   const merchantItems = useQuery(
     api.itemGroups.getMerchantItemsWithOverrides,
-    merchantEventId ? { merchantEventId } : 'skip'
+    merchantEventId ? { merchantEventId } : "skip",
   );
 
   // Handle loading state
@@ -59,7 +61,9 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
     return (
       <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
         <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">No Item Groups Assigned</h2>
+        <h2 className="text-xl font-bold text-white mb-2">
+          No Item Groups Assigned
+        </h2>
         <p className="text-[#9db0b9]">
           You haven't been assigned any item groups for this event yet.
           <br />
@@ -72,7 +76,7 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
   // Extract unique categories (group names) from merchant items
   const categories = useMemo(() => {
     const uniqueNames = new Set(merchantItems.map((g) => g.group.name));
-    return ['All', ...Array.from(uniqueNames).sort()];
+    return ["All", ...Array.from(uniqueNames).sort()];
   }, [merchantItems]);
 
   // Flatten all items with their group info for filtering
@@ -83,17 +87,22 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
         effectivePrice: itemData.effectivePrice,
         effectiveStock: itemData.effectiveStock,
         groupName: groupData.group.name,
-        groupColor: groupData.group.color || DEFAULT_GROUP_COLORS[groupData.group.name] || '#1a2f38',
-      }))
+        groupColor:
+          groupData.group.color ||
+          DEFAULT_GROUP_COLORS[groupData.group.name] ||
+          "#1a2f38",
+      })),
     );
   }, [merchantItems]);
 
   // Filter items based on selected category
   const filteredItems = useMemo(() => {
-    if (selectedCategory === 'All') {
+    if (selectedCategory === "All") {
       return allItemsWithGroup;
     }
-    return allItemsWithGroup.filter((item) => item.groupName === selectedCategory);
+    return allItemsWithGroup.filter(
+      (item) => item.groupName === selectedCategory,
+    );
   }, [allItemsWithGroup, selectedCategory]);
 
   if (filteredItems.length === 0) {
@@ -108,11 +117,13 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
                 onClick={() => setSelectedCategory(category)}
                 className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 transition-colors ${
                   selectedCategory === category
-                    ? 'border-[#13a4ec] text-[#13a4ec]'
-                    : 'border-transparent text-[#9db0b9]'
+                    ? "border-[#13a4ec] text-[#13a4ec]"
+                    : "border-transparent text-[#9db0b9]"
                 }`}
               >
-                <span className="text-sm font-bold leading-normal tracking-wide">{category}</span>
+                <span className="text-sm font-bold leading-normal tracking-wide">
+                  {category}
+                </span>
               </button>
             ))}
           </div>
@@ -120,7 +131,9 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
 
         <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
           <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">No Items Available</h2>
+          <h2 className="text-xl font-bold text-white mb-2">
+            No Items Available
+          </h2>
           <p className="text-[#9db0b9]">
             No items found in the {selectedCategory} category.
           </p>
@@ -152,11 +165,13 @@ export default function MerchantInventory({ merchantEventId }: MerchantInventory
               onClick={() => setSelectedCategory(category)}
               className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-4 transition-colors ${
                 selectedCategory === category
-                  ? 'border-[#13a4ec] text-[#13a4ec]'
-                  : 'border-transparent text-[#9db0b9]'
+                  ? "border-[#13a4ec] text-[#13a4ec]"
+                  : "border-transparent text-[#9db0b9]"
               }`}
             >
-              <span className="text-sm font-bold leading-normal tracking-wide">{category}</span>
+              <span className="text-sm font-bold leading-normal tracking-wide">
+                {category}
+              </span>
             </button>
           ))}
         </div>
@@ -196,7 +211,11 @@ interface InventoryItemCardProps {
   color?: string;
 }
 
-function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryItemCardProps) {
+function InventoryItemCard({
+  item,
+  onGenerateQR,
+  color = "#1a2f38",
+}: InventoryItemCardProps) {
   // effectivePrice and effectiveStock are already on the item from the query
   const effectivePrice = item.effectivePrice ?? item.defaultPrice;
   const effectiveStock = item.effectiveStock ?? item.defaultStock;
@@ -204,7 +223,7 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
   // Get stock display text
   const getStockDisplay = (stock: number | null | undefined) => {
     if (stock === null || stock === undefined || stock > 5) {
-      return 'In Stock';
+      return "In Stock";
     }
     return stock.toString();
   };
@@ -214,26 +233,33 @@ function InventoryItemCard({ item, onGenerateQR, color = '#1a2f38' }: InventoryI
       onClick={() => onGenerateQR(effectivePrice, item)}
       className="aspect-square rounded-xl border border-[#1a2f38] hover:border-[#13a4ec]/50 active:scale-95 transition-transform p-4 relative text-left w-full overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${color}00 0%, ${color}99 60%)`,
+        background: `linear-gradient(0deg, ${color}00 0%, ${color}99 30%)`,
       }}
     >
       {/* Top content */}
       <div className="z-10 flex flex-col h-full">
         {/* Top: name and description */}
         <div>
-          <h3 className="font-extrabold text-white text-lg tracking-tight">{item.name}</h3>
+          <h3 className="font-extrabold text-white text-lg tracking-tight">
+            {item.name}
+          </h3>
           {item.description && (
-            <p className="text-xs text-slate-400 font-medium mt-1 line-clamp-2">{item.description}</p>
+            <p className="text-xs text-slate-400 font-medium mt-1 line-clamp-2">
+              {item.description}
+            </p>
           )}
         </div>
 
         {/* Bottom: stock (left) + price (right) */}
         <div className="flex items-end justify-between mt-auto">
-          <span className={`bg-[#13a4ec]/20 text-[#13a4ec] px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest`}>
+          <span
+            className={`bg-[#13a4ec]/20 text-[#13a4ec] px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest`}
+          >
             {getStockDisplay(effectiveStock)}
           </span>
           <div className="text-base font-bold text-white">
-            {Math.round(effectivePrice)} <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
+            {Math.round(effectivePrice)}{" "}
+            <span className="text-[#13a4ec] text-xs tracking-tighter">EVT</span>
           </div>
         </div>
       </div>
