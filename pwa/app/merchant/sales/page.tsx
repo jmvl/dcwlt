@@ -1,8 +1,6 @@
 'use client';
 
 import { useMerchantAuth } from '../../components/MerchantAuthProvider';
-import { useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import {
   DollarSign,
   ShoppingBag,
