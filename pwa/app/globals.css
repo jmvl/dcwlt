@@ -161,3 +161,8 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Custom gradient for sales/inventory cards */
+.custom-gradient {
+  background: linear-gradient(180deg, rgba(35,48,56,1) 0%, rgba(16,28,34,1) 100%);
+}
+
