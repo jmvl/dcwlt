@@ -361,6 +361,7 @@ export const updateTransactionStatus = mutation({
       throw new Error("Transaction not found");
     }
 
+    const previousStatus = transaction.status;
     const updates: Record<string, any> = {
       status: args.status,
     };
@@ -370,6 +371,30 @@ export const updateTransactionStatus = mutation({
     }
 
     await ctx.db.patch(args.transactionId, updates);
+
+    // When a customer transaction is confirmed, sync the wallet balance
+    // This keeps the Convex wallets table in sync with on-chain Solana balance
+    if (previousStatus !== "confirmed" && args.status === "confirmed") {
+      // Find the wallet by customer wallet address
+      const wallet = await ctx.db
+        .query("wallets")
+        .withIndex("by_wallet", (q) => q.eq("walletAddress", transaction.customerWallet))
+        .first();
+
+      if (wallet) {
+        // Subtract the payment amount from the wallet balance
+        // This matches what happens on Solana when the payment is confirmed
+        const newBalance = wallet.tokenBalance - transaction.amount;
+
+        if (newBalance >= 0) {
+          await ctx.db.patch(wallet._id, {
+            tokenBalance: newBalance,
+            fiatBalance: newBalance * 0.1, // Mock conversion rate
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    }
 
     return await ctx.db.get(args.transactionId);
   },
