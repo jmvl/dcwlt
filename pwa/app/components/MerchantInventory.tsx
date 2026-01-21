@@ -47,40 +47,18 @@ export default function MerchantInventory({
     merchantEventId ? { merchantEventId } : "skip",
   );
 
-  // Handle loading state
-  if (merchantItems === undefined) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-[#13a4ec] animate-spin" />
-      </div>
-    );
-  }
-
-  // Handle empty state - no groups assigned or no items
-  if (merchantItems === null || merchantItems.length === 0) {
-    return (
-      <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
-        <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">
-          No Item Groups Assigned
-        </h2>
-        <p className="text-[#9db0b9]">
-          You haven't been assigned any item groups for this event yet.
-          <br />
-          Contact your admin to get access to inventory.
-        </p>
-      </div>
-    );
-  }
-
   // Extract unique categories (group names) from merchant items
+  // MUST be called before any conditional returns to maintain consistent hook order
   const categories = useMemo(() => {
+    if (!merchantItems || merchantItems.length === 0) return ["All"];
     const uniqueNames = new Set(merchantItems.map((g) => g.group.name));
     return ["All", ...Array.from(uniqueNames).sort()];
   }, [merchantItems]);
 
   // Flatten all items with their group info for filtering
+  // MUST be called before any conditional returns to maintain consistent hook order
   const allItemsWithGroup = useMemo(() => {
+    if (!merchantItems) return [];
     return merchantItems.flatMap((groupData) =>
       groupData.items.map((itemData: any) => ({
         ...itemData.groupItem,
@@ -96,6 +74,7 @@ export default function MerchantInventory({
   }, [merchantItems]);
 
   // Filter items based on selected category
+  // MUST be called before any conditional returns to maintain consistent hook order
   const filteredItems = useMemo(() => {
     if (selectedCategory === "All") {
       return allItemsWithGroup;
@@ -104,6 +83,32 @@ export default function MerchantInventory({
       (item) => item.groupName === selectedCategory,
     );
   }, [allItemsWithGroup, selectedCategory]);
+
+  // Handle loading state (after all hooks are declared)
+  if (merchantItems === undefined) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 text-[#13a4ec] animate-spin" />
+      </div>
+    );
+  }
+
+  // Handle empty state - no groups assigned or no items (after all hooks are declared)
+  if (merchantItems === null || merchantItems.length === 0) {
+    return (
+      <div className="bg-[#1a2f38] rounded-lg p-12 border border-[#1a2f38] text-center">
+        <Package className="w-12 h-12 text-[#9db0b9] mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-white mb-2">
+          No Item Groups Assigned
+        </h2>
+        <p className="text-[#9db0b9]">
+          You haven't been assigned any item groups for this event yet.
+          <br />
+          Contact your admin to get access to inventory.
+        </p>
+      </div>
+    );
+  }
 
   if (filteredItems.length === 0) {
     return (
