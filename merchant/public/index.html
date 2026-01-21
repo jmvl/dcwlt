@@ -18,13 +18,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .container {
       background: white;
       border-radius: 20px;
-      padding: 40px;
+      padding: clamp(20px, 5vw, 40px);
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       max-width: 500px;
       width: 100%;
@@ -34,31 +34,36 @@
       text-align: center;
       color: #333;
       margin-bottom: 5px;
-      font-size: 28px;
+      font-size: clamp(22px, 5vw, 28px);
     }
 
     .subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 30px;
-      font-size: 14px;
+      margin-bottom: clamp(20px, 4vw, 30px);
+      font-size: clamp(12px, 3vw, 14px);
     }
 
     .product-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 30px;
+      gap: clamp(10px, 3vw, 15px);
+      margin-bottom: clamp(20px, 4vw, 30px);
     }
 
     .product-button {
-      padding: 20px;
+      padding: clamp(16px, 4vw, 20px);
       border: 2px solid #e0e0e0;
       border-radius: 12px;
       background: white;
       cursor: pointer;
       transition: all 0.2s;
       text-align: center;
+      min-height: 88px; /* Ensures 44x44px touch target */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .product-button:hover {
@@ -76,17 +81,29 @@
     .product-name {
       font-weight: bold;
       margin-bottom: 5px;
-      font-size: 16px;
+      font-size: clamp(14px, 4vw, 16px);
     }
 
     .product-price {
-      font-size: 18px;
-      color: #9945FF;
+      font-size: clamp(16px, 4.5vw, 18px);
+      color: #7B2CBF;
       font-weight: 600;
     }
 
     .product-button.active .product-price {
       color: white;
+    }
+
+    /* Keyboard focus styles */
+    .product-button:focus-visible,
+    .reset-button:focus-visible {
+      outline: 3px solid #9945FF;
+      outline-offset: 2px;
+    }
+
+    .qr-image:focus-visible {
+      outline: 3px solid #9945FF;
+      outline-offset: 4px;
     }
 
     .qr-container {
@@ -99,58 +116,62 @@
     }
 
     .qr-image {
-      margin: 20px auto;
+      margin: clamp(10px, 3vw, 20px) auto;
       border-radius: 10px;
       border: 3px solid #9945FF;
       padding: 10px;
       background: white;
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
 
     .amount-display {
-      font-size: 24px;
+      font-size: clamp(18px, 5vw, 24px);
       font-weight: bold;
       color: #333;
       margin-bottom: 10px;
     }
 
     .product-display {
-      font-size: 18px;
+      font-size: clamp(16px, 4.5vw, 18px);
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: clamp(15px, 3vw, 20px);
     }
 
     .status {
       text-align: center;
       color: #666;
-      font-size: 14px;
+      font-size: clamp(12px, 3vw, 14px);
       margin-top: 10px;
     }
 
     .loading {
       text-align: center;
-      padding: 40px;
+      padding: clamp(30px, 8vw, 40px);
       color: #666;
     }
 
     .error {
       background: #fee;
       color: #c33;
-      padding: 15px;
+      padding: clamp(12px, 3vw, 15px);
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: clamp(15px, 3vw, 20px);
       text-align: center;
     }
 
     .reset-button {
       width: 100%;
-      padding: 15px;
+      padding: clamp(12px, 3vw, 15px);
       background: #f0f0f0;
       border: none;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: clamp(14px, 4vw, 16px);
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: clamp(15px, 4vw, 20px);
       font-weight: 600;
+      min-height: 48px; /* WCAG touch target */
     }
 
     .reset-button:hover {
@@ -160,8 +181,37 @@
     .info-text {
       text-align: center;
       color: #999;
-      font-size: 12px;
-      margin-top: 30px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      margin-top: clamp(20px, 5vw, 30px);
+    }
+
+    /* Small mobile devices */
+    @media (max-width: 340px) {
+      body {
+        padding: 12px;
+      }
+
+      .product-buttons {
+        grid-template-columns: 1fr; /* Single column on very small screens */
+      }
+
+      .product-button {
+        min-height: 56px; /* Compact but still accessible */
+      }
+    }
+
+    /* Prevent layout shift during QR loading */
+    #qrWrapper {
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 340px) {
+      #qrWrapper {
+        min-height: 240px;
+      }
     }
   </style>
 </head>
@@ -170,37 +220,37 @@
     <h1>🎪 Event Terminal</h1>
     <p class="subtitle">Select item to generate payment QR code</p>
 
-    <div id="error-container"></div>
+    <div id="error-container" role="alert" aria-live="assertive"></div>
 
     <div class="product-buttons">
-      <div class="product-button" data-amount="5" data-product="🍺 Beer">
+      <button type="button" class="product-button" data-amount="5" data-product="🍺 Beer" aria-label="Select Beer, 5 EVT">
         <div class="product-name">🍺 Beer</div>
         <div class="product-price">5 EVT</div>
-      </div>
-      <div class="product-button" data-amount="3" data-product="🍕 Pizza Slice">
+      </button>
+      <button type="button" class="product-button" data-amount="3" data-product="🍕 Pizza Slice" aria-label="Select Pizza Slice, 3 EVT">
         <div class="product-name">🍕 Pizza Slice</div>
         <div class="product-price">3 EVT</div>
-      </div>
-      <div class="product-button" data-amount="10" data-product="🍔 Burger">
+      </button>
+      <button type="button" class="product-button" data-amount="10" data-product="🍔 Burger" aria-label="Select Burger, 10 EVT">
         <div class="product-name">🍔 Burger</div>
         <div class="product-price">10 EVT</div>
-      </div>
-      <div class="product-button" data-amount="20" data-product="🎟️ Event Ticket">
+      </button>
+      <button type="button" class="product-button" data-amount="20" data-product="🎟️ Event Ticket" aria-label="Select Event Ticket, 20 EVT">
         <div class="product-name">🎟️ Event Ticket</div>
         <div class="product-price">20 EVT</div>
-      </div>
+      </button>
     </div>
 
-    <div class="qr-container" id="qrContainer">
+    <div class="qr-container" id="qrContainer" role="region" aria-live="polite">
       <div class="amount-display" id="amountDisplay">0 EVT</div>
       <div class="product-display" id="productDisplay"></div>
       <div id="qrWrapper">
         <div class="loading">Loading QR code...</div>
       </div>
-      <p class="status">Scan with Event Wallet app to pay</p>
+      <p class="status" role="status">Scan with Event Wallet app to pay</p>
     </div>
 
-    <button class="reset-button" id="resetButton" style="display: none;">New Transaction</button>
+    <button class="reset-button" id="resetButton" style="display: none;" aria-label="Start new transaction">New Transaction</button>
 
     <p class="info-text">
       Powered by Solana Pay • Devnet only • No real value
@@ -241,7 +291,7 @@
 
           if (data.success && data.qrCode) {
             // Display QR code
-            qrWrapper.innerHTML = `<img src="${data.qrCode}" class="qr-image" alt="Payment QR Code" width="250" height="250">`;
+            qrWrapper.innerHTML = `<img src="${data.qrCode}" class="qr-image" alt="Payment QR code for ${productName}">`;
             resetButton.style.display = 'block';
 
             // Hide product buttons
