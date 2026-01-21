@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: Quick task
-Plan: 003 (Fix Inventory Card Layout and Tabs)
+Plan: 004 (Improve Merchant Terminal Accessibility)
 Status: Complete
-Last activity: 2026-01-20 — Completed Quick task 003 (Category tabs, EVT blue, per-card colors)
+Last activity: 2026-01-21 — Completed Quick task 004 (WCAG AA compliance, semantic HTML, keyboard navigation)
 
 Progress: ██████████ 100%
 
@@ -56,6 +56,7 @@ Resume file: None
 | 001 | Refactor merchant sales screen ui | 2026-01-20 | ddce6b33f | [001-refactor-merchant-sales-screen-ui](./quick/001-refactor-merchant-sales-screen-ui/) |
 | 002 | Refactor merchant inventory to 2-column grid | 2026-01-20 | 7385971c1 | [002-refactor-merchant-inventory-grid-layout](./quick/002-refactor-merchant-inventory-grid-layout/) |
 | 003 | Fix inventory card layout with category tabs | 2026-01-20 | f4aadf1bd | [003-fix-inventory-card-layout-tabs](./quick/003-fix-inventory-card-layout-tabs/) |
+| 004 | Improve merchant terminal accessibility | 2026-01-21 | e31783082 | [004-improve-merchant-terminal-accessibility](./quick/004-improve-merchant-terminal-accessibility/) |
 
 ---
 
