@@ -73,7 +73,7 @@ export function QRCodeGenerator({
       // Record the current latest transaction ID so we only show success for NEW payments
       initialTransactionId.current = transactions?.[0]?._id || null;
     }
-  }, [isOpen, transactions]);
+  }, [isOpen]);
 
   // Build Solana Pay URL
   const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&spl-token=${TOKEN_MINT_ADDRESS}&reference=${itemId}`;
