@@ -1,0 +1,17 @@
+{
+  "network": "devnet",
+  "rpcUrl": "https://api.devnet.solana.com",
+  "token": {
+    "name": "EVENT",
+    "symbol": "EVENT",
+    "decimals": 9,
+    "supply": 1000000,
+    "mintAddress": "BKMD88P4fFgGpDAqPEhuo7ap2PeRecg6Y9NLrv6CcPjE",
+    "totalSupplyRaw": 1000000000000000
+  },
+  "pool": {
+    "address": "HdYn64ize8g4N8U9VNey6Mme1KEBP5ALBkk5XbP9oYQJ",
+    "tokenAccount": "Fy3K2AnvHDuNGtgE4HmLK7Rbf6cNCXsRPTxvjHM5y9Qn"
+  },
+  "createdAt": "2026-01-15T23:58:14.459Z"
+}
