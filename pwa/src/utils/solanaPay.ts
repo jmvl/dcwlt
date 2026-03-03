@@ -2,7 +2,10 @@
  * Solana Pay URL parser and validator
  *
  * Parses Solana Pay URLs of the format:
- * solana:<recipient>?amount=<amount>&spl-token=<token>&reference=<ref>&label=<label>&message=<message>
+ * solana:<recipient>?amount=<amount>&reference=<ref>&label=<label>&message=<message>
+ *
+ * Note: spl-token parameter is optional - not required for database token system
+ * The parser handles missing spl-token gracefully (returns null if not present)
  */
 
 export interface ParsedSolanaPayURL {
