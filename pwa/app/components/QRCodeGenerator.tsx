@@ -7,9 +7,6 @@ import QRCode from 'qrcode';
 import { X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-// Event Token mint address on Solana Devnet
-const TOKEN_MINT_ADDRESS = '4RGfPGKm8jntNg88mwNP3zHi2AxAzrVq68zDcLrSuKwq';
-
 interface QRCodeGeneratorProps {
   isOpen: boolean;
   onClose: () => void;
@@ -75,8 +72,8 @@ export function QRCodeGenerator({
     }
   }, [isOpen]);
 
-  // Build Solana Pay URL
-  const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&spl-token=${TOKEN_MINT_ADDRESS}&reference=${itemId}`;
+  // Build Solana Pay URL (simplified format without spl-token for database token system)
+  const solanaPayUrl = `solana:${merchantAddress}?amount=${itemPrice}&reference=${itemId}`;
 
   // Handle slide-up animation
   useEffect(() => {
