@@ -21,8 +21,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4.1: Merchant Payment Notifications** - Real-time payment notifications via Convex subscriptions (INSERTED)
 - [x] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
 - [x] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
-- [ ] **Phase 4.4: Dashboard Visual Refactor** - Visual polish to match design reference (INSERTED)
-- [ ] **Phase 5: History + Offline** - Transaction history, offline support
+- [x] **Phase 4.4: Dashboard Visual Refactor** - Visual polish to match design reference (INSERTED)
+- [ ] **Phase 5: Database Token Refactor** - Remove Solana SPL token, use Convex for balances (NEW)
+- [ ] **Phase 6: History + Offline** - Transaction history, offline support
 
 ## Phase Details
 
@@ -219,15 +220,42 @@ Plans:
 
 Plans:
 
-- [ ] 04.4-01: Design system foundation (CSS variables for colors, typography, shadows, spacing)
-- [ ] 04.4-02: BalanceCard and ActionButtons visual updates
-- [ ] 04.4-03: TransactionItem and TransactionList visual updates
-- [ ] 04.4-04: Final consistency pass (colors, borders, shadows, Material Symbols font)
+- [x] 04.4-01: Design system foundation (CSS variables for colors, typography, shadows, spacing)
+- [x] 04.4-02: BalanceCard and ActionButtons visual updates
+- [x] 04.4-03: TransactionItem and TransactionList visual updates
+- [x] 04.4-04: Final consistency pass (colors, borders, shadows, Material Symbols font)
 
-### Phase 5: History + Offline
+### Phase 5: Database Token Refactor
+
+**Goal**: Remove Solana SPL token dependency, use Convex database for all token balances
+**Depends on**: Phase 4.4 (dashboard complete)
+**Requirements**: DB-TOKEN-01, DB-TOKEN-02, DB-TOKEN-03, DB-TOKEN-04, DB-TOKEN-05, DB-TOKEN-06, DB-TOKEN-07
+**Success Criteria** (what must be TRUE):
+
+1. All token balances stored in Convex (no Solana RPC calls for balance)
+2. Payment flow uses database mutations (no blockchain transactions)
+3. Top-up flow updates database directly (no SPL token minting)
+4. Privy retained for social auth but Solana wallet creation disabled
+5. Existing wallet addresses kept as user identifiers (no data migration)
+6. Gas sponsorship backend removed (no longer needed)
+7. All Solana/web3.js dependencies removed from payment flow
+   **Research**: Likely (balance consistency patterns, transaction atomicity in Convex)
+   **Research topics**: Convex transaction atomicity, balance consistency without blockchain, removing Privy Solana wallet
+   **Plans**: TBD
+
+Plans:
+
+- [ ] 05-01: Add balance field to wallets table, migrate existing balances from Solana
+- [ ] 05-02: Refactor usePayment hook to use Convex mutations instead of Solana transactions
+- [ ] 05-03: Refactor useSolanaBalance to use Convex balance query
+- [ ] 05-04: Update top-up flow to update database balance instead of SPL token transfer
+- [ ] 05-05: Remove gas sponsorship backend and Solana dependencies
+- [ ] 05-06: Update Privy config to disable embedded Solana wallet
+
+### Phase 6: History + Offline
 
 **Goal**: Transaction history and offline support
-**Depends on**: Phase 4 (user dashboard with transactions)
+**Depends on**: Phase 5 (database token system must be stable)
 **Requirements**: HISTORY-01, HISTORY-02, HISTORY-03, HISTORY-04, HISTORY-05, OFFLINE-01, OFFLINE-02, OFFLINE-03
 **Success Criteria** (what must be TRUE):
 
@@ -242,18 +270,18 @@ Plans:
 
 Plans:
 
-- [ ] 05-01: History page with transaction list
-- [ ] 05-02: Date range filtering
-- [ ] 05-03: Search functionality
-- [ ] 05-04: Offline service worker caching
-- [ ] 05-05: Offline mutation queuing and sync
+- [ ] 06-01: History page with transaction list
+- [ ] 06-02: Date range filtering
+- [ ] 06-03: Search functionality
+- [ ] 06-04: Offline service worker caching
+- [ ] 06-05: Offline mutation queuing and sync
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5 → 6
 
-Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5).
+Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5 → 6).
 
 | Phase                                   | Plans Complete | Status      | Completed  |
 | --------------------------------------- | -------------- | ----------- | ---------- |
@@ -266,3 +294,5 @@ Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding 
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
 | 4.3. User Dashboard UX                 | 3/3            | Complete    | 2026-01-20 |
 | 4.4. Dashboard Visual Refactor         | 4/4            | Complete    | 2026-01-20 |
+| 5. Database Token Refactor             | 0/6            | Pending     | —          |
+| 6. History + Offline                   | 0/5            | Pending     | —          |
