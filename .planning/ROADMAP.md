@@ -245,9 +245,9 @@ Plans:
 
 Plans:
 
-- [ ] 05-01: Add balance field to wallets table, migrate existing balances from Solana
-- [ ] 05-02: Refactor usePayment hook to use Convex mutations instead of Solana transactions
-- [ ] 05-03: Refactor useSolanaBalance to use Convex balance query
+- [x] 05-01: Add balance field to wallets table, migrate existing balances from Solana
+- [x] 05-02: Refactor usePayment hook to use Convex mutations instead of Solana transactions
+- [x] 05-03: Simplify QR code format - remove spl-token parameter
 - [ ] 05-04: Update top-up flow to update database balance instead of SPL token transfer
 - [ ] 05-05: Remove gas sponsorship backend and Solana dependencies
 - [ ] 05-06: Update Privy config to disable embedded Solana wallet

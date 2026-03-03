@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-03-03T19:15:56.085Z"
+progress:
+  total_phases: 18
+  completed_phases: 9
+  total_plans: 42
+  completed_plans: 33
+---
+
 # Project State
 
 ## Project Reference
@@ -9,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 
 ## Current Position
 
-Phase: Quick task
-Plan: 004 (Improve Merchant Terminal Accessibility)
+Phase: 05-database-token-refactor
+Plan: 05 (Delete Gas Sponsorship Endpoint)
 Status: Complete
-Last activity: 2026-01-21 — Completed Quick task 004 (WCAG AA compliance, semantic HTML, keyboard navigation)
+Last activity: 2026-03-03 — Completed 05-05 (Gas sponsorship backend endpoint deleted - no blockchain transactions needed)
 
-Progress: ██████████ 100%
+Progress: █████░░░░░ 50%
 
 ## Performance Metrics
 
@@ -40,8 +53,9 @@ Progress: ██████████ 100%
 
 **Recent Trend:**
 - Last 3 plans: 1 min (quick-003), 3 min (quick-001), 3 min (04.4-04)
-- Trend: Quick task to add category tabs and fix inventory card styling
-- Next: Phase 5 or future enhancements
+- Trend: Phase 5 database token refactor in progress
+- Next: Complete remaining plans in 05-database-token-refactor phase (04-08)
+| Phase 05-database-token-refactor P05 | 2 | 1 tasks | 1 files |
 
 ## Session Continuity
 
@@ -272,3 +286,12 @@ Recent decisions affecting current work:
 136. useMemo for performance optimization — category extraction and filtered items computed once per data change
 137. Dynamic inline styles for card backgrounds — linear-gradient with hex color opacity (dd to aa) for depth
 138. Price positioning bottom-right — absolute positioning with text-right alignment for card price display
+
+**From Plan 05-03:**
+139. QR codes use simplified Solana Pay URL format — removed spl-token parameter for database token system (format: solana:<address>?amount=<price>&reference=<itemId>)
+140. Parser already handles optional spl-token gracefully — searchParams.get returns null if parameter missing, no code changes needed
+
+**From Plan 05-02:**
+139. Top-up uses incrementBalance mutation instead of setMockBalance — cleaner API passing amount to add, not total
+140. React Query invalidation removed for top-up — Convex subscriptions provide real-time balance updates automatically
+141. Database-only top-up flow — no Solana transaction or backend API call required for balance updates
