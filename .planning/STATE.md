@@ -264,3 +264,19 @@ Decisions made:
 - [Phase 05]: Feature-flagged usePayment hook: USE_DATABASE_TOKENS controls database vs Solana mode at runtime
 - [Phase 05]: Backward-compatible usePayment: hook gets identifiers from Privy context, no parameters required
 - [Phase 05]: Payment flow uses Convex hooks; usePayment extracts wallet/privy ID internally; no blockchain explorer links in database mode
+
+**From Plan 05-01:**
+139. Feature flag USE_DATABASE_TOKENS controls token implementation - can switch between database and Solana
+140. Privy User ID (did:privy:xxx) is primary user identifier instead of wallet address
+141. privyId field added to users table with by_privy_id index
+142. transferBalance mutation provides atomic balance transfers in database mode
+
+**From Plan 05-06:**
+143. usePayment hook supports both implementations via feature flag
+144. Database mode: instant Convex mutation, no gas, no signing
+145. Solana mode: existing blockchain flow preserved as fallback
+146. Both implementations coexist in same codebase
+
+**From Plan 05-08:**
+147. Feature flag documented in CLAUDE.md and .env.example
+148. Default mode is database (NEXT_PUBLIC_USE_DATABASE_TOKENS=true)
