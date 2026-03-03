@@ -198,10 +198,10 @@ export default defineSchema({
 
   // Transactions - payment transaction records
   transactions: defineTable({
-    // Reference to merchant receiving payment
-    merchantId: v.id("merchants"),
-    // Reference to item purchased
-    itemId: v.id("groupItems"),
+    // Reference to merchant receiving payment (optional for DB transfers without merchant)
+    merchantId: v.optional(v.id("merchants")),
+    // Reference to item purchased (optional for DB transfers without item)
+    itemId: v.optional(v.id("groupItems")),
     // Customer wallet address
     customerWallet: v.string(),
     // Amount in EVT (lamports/smallest unit)

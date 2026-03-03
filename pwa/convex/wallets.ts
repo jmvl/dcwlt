@@ -3,6 +3,9 @@ import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 
+// Fiat conversion rate constant
+const FIAT_CONVERSION_RATE = 0.1;
+
 // Get all wallets (for admin dashboard)
 export const getAllWallets = query({
   args: {},
@@ -296,6 +299,102 @@ export const recordPayment = mutation({
       success: true,
       signature: args.signature,
       newBalance,
+    };
+  },
+});
+
+// Atomic transfer mutation for database-based token transfers
+// Atomically debits sender, credits recipient, and creates transaction record
+export const transferBalance = mutation({
+  args: {
+    senderPrivyId: v.string(), // Primary identifier - Privy User ID (did:privy:xxx)
+    recipientWalletAddress: v.string(), // Merchant wallet address
+    amount: v.number(), // Amount in EVT tokens (not lamports)
+    merchantId: v.optional(v.id("merchants")),
+    itemId: v.optional(v.id("groupItems")),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get sender user by privyId
+    const senderUser = await ctx.db
+      .query("users")
+      .withIndex("by_privy_id", (q) => q.eq("privyId", args.senderPrivyId))
+      .first();
+
+    if (!senderUser) {
+      throw new Error("Sender not found - user must have privyId set");
+    }
+
+    // 2. Get sender wallet via user's wallet address
+    const senderWallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", senderUser.walletAddress))
+      .first();
+
+    if (!senderWallet) {
+      throw new Error("Sender wallet not found");
+    }
+
+    // 3. Validate sufficient balance
+    if (senderWallet.tokenBalance < args.amount) {
+      throw new Error(
+        `Insufficient balance: have ${senderWallet.tokenBalance} EVT, need ${args.amount} EVT`
+      );
+    }
+
+    // 4. Get recipient wallet
+    const recipientWallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.recipientWalletAddress))
+      .first();
+
+    if (!recipientWallet) {
+      throw new Error("Recipient wallet not found");
+    }
+
+    // 5. Calculate new balances
+    const newSenderBalance = senderWallet.tokenBalance - args.amount;
+    const newRecipientBalance = recipientWallet.tokenBalance + args.amount;
+    const now = Date.now();
+
+    // 6. Debit sender (atomic with rest of operation)
+    await ctx.db.patch(senderWallet._id, {
+      tokenBalance: newSenderBalance,
+      fiatBalance: newSenderBalance * FIAT_CONVERSION_RATE,
+      updatedAt: now,
+    });
+
+    // 7. Credit recipient (atomic with rest of operation)
+    await ctx.db.patch(recipientWallet._id, {
+      tokenBalance: newRecipientBalance,
+      fiatBalance: newRecipientBalance * FIAT_CONVERSION_RATE,
+      updatedAt: now,
+    });
+
+    // 8. Create transaction record (status is always confirmed for DB transfers)
+    // Only include merchantId/itemId if provided (they are now optional in schema)
+    const transactionRecord: any = {
+      customerWallet: senderUser.walletAddress,
+      amount: args.amount,
+      timestamp: now,
+      status: "confirmed",
+    };
+
+    // Only add merchantId if provided
+    if (args.merchantId) {
+      transactionRecord.merchantId = args.merchantId;
+    }
+
+    // Only add itemId if provided
+    if (args.itemId) {
+      transactionRecord.itemId = args.itemId;
+    }
+
+    const transactionId = await ctx.db.insert("transactions", transactionRecord);
+
+    return {
+      success: true,
+      transactionId,
+      newSenderBalance,
     };
   },
 });

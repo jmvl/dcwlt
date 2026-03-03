@@ -42,7 +42,7 @@ export const listLiveMerchantTransactions = query({
     // Fetch item names for display
     const transactionsWithItems = await Promise.all(
       transactions.map(async (tx) => {
-        const item = await ctx.db.get(tx.itemId);
+        const item = tx.itemId ? await ctx.db.get(tx.itemId) : null;
         return {
           ...tx,
           itemName: item?.name || "Unknown Item",
@@ -121,7 +121,7 @@ export const listMerchantTransactions = query({
     // Join with groupItems table to get item names
     const transactionsWithItemNames = await Promise.all(
       sorted.map(async (tx) => {
-        const item = await ctx.db.get(tx.itemId);
+        const item = tx.itemId ? await ctx.db.get(tx.itemId) : null;
         return {
           _id: tx._id,
           timestamp: tx.timestamp,
@@ -180,7 +180,7 @@ export const listUserTransactions = query({
     // Fetch item names for display
     const transactionsWithItems = await Promise.all(
       limitedTransactions.map(async (tx) => {
-        const item = await ctx.db.get(tx.itemId);
+        const item = tx.itemId ? await ctx.db.get(tx.itemId) : null;
         return {
           ...tx,
           itemName: item?.name || "Unknown Item",
