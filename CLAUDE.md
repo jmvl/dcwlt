@@ -105,6 +105,28 @@ The project consists of three independent Node.js projects:
 2. **backend/** - Express server for top-up simulation
 3. **merchant/** - Express server with QR code generator
 
+## Token Implementation Feature Flag
+
+The system supports two token implementations controlled by `NEXT_PUBLIC_USE_DATABASE_TOKENS`:
+
+| Value | Implementation | Use Case |
+|-------|---------------|----------|
+| `true` | Convex database | Instant payments, no gas, recommended for POC |
+| `false` | Solana SPL tokens | Blockchain payments, gas sponsorship required |
+
+**Current default:** Database mode (`true`)
+
+**To switch modes:**
+1. Update `pwa/.env.local`
+2. Restart the dev server
+3. Clear browser cache if needed
+
+**Key files:**
+- `pwa/src/config/tokens.ts` - Feature flag definition
+- `pwa/app/hooks/usePayment.ts` - Feature-flagged payment logic
+- `pwa/app/hooks/useBalance.ts` - Database balance (when flag is true)
+- `pwa/app/hooks/useSolanaBalance.ts` - Solana balance (when flag is false)
+
 ## Project Status
 
 **Current Phase**: Planning/Setup
