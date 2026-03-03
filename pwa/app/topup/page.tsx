@@ -4,10 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePrivyAuth } from '../hooks/usePrivyAuth';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { TopUpBundle } from '../components/TopUpBundle';
-import { CheckCircle, ExternalLink } from 'lucide-react';
-import { balanceQueryKeys } from '../hooks/useSolanaBalance';
+import { CheckCircle } from 'lucide-react';
 
 const BUNDLES = [
   { amount: 50, price: 5 },
@@ -18,9 +18,9 @@ const BUNDLES = [
 
 export default function TopUpPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { ready, authenticated, user } = usePrivyAuth();
-  const [successData, setSuccessData] = useState<{ signature: string; amount: number; explorerUrl?: string } | null>(null);
+  const incrementBalance = useMutation(api.wallets.incrementBalance);
+  const [successData, setSuccessData] = useState<{ amount: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,45 +40,21 @@ export default function TopUpPage() {
     setIsLoading(true);
 
     try {
-      console.log('[TopUp] Calling backend for token transfer...');
+      console.log('[TopUp] Incrementing balance via Convex mutation...');
 
-      // Call backend API directly (bypasses Convex sandbox limitation)
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/topup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress,
-          amount,
-        }),
+      // Call Convex mutation directly - updates database only, no Solana transaction
+      const result = await incrementBalance({
+        walletAddress,
+        amount,
       });
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Top-up failed');
-      }
-
-      console.log('[TopUp] Backend response:', result);
-
-      // Invalidate the balance query to trigger a refetch from Solana
-      // This ensures the dashboard shows the updated balance
-      if (walletAddress) {
-        console.log('[TopUp] Invalidating balance query to trigger refetch...');
-        queryClient.invalidateQueries({
-          queryKey: balanceQueryKeys.detail(walletAddress),
-        });
-      }
+      console.log('[TopUp] Balance updated:', result);
 
       setSuccessData({
-        signature: result.signature,
         amount,
-        explorerUrl: result.explorerUrl,
       });
 
-      console.log('[TopUp] Top-up successful:', result.signature);
+      console.log('[TopUp] Top-up successful, new balance:', result.newBalance);
     } catch (err) {
       console.error('[TopUp] Error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during top-up');
@@ -127,26 +103,8 @@ export default function TopUpPage() {
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-white mb-2">Top-Up Successful!</h2>
               <p className="text-[#9db0b9] mb-6">
-                Your wallet has been topped up with {successData.amount} EVT on Solana Devnet
+                Your wallet has been topped up with {successData.amount} EVT
               </p>
-
-              <div className="bg-[#101c22] rounded-lg p-4 mb-6">
-                <p className="text-[#9db0b9] text-sm mb-2">Transaction Signature</p>
-                <code className="text-xs text-[#13a4ec] break-all block mb-2">
-                  {successData.signature}
-                </code>
-                {successData.explorerUrl && (
-                  <a
-                    href={successData.explorerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[#9db0b9] hover:text-[#13a4ec] flex items-center gap-1 mt-2 inline-flex"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    View on Solana Explorer
-                  </a>
-                )}
-              </div>
 
               <button
                 onClick={() => router.push('/dashboard')}

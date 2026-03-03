@@ -107,6 +107,33 @@ export const setMockBalance = mutation({
   },
 });
 
+// Increment balance by amount (for top-up flow - database-only, no Solana transaction)
+export const incrementBalance = mutation({
+  args: {
+    walletAddress: v.string(),
+    amount: v.number(), // Amount to add (positive)
+  },
+  handler: async (ctx, args) => {
+    const wallet = await ctx.db
+      .query("wallets")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (!wallet) {
+      throw new Error("Wallet not found");
+    }
+
+    const newBalance = wallet.tokenBalance + args.amount;
+    await ctx.db.patch(wallet._id, {
+      tokenBalance: newBalance,
+      fiatBalance: newBalance * 0.1,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, newBalance };
+  },
+});
+
 // Internal query to get wallet (used by action)
 export const getWalletForTopUpInternal = internalQuery({
   args: {
