@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useSolanaBalance } from '../../hooks/useSolanaBalance';
+import { useBalance } from '../../hooks/useBalance';
 import { usePrivyAuth } from '../../hooks/usePrivyAuth';
 
 export function BalanceCard() {
@@ -15,8 +15,8 @@ export function BalanceCard() {
   );
   const walletAddress = solanaWallet && 'address' in solanaWallet ? solanaWallet.address : undefined;
 
-  // Fetch balance
-  const { data: balance, isLoading } = useSolanaBalance(walletAddress);
+  // Fetch balance from Convex (database tokens)
+  const { balance, isLoading } = useBalance(walletAddress);
   const tokenBalance = balance ?? 0;
   const displayBalance = isMasked ? '•••' : Math.floor(tokenBalance).toString();
 
