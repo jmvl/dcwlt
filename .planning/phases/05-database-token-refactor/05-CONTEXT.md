@@ -1,27 +1,28 @@
 # Phase 5: Database Token Refactor - Context
 
 **Gathered:** 2026-03-03
-**Status:** Ready for planning
+**Status:** Ready for planning (UPDATED with feature flag decision)
 **Source:** User discussion via /gsd:plan-phase
 
 <domain>
 ## Phase Boundary
 
-This phase removes the Solana SPL token dependency and replaces it with a pure database (Convex) token system. All token balances will be stored and managed in Convex, eliminating the need for blockchain transactions, gas sponsorship, and complex wallet signing flows.
+This phase adds a database-based token system as an alternative to Solana SPL tokens, with a feature flag to toggle between implementations. All token balances can be stored in Convex, with the option to switch back to blockchain if needed.
 
 **In Scope:**
-- Remove all Solana/web3.js dependencies from payment flow
-- Store balances in Convex wallets table
-- Simplify payment flow to database mutations
-- Remove gas sponsorship backend
+- Add feature flag `USE_DATABASE_TOKENS` to toggle between implementations
+- Store balances in Convex wallets table (when flag is true)
+- Create database-based payment flow (when flag is true)
+- Keep Solana code behind feature flag (can re-enable later)
 - Keep Privy for social auth (Google/Apple login)
-- Keep wallet addresses as user identifiers
+- Use Privy User ID (did) as user identifier instead of wallet address
 
 **Out of Scope:**
 - History page improvements (Phase 6)
 - Offline support (Phase 6)
 - New payment features
 - UI changes beyond flow simplification
+- Removing Solana dependencies entirely (keep for feature flag)
 </domain>
 
 <decisions>
@@ -29,61 +30,78 @@ This phase removes the Solana SPL token dependency and replaces it with a pure d
 
 ### Authentication Strategy
 - **Keep Privy for social auth** - Privy handles Google/Apple OAuth, remains the authentication layer
-- **Disable Solana wallet creation** - Privy config updated to not create embedded Solana wallets
-- **Wallet addresses become opaque IDs** - Existing wallet addresses kept as user identifiers, no migration needed
+- **Keep Solana wallet creation enabled** - Privy still creates wallets (needed if we switch back)
+- **Use Privy User ID as primary identifier** - `user.id` (did:privy:xxx) instead of wallet address
+- **Wallet address still available** - Kept for Solana mode, but not primary key
+
+### Feature Flag Architecture
+- **Environment variable** - `USE_DATABASE_TOKENS=true|false`
+- **Default to database** - New installations use database by default
+- **Runtime toggle** - Can switch without code deploy (via env var)
+- **Graceful migration** - Existing users with Solana balances can be migrated
 
 ### Balance Management
 - **Store balances in Convex wallets table** - Add `balance` field (number, in EVT tokens)
 - **Atomic balance updates** - Use Convex transactions for debit/credit operations
-- **No blockchain consensus needed** - Database is source of truth, not Solana
+- **Dual-track during migration** - Both Solana and database balances can exist
 
 ### Payment Flow
-- **Replace Solana transactions with Convex mutations** - Payment becomes: debit sender, credit merchant, create transaction record
-- **Remove gas sponsorship backend** - `/api/sponsor-transaction` no longer needed
-- **Simplify QR code format** - No longer need `spl-token` parameter in Solana Pay URLs
+- **Feature-flagged implementations** - `usePayment` switches based on flag
+- **Database mode**: Convex mutations (instant, no gas)
+- **Solana mode**: Existing blockchain flow (gas sponsorship)
+- **QR code format unchanged** - Keep Solana Pay format for compatibility
 
-### Data Migration
-- **Migrate balances from Solana to Convex** - One-time script to read SPL token balances and populate database
-- **Keep existing wallet addresses** - No changes to wallet address fields in any table
-- **Transaction history preserved** - Only signature field becomes optional (no on-chain signature)
-
-### Code Removal
-- **Remove @solana/web3.js from payment hooks** - usePayment no longer needs Solana imports
-- **Remove @solana/spl-token dependency** - No SPL token operations
-- **Remove gas sponsorship API route** - Delete `/api/sponsor-transaction`
-- **Simplify useSolanaBalance hook** - Becomes useBalance, queries Convex instead of RPC
+### Data Model Changes
+- **Add `privyId` field to users table** - Primary identifier (did:privy:xxx)
+- **Add `balance` field to wallets table** - Database token balance
+- **Keep `walletAddress` field** - Still needed for Solana mode
+- **Migration script** - Copy Solana balances to database field
 
 ### Claude's Discretion
-- Exact balance migration script implementation
+- Exact feature flag implementation (env var vs config file)
+- Migration script timing and execution
 - Error handling patterns for balance operations
-- Whether to keep any Solana utilities for future use
-- QR code format changes (keep Solana Pay compatible or simplify further?)
+- Whether to sync balances between Solana and database
 </decisions>
 
 <specifics>
 ## Specific Ideas
 
-### Current Architecture (to be removed)
+### Feature Flag Implementation
+```typescript
+// src/config/tokens.ts
+export const USE_DATABASE_TOKENS = process.env.NEXT_PUBLIC_USE_DATABASE_TOKENS === 'true';
+
+// usePayment hook
+export function usePayment(senderWalletAddress: string | undefined, senderPrivyId: string | undefined) {
+  if (USE_DATABASE_TOKENS) {
+    return useDatabasePayment(senderPrivyId);
+  } else {
+    return useSolanaPayment(senderWalletAddress);
+  }
+}
+```
+
+### Current Architecture (Solana mode)
 - `usePayment` hook builds Solana transactions, signs with Privy, sends to sponsor backend
 - `useSolanaBalance` queries Solana RPC for SPL token balance
 - `/api/sponsor-transaction` signs as fee payer and broadcasts to Solana
 - Gas sponsorship required for every payment
-- Complex transaction building with ATA creation, transfer instructions
 
-### Target Architecture
-- `usePayment` becomes simple: call Convex mutation to transfer balance
-- `useBalance` queries Convex for balance (already real-time via subscriptions)
+### Target Architecture (Database mode)
+- `usePayment` calls Convex mutation to transfer balance
+- `useBalance` queries Convex for balance (real-time via subscriptions)
 - No backend API needed for payments
 - Instant confirmation (no blockchain wait)
-- Simpler error handling (database errors only)
 
 ### Key Files to Modify
-- `pwa/app/hooks/usePayment.ts` - Complete rewrite
-- `pwa/app/hooks/useSolanaBalance.ts` - Rename to useBalance, query Convex
+- `pwa/src/config/tokens.ts` - NEW: Feature flag configuration
+- `pwa/app/hooks/usePayment.ts` - Add feature flag branching
+- `pwa/app/hooks/useBalance.ts` - NEW: Database balance hook
 - `pwa/convex/wallets.ts` - Add balance field, transfer mutation
-- `pwa/app/api/sponsor-transaction/route.ts` - Delete
-- `pwa/app/topup/page.tsx` - Simplify to database update
-- `pwa/src/lib/privy.ts` - Disable Solana wallet creation
+- `pwa/convex/users.ts` - Add privyId field, lookup by privyId
+- `pwa/app/topup/page.tsx` - Add feature flag branching
+- Existing Solana hooks - Keep but conditionally use
 </specifics>
 
 <deferred>
@@ -97,3 +115,4 @@ None - phase scope is well-defined.
 
 *Phase: 05-database-token-refactor*
 *Context gathered: 2026-03-03 via /gsd:plan-phase*
+*Updated: 2026-03-03 with feature flag and Privy ID decisions*
