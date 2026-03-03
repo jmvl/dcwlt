@@ -3,9 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T19:20:59.867Z"
-
-progress: █████████░░░ 50%
+last_updated: "2026-03-03T20:35:44.929Z"
+progress:
+  total_phases: 18
+  completed_phases: 9
+  total_plans: 42
+  completed_plans: 35
 ---
 
 ## Performance
@@ -258,3 +261,5 @@ Decisions made:
            - history page filters improve with search
            - mobile-responsive design with touch targets for better thumb reach
            - dashboard loads instantly after balance updates"
+- [Phase 05]: Feature-flagged usePayment hook: USE_DATABASE_TOKENS controls database vs Solana mode at runtime
+- [Phase 05]: Backward-compatible usePayment: hook gets identifiers from Privy context, no parameters required
