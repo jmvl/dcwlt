@@ -58,7 +58,7 @@ Each task was committed atomically:
 
 1. **Task 1: Delete the sponsor-transaction API route** - `9cd05460c` (feat)
 
-**Plan metadata:** pending (docs: complete plan)
+**Plan metadata:** `769434dea` (docs: complete plan)
 
 ## Files Created/Modified
 - `pwa/app/api/sponsor-transaction/route.ts` - DELETED (was: Solana transaction sponsorship with fee payer signing)
