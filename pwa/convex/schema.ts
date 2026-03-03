@@ -6,6 +6,8 @@ export default defineSchema({
   users: defineTable({
     // Primary identifier: Solana wallet address from Privy
     walletAddress: v.string(),
+    // Privy User ID (did:privy:xxx) - unique identifier from Privy auth
+    privyId: v.optional(v.string()),
     // OAuth provider (google, apple)
     oauthProvider: v.optional(v.string()),
     // OAuth email (for recovery)
@@ -16,7 +18,8 @@ export default defineSchema({
     lastActiveAt: v.number(),
   })
     .index("by_wallet", ["walletAddress"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_privy_id", ["privyId"]),
 
   // Wallet balances - tracks token holdings
   wallets: defineTable({
