@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T20:35:44.929Z"
+last_updated: "2026-03-03T20:38:38.414Z"
 progress:
   total_phases: 18
   completed_phases: 9
   total_plans: 42
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 ## Performance
@@ -263,3 +263,4 @@ Decisions made:
            - dashboard loads instantly after balance updates"
 - [Phase 05]: Feature-flagged usePayment hook: USE_DATABASE_TOKENS controls database vs Solana mode at runtime
 - [Phase 05]: Backward-compatible usePayment: hook gets identifiers from Privy context, no parameters required
+- [Phase 05]: Payment flow uses Convex hooks; usePayment extracts wallet/privy ID internally; no blockchain explorer links in database mode
