@@ -294,5 +294,5 @@ Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding 
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
 | 4.3. User Dashboard UX                 | 3/3            | Complete    | 2026-01-20 |
 | 4.4. Dashboard Visual Refactor         | 4/4            | Complete    | 2026-01-20 |
-| 5. Database Token Refactor             | 0/6            | Pending     | —          |
+| 5. Database Token Refactor             | 3/6            | In Progress | —          |
 | 6. History + Offline                   | 0/5            | Pending     | —          |
