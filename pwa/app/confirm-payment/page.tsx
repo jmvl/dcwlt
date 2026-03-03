@@ -4,8 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PaymentConfirmation } from '../components/PaymentConfirmation';
 import { usePayment } from '../hooks/usePayment';
-import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
-import { parseTokenAmount, TOKEN_DECIMALS } from '../../src/utils/transactions';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
@@ -21,16 +20,17 @@ function ConfirmPaymentContent() {
   const searchParams = useSearchParams();
 
   // Call ALL hooks unconditionally at the top (Rules of Hooks)
-  const { executePayment, loading } = usePayment();
+  // usePayment now extracts wallet address and Privy ID internally
+  const { executePayment, loading, walletAddress } = usePayment();
   const [success, setSuccess] = useState<boolean | null>(null);
-  const [signature, setSignature] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   // Parse URL parameters
   const recipient = searchParams.get('recipient');
   const amount = searchParams.get('amount');
-  const splToken = searchParams.get('splToken');
+  const splToken = searchParams.get('splToken'); // Optional in database mode
   const label = searchParams.get('label') || undefined;
   const message = searchParams.get('message') || undefined;
   const reference = searchParams.get('reference'); // This is the itemId
@@ -58,11 +58,11 @@ function ConfirmPaymentContent() {
     merchantId: merchantId?.toString(),
     itemId: itemId?.toString(),
     merchantFound: !!merchant,
-    merchantData: merchant,
+    walletAddress,
   });
 
-  // Validate required parameters (useMemo for computed value)
-  const isValid = useMemo(() => recipient && amount && splToken, [recipient, amount, splToken]);
+  // Validate required parameters (recipient and amount are required, splToken is optional)
+  const isValid = useMemo(() => recipient && amount, [recipient, amount]);
 
   // Client-side hydration effect
   useEffect(() => {
@@ -81,38 +81,22 @@ function ConfirmPaymentContent() {
    */
   const handleConfirm = async () => {
     console.log('[ConfirmPayment] handleConfirm called');
-    console.log('[ConfirmPayment] Params:', { recipient, amount, splToken });
+    console.log('[ConfirmPayment] Params:', { recipient, amount, splToken, merchantId, itemId });
 
-    if (!recipient || !amount || !splToken) {
+    if (!recipient || !amount) {
       console.error('[ConfirmPayment] Missing parameters');
       setError('Missing required payment parameters');
       return;
     }
 
-    // CRITICAL FIX: Convert display amount to base units
-    // The QR code encodes display amount (e.g., "5" for 5 EVT)
-    // But SPL token transfers need base units (5 * 10^9 = 5000000000 for 9 decimals)
-    let amountInBaseUnits: string;
-    try {
-      const amountBigInt = parseTokenAmount(amount);
-      amountInBaseUnits = amountBigInt.toString();
-      console.log('[ConfirmPayment] Amount conversion:', {
-        displayAmount: amount,
-        decimals: TOKEN_DECIMALS,
-        baseUnits: amountInBaseUnits,
-      });
-    } catch (err) {
-      console.error('[ConfirmPayment] Failed to parse amount:', err);
-      setError(`Invalid amount format: ${amount}`);
-      return;
-    }
-
     console.log('[ConfirmPayment] About to call executePayment...');
     try {
+      // In database mode, amount is already in EVT (no conversion needed)
+      // In Solana mode, amount should already be in base units
       const result = await executePayment({
         recipient,
-        amount: amountInBaseUnits,
-        splToken,
+        amount: amount, // Pass amount as-is (EVT for database, base units for Solana)
+        splToken: splToken || undefined, // Optional in database mode
         merchantId,
         itemId,
       });
@@ -120,7 +104,7 @@ function ConfirmPaymentContent() {
 
       if (result.success) {
         setSuccess(true);
-        setSignature(result.signature || null);
+        setTransactionId(result.transactionId || result.signature || null);
       } else {
         setSuccess(false);
         setError(result.error || 'Payment failed');
@@ -144,15 +128,6 @@ function ConfirmPaymentContent() {
    */
   const handleBackToDashboard = () => {
     router.push('/dashboard');
-  };
-
-  /**
-   * Navigate to Solana Explorer
-   */
-  const handleViewOnExplorer = () => {
-    if (signature) {
-      window.open(`https://explorer.solana.com/tx/${signature}?cluster=devnet`, '_blank');
-    }
   };
 
   // ===== CONDITIONAL RENDERING (all hooks already called) =====
@@ -190,7 +165,7 @@ function ConfirmPaymentContent() {
   }
 
   // Show success state
-  if (success === true && signature) {
+  if (success === true && transactionId) {
     return (
       <div className="min-h-screen bg-[#0a1216] flex items-center justify-center p-4">
         <div className="max-w-md w-full">
@@ -200,20 +175,11 @@ function ConfirmPaymentContent() {
               <h1 className="text-2xl font-bold text-white mb-2">Payment Successful!</h1>
               <p className="text-[#9db0b9] mb-6">Your payment has been processed</p>
 
-              {/* Transaction Signature */}
+              {/* Transaction ID */}
               <div className="bg-[#0a1216] rounded-lg p-4 mb-4">
-                <p className="text-[#9db0b9] text-xs mb-1">Transaction Signature</p>
-                <p className="text-white font-mono text-xs break-all">{signature}</p>
+                <p className="text-[#9db0b9] text-xs mb-1">Transaction ID</p>
+                <p className="text-white font-mono text-xs break-all">{transactionId}</p>
               </div>
-
-              {/* Explorer Link */}
-              <button
-                onClick={handleViewOnExplorer}
-                className="w-full mb-3 py-3 px-4 rounded-xl bg-[#1a2f38] border border-[#243b47] text-white font-medium hover:bg-[#243b47] transition-colors flex items-center justify-center gap-2"
-              >
-                <ExternalLink className="w-4 h-4" />
-                View on Solana Explorer
-              </button>
 
               {/* Back to Dashboard */}
               <button
@@ -279,7 +245,7 @@ function ConfirmPaymentContent() {
     <PaymentConfirmation
       recipient={recipient!}
       amount={amount!}
-      splToken={splToken!}
+      splToken={splToken || ''}
       label={merchantLabel}
       message={message}
       onConfirm={handleConfirm}
@@ -298,8 +264,8 @@ function ConfirmPaymentContent() {
  *
  * URL Parameters:
  * - recipient: (required) Wallet address to send tokens to
- * - amount: (required) Amount in smallest unit (lamports)
- * - splToken: (required) SPL Token mint address
+ * - amount: (required) Amount in EVT (database mode) or smallest unit (Solana mode)
+ * - splToken: (optional) SPL Token mint address (ignored in database mode)
  * - label: (optional) Merchant/recipient name
  * - message: (optional) Payment note/message
  *
