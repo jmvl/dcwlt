@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
 - [x] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
 - [x] **Phase 4.4: Dashboard Visual Refactor** - Visual polish to match design reference (INSERTED)
-- [ ] **Phase 5: Database Token Refactor** - Remove Solana SPL token, use Convex for balances (NEW)
+- [x] **Phase 5: Database Token Refactor** - Remove Solana SPL token, use Convex for balances (NEW) ✓ 2026-03-03
 - [ ] **Phase 6: History + Offline** - Transaction history, offline support
 
 ## Phase Details
