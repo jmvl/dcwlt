@@ -17,6 +17,25 @@ import * as crypto from "crypto";
 // Server secret from environment (never exposed to client)
 const QR_SIGNING_SECRET = process.env.QR_SIGNING_SECRET || "default-dev-secret";
 
+// Base32 alphabet (RFC 4648)
+const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+// Helper: Convert buffer to Base32 string
+function bufferToBase32(buffer: Buffer): string {
+  let bits = "";
+  for (const byte of buffer) {
+    bits += byte.toString(2).padStart(8, "0");
+  }
+
+  let result = "";
+  for (let i = 0; i < bits.length; i += 5) {
+    const chunk = bits.slice(i, i + 5).padEnd(5, "0");
+    result += BASE32_ALPHABET[parseInt(chunk, 2)];
+  }
+
+  return result;
+}
+
 // Configure TOTP for 60-second windows with clock skew tolerance
 const totp = new TOTP({
   period: 60,
@@ -24,12 +43,13 @@ const totp = new TOTP({
   base32: new ScureBase32Plugin(),
 });
 
-// Helper: Derive per-user secret (never exposed to client)
-function deriveUserSecret(userId: string): string {
-  return crypto
+// Helper: Derive per-user secret as Base32 (TOTP requires Base32)
+function deriveUserSecretBase32(userId: string): string {
+  const hmac = crypto
     .createHmac("sha256", QR_SIGNING_SECRET)
     .update(userId)
-    .digest("hex");
+    .digest();
+  return bufferToBase32(hmac);
 }
 
 // Helper: Verify TOTP time key (5-minute window, 2-minute skew)
@@ -78,17 +98,17 @@ export const processQRPayment = internalAction({
     transactionId: Id<"transactions">;
     newCustomerBalance: number;
   }> => {
-    // 1. Get derived secret for this user
-    const derivedSecret = deriveUserSecret(args.customerPrivyId);
+    // 1. Get derived secret for this user (Base32 for TOTP)
+    const derivedSecretBase32 = deriveUserSecretBase32(args.customerPrivyId);
 
-    // 2. Verify signature
+    // 2. Verify signature (using raw secret for HMAC)
     const message = `${args.customerPrivyId}:${args.timeKey}`;
-    if (!verifyHMAC(message, args.signature, derivedSecret)) {
+    if (!verifyHMAC(message, args.signature, QR_SIGNING_SECRET)) {
       throw new Error("Invalid QR signature");
     }
 
     // 3. Verify time key (5-minute validity, 2-minute skew)
-    if (!await verifyTimeKey(args.timeKey, derivedSecret)) {
+    if (!await verifyTimeKey(args.timeKey, derivedSecretBase32)) {
       throw new Error("QR code expired");
     }
 

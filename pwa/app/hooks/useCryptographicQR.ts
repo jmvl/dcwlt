@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useQuery } from 'convex/react';
+import { useAction } from 'convex/react';
 import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import { signHMAC } from '@/src/utils/crypto';
 import { api } from '@/convex/_generated/api';
@@ -35,12 +35,26 @@ export function useCryptographicQR(): UseCryptographicQRReturn {
   const [qrData, setQRData] = useState<QRData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [secretData, setSecretData] = useState<{ derivedSecret: string; signingKey: string } | null>(null);
 
-  // Fetch derived secret from server - NEVER use env var on client!
-  const secretData = useQuery(
-    api.clientQr.getQRSecret,
-    privyId ? { privyId } : 'skip'
-  );
+  // Action to fetch derived secret from server
+  const getQRSecret = useAction(api.clientQr.getQRSecret);
+
+  // Fetch secret when user is available
+  useEffect(() => {
+    if (!privyId) return;
+
+    getQRSecret({ privyId })
+      .then((data) => {
+        setSecretData(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to get QR secret:', err);
+        setError(err.message || 'Failed to get QR secret');
+        setIsLoading(false);
+      });
+  }, [privyId, getQRSecret]);
 
   // Generate QR data
   const generateQR = useCallback(async (): Promise<QRData | null> => {

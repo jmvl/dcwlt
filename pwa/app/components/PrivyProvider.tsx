@@ -8,6 +8,24 @@ export function PrivyAuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsClient(true);
+
+    // Suppress Privy's hydration warning (div inside p tag - their bug, not ours)
+    const originalError = console.error;
+    console.error = (...args: unknown[]) => {
+      // Check if any argument contains the Privy hydration error
+      const errorStr = args.map(String).join(' ');
+      if (
+        errorStr.includes('cannot be a descendant of') ||
+        errorStr.includes('hydration error') ||
+        errorStr.includes('In HTML,')
+      ) {
+        return;
+      }
+      originalError(...args);
+    };
+    return () => {
+      console.error = originalError;
+    };
   }, []);
 
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';

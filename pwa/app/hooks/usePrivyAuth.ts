@@ -11,6 +11,7 @@ export function usePrivyAuth() {
 
   // api.users.createFromPrivy will be undefined during SSR build, but will be available at runtime
   const createUser = useMutation(api.users.createFromPrivy);
+  const migratePrivyId = useMutation(api.users.migratePrivyId);
 
   // Extract user's email address for display
   const userEmail = (user?.linkedAccounts?.find(
@@ -36,12 +37,32 @@ export function usePrivyAuth() {
         createUser({
           walletAddress: solanaWallet.address as string,
           email: email,
+          privyId: user.id, // Pass Privy user ID for QR auth
         });
         // Store user type for session tracking
         storeUserType('user');
       }
     }
   }, [ready, authenticated, createUser]);
+
+  // Migration effect: ensure privyId is set for existing users
+  useEffect(() => {
+    if (ready && authenticated && user && api?.users?.migratePrivyId) {
+      const solanaWallet = user.linkedAccounts?.find(
+        (account: any) => account.type === 'wallet' && account.chainType === 'solana'
+      );
+
+      if (solanaWallet && 'address' in solanaWallet && user.id) {
+        migratePrivyId({
+          walletAddress: solanaWallet.address as string,
+          privyId: user.id,
+        }).catch((err) => {
+          // Silently fail - user might not exist yet
+          console.log('[usePrivyAuth] Migration skipped:', err.message);
+        });
+      }
+    }
+  }, [ready, authenticated, migratePrivyId]);
 
   // Wrap logout to clear stored user type
   const handleLogout = async () => {

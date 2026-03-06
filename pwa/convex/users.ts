@@ -127,4 +127,35 @@ export const createFromPrivy = mutation({
 
     return await ctx.db.get(userId);
   },
-});;
+});
+
+// Migration: Update existing user with privyId
+// Called when a logged-in user doesn't have privyId set
+export const migratePrivyId = mutation({
+  args: {
+    walletAddress: v.string(),
+    privyId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Find user by wallet address
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.walletAddress))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Update privyId if not already set
+    if (!user.privyId) {
+      await ctx.db.patch(user._id, {
+        privyId: args.privyId,
+        lastActiveAt: Date.now(),
+      });
+      return { success: true, updated: true };
+    }
+
+    return { success: true, updated: false, message: "privyId already set" };
+  },
+});
