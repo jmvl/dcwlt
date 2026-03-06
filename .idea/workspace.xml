@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="27cf7d08-4951-41be-af4e-ae84f470ab24" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/@fix_plan.md" beforeDir="false" afterPath="$PROJECT_DIR$/@fix_plan.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PROMPT.md" beforeDir="false" afterPath="$PROJECT_DIR$/PROMPT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-notes.md" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-notes.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/polyfills.ts" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/polyfills.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/config/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/config/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/contexts/Web3AuthContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/contexts/Web3AuthContext.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/navigation/AppNavigator.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/navigation/AppNavigator.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/screens/DashboardScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/screens/DashboardScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/screens/LoginScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/screens/LoginScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/screens/QRScannerScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/screens/QRScannerScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event-wallet/src/utils/solana.ts" beforeDir="false" afterPath="$PROJECT_DIR$/event-wallet/src/utils/solana.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/progress.json" beforeDir="false" afterPath="$PROJECT_DIR$/progress.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/status.json" beforeDir="false" afterPath="$PROJECT_DIR$/status.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="38DpdwVH9nRgiSh8pCPyACKzqDz" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/jm/Codebase/dcwlt&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;templates.modelproviders.configurable&quot;
+  }
+}</component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="27cf7d08-4951-41be-af4e-ae84f470ab24" name="Changes" comment="" />
+      <created>1768344087932</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768344087932</updated>
+    </task>
+    <servers />
+  </component>
+</project>

@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "updated": 1768999350208,
+  "naming": {
+    "exports": {
+      "dominant": "camelCase",
+      "count": 122,
+      "percentage": 63
+    }
+  },
+  "directories": {
+    "components": {
+      "purpose": "UI components",
+      "files": 24
+    },
+    "hooks": {
+      "purpose": "React/custom hooks",
+      "files": 6
+    },
+    "utils": {
+      "purpose": "Utility functions",
+      "files": 5
+    },
+    "convex": {
+      "purpose": "Convex database functions",
+      "files": 16
+    },
+    "admin": {
+      "purpose": "Admin pages",
+      "files": 9
+    },
+    "merchant": {
+      "purpose": "Merchant pages",
+      "files": 7
+    },
+    "dashboard": {
+      "purpose": "Dashboard pages",
+      "files": 8
+    },
+    "api": {
+      "purpose": "API endpoints",
+      "files": 1
+    },
+    "layout": {
+      "purpose": "Layout components",
+      "files": 0
+    },
+    "src": {
+      "purpose": "Source files",
+      "files": 4
+    },
+    "public": {
+      "purpose": "Public assets",
+      "files": 3
+    }
+  },
+  "suffixes": {
+    ".page.tsx": {
+      "purpose": "Next.js page components",
+      "count": 0
+    },
+    ".page.ts": {
+      "purpose": "Next.js page components",
+      "count": 0
+    },
+    ".layout.tsx": {
+      "purpose": "Next.js layout components",
+      "count": 0
+    },
+    ".route.ts": {
+      "purpose": "Next.js API routes",
+      "count": 1
+    },
+    "components/": {
+      "purpose": "Reusable React components",
+      "count": 24
+    },
+    "hooks/": {
+      "purpose": "React hooks",
+      "count": 6
+    },
+    "utils/": {
+      "purpose": "Utility functions",
+      "count": 5
+    },
+    "_generated/": {
+      "purpose": "Generated code",
+      "count": 5
+    },
+    "convex/": {
+      "purpose": "Convex backend functions",
+      "count": 16
+    }
+  }
+}

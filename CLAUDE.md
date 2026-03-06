@@ -2,6 +2,80 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL: ALWAYS CALL `get_context_capsule` FIRST
+
+**This is NON-NEGOTIABLE. Before ANY task, question, or action:**
+
+### The #1 Rule
+
+```
+User asks ANYTHING
+       │
+       ▼
+┌─────────────────────────────────────────┐
+│  CALL get_context_capsule(query) FIRST  │  ← MANDATORY
+└─────────────────────────────────────────┘
+       │
+       ▼
+Then read the pivot files returned
+       │
+       ▼
+Then decide: delegate or proceed
+```
+
+### DO NOT:
+- ❌ Delegate to Explore agent without calling `get_context_capsule` first
+- ❌ Use Grep/Glob/Read to search codebase
+- ❌ Ask questions without context from `get_context_capsule`
+
+### DO:
+- ✅ Call `get_context_capsule("your question")` immediately
+- ✅ Read the pivot files it returns
+- ✅ Use `search_symbols` for specific lookups
+- ✅ Use `search_memory` for past decisions
+
+### Available MCP Tools
+
+| Tool | Description | When to Use |
+|------|-------------|-------------|
+| `get_context_capsule` | Most relevant code for task | **ALWAYS FIRST** |
+| `get_impact_graph` | What breaks if you change a symbol | Before refactoring |
+| `get_skeleton` | Token-efficient file structure | Quick overview |
+| `search_symbols` | Search symbols by name/keyword | Specific lookup |
+| `save_observation` | Persist insights with symbol links | After decisions |
+| `search_memory` | Cross-session memory search | Recall past work |
+| `get_recent_observations` | Recent session observations | Current context |
+| `index_status` | Check indexing statistics | Debugging |
+| `reindex` | Re-index the workspace | After major changes |
+
+### Example: Correct Workflow
+
+```
+User: "How does the payment flow work?"
+
+WRONG:
+  ❌ Delegate to Explore agent
+  ❌ Use Grep/Glob to search files
+
+CORRECT:
+  1. Call get_context_capsule("payment flow merchant user QR scan")
+  2. Read returned pivot files (usePayment, QRCodeGenerator, etc.)
+  3. Summarize findings from the context
+  4. Optionally save observation: "Payment uses gas sponsorship..."
+```
+
+### Session Memory
+
+After making decisions or discoveries, save them:
+```
+save_observation({
+  content: "Payment flow uses gas sponsorship - backend signs as fee payer so users don't need SOL",
+  type: "insight",
+  symbol_fqns: ["usePayment::executePayment", "sponsor-transaction::POST"]
+})
+```
+
+
 ## Project Overview
 
 DCWLT is a **Proof of Concept (POC)** for an Android crypto wallet app demonstrating a complete "Gmail Login → Wallet → Simulated Visa Top-Up → QR Payment" flow using Solana Devnet. This is a multi-service architecture with three separate components.
@@ -30,6 +104,28 @@ The project consists of three independent Node.js projects:
 1. **event-wallet/** - React Native Android app (Expo + TypeScript)
 2. **backend/** - Express server for top-up simulation
 3. **merchant/** - Express server with QR code generator
+
+## Token Implementation Feature Flag
+
+The system supports two token implementations controlled by `NEXT_PUBLIC_USE_DATABASE_TOKENS`:
+
+| Value | Implementation | Use Case |
+|-------|---------------|----------|
+| `true` | Convex database | Instant payments, no gas, recommended for POC |
+| `false` | Solana SPL tokens | Blockchain payments, gas sponsorship required |
+
+**Current default:** Database mode (`true`)
+
+**To switch modes:**
+1. Update `pwa/.env.local`
+2. Restart the dev server
+3. Clear browser cache if needed
+
+**Key files:**
+- `pwa/src/config/tokens.ts` - Feature flag definition
+- `pwa/app/hooks/usePayment.ts` - Feature-flagged payment logic
+- `pwa/app/hooks/useBalance.ts` - Database balance (when flag is true)
+- `pwa/app/hooks/useSolanaBalance.ts` - Solana balance (when flag is false)
 
 ## Project Status
 

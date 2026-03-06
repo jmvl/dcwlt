@@ -1,0 +1,4 @@
+.vercel
+.env*.local
+event-wallet/android/app/build/outputs/apk/
+event-wallet/
