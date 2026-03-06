@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as clientQr from "../clientQr.js";
+import type * as cryptographicQr from "../cryptographicQr.js";
+import type * as cryptographicQrInternal from "../cryptographicQrInternal.js";
 import type * as events from "../events.js";
 import type * as inventory from "../inventory.js";
 import type * as itemGroups from "../itemGroups.js";
@@ -26,6 +29,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  clientQr: typeof clientQr;
+  cryptographicQr: typeof cryptographicQr;
+  cryptographicQrInternal: typeof cryptographicQrInternal;
   events: typeof events;
   inventory: typeof inventory;
   itemGroups: typeof itemGroups;

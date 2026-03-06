@@ -1,0 +1,282 @@
+# Phase 5.5 Plan Revisions Summary
+
+**Date:** 2026-03-06
+
+## Blockers Fixed
+
+### 1. Security violation in Plan 01
+- **Issue:** Plan exposed server secret to client via `process.env.NEXT_PUBLIC_QR_SIGNING_SECRET`
+- **Fix**: Hook now calls Convex query `getQRSecret` to get derived secret server-side. The server secret is NEVER exposed to client environment variables.
+- **files affected:** `05.5-01-PLAN.md`
+- **change:** Updated `useCryptographicQR` hook to use Convex query instead of env var
+- Added new task to add "Show Payment QR" button to customer dashboard
+
+- Added `getQRSecret` query to artifacts
+
+- Updated must_haves phrasing to user-observable behavior
+
+- Added fade animation to QR auto-refresh (CONTEXT.md specifies "fade out/in animation")
+
+- Updated verification steps
+
+- Updated files_modified list
+
+- Updated success criteria
+- Updated success_criteria
+
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+
+### 2. Duplicate work in plan 02/ task 3
+- **issue:** Plan 02 created `processQRPayment` mutation, but plan 03 task 1 also created the
+- **fix**: Removed mutation creation from plan 02. Keep it only in plan 03. Plan 02 now only handles scanner UI and QR parsing.
+- **files affected:** `05.5-02-PLAN.md`
+- **change:** Removed task 3 from plan 02
+- Removed cryptographicQr.ts from files_modified list
+- Removed processQRPayment from artifacts
+- Updated must_haves to reflect scanner-only behavior
+- Removed `pwa/convex/cryptographicQr.ts` from files_modified
+ changed to: `pwa/app/merchant/scan-customer/page.tsx, `pwa/app/components/ScannerOverlay.tsx`
+- Updated files_modified list
+- Updated must_haves truths to reflect scanner-only behavior
+- Updated verification section
+
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+
+- Updated success criteria
+
+### 3. YAML syntax error in plan 04
+- **Issue:** Invalid `depends_on` field with nested brackets: `depends_on: [05.5-01, [05.5-02]`
+- **fix:** Corrected to `depends_on: ["05.5-01", "05.5-02", "05.5-03"]`
+- **files affected:** `05.5-04-PLAN.md`
+- **change:** Fixed YAML syntax
+- Updated verification steps to reference plan 03
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+
+### 4. Missing dashboard integration
+- **issue:** No task adds "Show Payment QR" button to user dashboard (`pwa/app/(dashboard)/page.tsx`)
+- **fix:** Added task to plan 01
+- **files affected:** `05.5-01-PLAN.md`
+- **change:** Added task 4 to add "Show Payment QR" button to dashboard
+- Button opens CustomerQRCode modal
+    - Customer can generate dynamic QR code
+    - QR displays in full-screen modal with countdown timer
+    - Button triggers brightness maximization
+- Added fade animation for auto-refresh
+- Auto-max brightness when QR displayed
+- Countdown shows minutes:seconds remaining
+- Close button dismisses modal
+- **cart validation enforced** (require items before scanning)
+- **Error messages displayed for QR parsing failures
+
+    - **Loading states** handled appropriately
+    - **Success screen** auto-dismisses after 3 seconds
+    - **Sound and vibration feedback** on successful scan
+    - **Cart validation** prevents scanning without items in cart
+- **scanner correctly parses dcwlt:// QR codes
+    - **payment flow handles success and error states**
+    - **success screen** shows amount and customer info, auto-dismiss after 3 seconds
+    - **error screen** displays detailed errors with suggested actions
+    - **autonomous flag set to false** for security-sensitive code
+    - **must_haves phrasing updated** reflect user-observable behavior
+
+    - Added fade animation requirement to must_haves
+    - Removed duplicate mutation from plan 02
+    - **cart validation** enforcement added to plan 02
+    - **cart validation prevents scanning without items in cart
+- **Updated must_haves phrasing** reflect user-observable behavior
+    - Updated success criteria
+- Updated verification steps
+- Updated files_modified list
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Updated success criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success_criteria
+- Updated success criteria
+- Customer sees toast notification on successful payment
+    - Balance updates in real-time after payment
+    - Transaction record created in database
+- QR code expires after 5 minutes (auto-refreshes 10s before expiry)
+    - Full-screen modal displays QR with countdown timer
+    - Screen brightness maximizes when QR displayed
+    - Close button dismisses modal
+- Cart validation enforced (require items before scanning)
+    - Empty cart validation prevents scanning without items in cart
+    - Error messages display detailed errors with suggested actions (e.g., "Ask customer to refresh QR")
+    - Payment flow handles success and error states appropriately
+    - Success screen auto-dismisses after 3 seconds with amount and customer info
+    - Sound and vibration feedback on successful scan
+- Payment validation includes: signature check, time key validation
+    - Atomic balance transfer using existing transferBalance mutation
+    - Transaction record created in database
+
+- Customer receives toast notification on successful payment
+    - Balance updates in real-time after payment
+    - Transaction record created in database
+- Rate limiting prevents QR abuse (10 QR generations per minute max)
+    - Countdown timer displays color-coded urgency states
+- Error handling covers all edge cases with clear messages

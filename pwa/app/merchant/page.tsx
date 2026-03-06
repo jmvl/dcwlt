@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useMerchantAuth } from '../components/MerchantAuthProvider';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -10,10 +12,44 @@ import {
   MapPin,
   Package,
   TrendingUp,
+  QrCode,
 } from 'lucide-react';
 
 export default function MerchantDashboard() {
   const { merchant } = useMerchantAuth();
+  const [cartTotal, setCartTotal] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  // Check cart status from localStorage
+  useEffect(() => {
+    const checkCart = () => {
+      try {
+        const storedCart = localStorage.getItem('merchantCart');
+        if (storedCart) {
+          const cart = JSON.parse(storedCart);
+          const items = cart.items || [];
+          setCartItemCount(items.length);
+          const total = items.reduce(
+            (sum: number, item: { price: number; quantity: number }) =>
+              sum + item.price * item.quantity,
+            0
+          );
+          setCartTotal(total);
+        } else {
+          setCartTotal(0);
+          setCartItemCount(0);
+        }
+      } catch {
+        setCartTotal(0);
+        setCartItemCount(0);
+      }
+    };
+
+    checkCart();
+    // Listen for storage changes (in case cart is updated in another tab)
+    window.addEventListener('storage', checkCart);
+    return () => window.removeEventListener('storage', checkCart);
+  }, []);
 
   // Get merchant's wallet balance
   const wallet = useQuery(
@@ -51,6 +87,45 @@ export default function MerchantDashboard() {
         <p className="text-[#9db0b9] mt-1">
           Welcome back, {merchant?.businessName || 'Merchant'}
         </p>
+      </div>
+
+      {/* Scan Customer QR Button */}
+      <div className="bg-[#1a2f38] rounded-lg p-6 border border-[#1a2f38]">
+        {cartItemCount > 0 ? (
+          <Link
+            href="/merchant/scan-customer"
+            className="flex items-center justify-between w-full group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                <QrCode className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white group-hover:text-[#13a4ec] transition-colors">
+                  Scan Customer QR
+                </h2>
+                <p className="text-sm text-[#9db0b9]">
+                  {cartItemCount} item{cartItemCount !== 1 ? 's' : ''} in cart • {cartTotal} EVT total
+                </p>
+              </div>
+            </div>
+            <div className="text-[#13a4ec] group-hover:translate-x-1 transition-transform">
+              →
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-4 opacity-50">
+            <div className="w-12 h-12 rounded-full bg-[#2d4452] flex items-center justify-center">
+              <QrCode className="w-6 h-6 text-[#9db0b9]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-[#9db0b9]">Scan Customer QR</h2>
+              <p className="text-sm text-[#9db0b9]">
+                Add items to cart first to accept payments
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Business Info Card */}

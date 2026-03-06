@@ -22,7 +22,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4.2: User App Payment Workflow UX** - Mobile-responsive payment confirmation, merchant name display, countdown removal (INSERTED)
 - [x] **Phase 4.3: User Dashboard UX** - Complete user dashboard with balance card, recent activities, navigation (INSERTED)
 - [x] **Phase 4.4: Dashboard Visual Refactor** - Visual polish to match design reference (INSERTED)
-- [x] **Phase 5: Database Token Refactor** - Remove Solana SPL token, use Convex for balances (NEW) ✓ 2026-03-03
+- [x] **Phase 5: Database Token Refactor** - Remove Solana SPL token, use Convex for balances ✓ 2026-03-04
+- [ ] **Phase 5.5: Cryptographic QR Payment** - Client-generated QR, merchant scans (INSERTED)
 - [ ] **Phase 6: History + Offline** - Transaction history, offline support
 
 ## Phase Details
@@ -248,9 +249,33 @@ Plans:
 - [x] 05-01: Add balance field to wallets table, migrate existing balances from Solana
 - [x] 05-02: Refactor usePayment hook to use Convex mutations instead of Solana transactions
 - [x] 05-03: Simplify QR code format - remove spl-token parameter
-- [ ] 05-04: Update top-up flow to update database balance instead of SPL token transfer
-- [ ] 05-05: Remove gas sponsorship backend and Solana dependencies
-- [ ] 05-06: Update Privy config to disable embedded Solana wallet
+- [x] 05-04: Update top-up flow to update database balance instead of SPL token transfer
+- [x] 05-05: Remove gas sponsorship backend and Solana dependencies
+- [x] 05-06: Update Privy config to disable embedded Solana wallet
+
+### Phase 5.5: Cryptographic QR Payment (INSERTED)
+
+**Goal**: Reverse payment flow - Client generates dynamic cryptographic QR code, Merchant scans to receive payment
+**Depends on**: Phase 5 (database token system must be stable)
+**Requirements**: CRYPTO-QR-01, CRYPTO-QR-02, CRYPTO-QR-03, CRYPTO-QR-04, CRYPTO-QR-05, CRYPTO-QR-06
+**Success Criteria** (what must be TRUE):
+
+1. Client PWA generates a dynamic QR code containing a derived cryptographic key
+2. QR code contains minimal data (simplified format for fast scanning)
+3. Merchant app can scan client QR codes
+4. Payment completes when merchant scans client's QR code
+5. Cryptographic key derivation ensures payment security
+6. No merchant-displayed QR codes needed (flow is reversed)
+   **Research**: Likely (cryptographic key derivation, secure payment tokens, QR code payload design)
+   **Research topics**: HMAC-based payment tokens, time-based QR codes, merchant scanner UX
+   **Plans**: TBD
+
+Plans:
+
+- [ ] 05.5-01: Client cryptographic key derivation and QR generation
+- [ ] 05.5-02: Merchant QR scanner implementation
+- [ ] 05.5-03: Payment verification and execution flow
+- [ ] 05.5-04: Security validation and edge cases
 
 ### Phase 6: History + Offline
 
@@ -279,7 +304,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5 → 5.5 → 6
 
 Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding integers (3 → 3.5 → 4 → 4.1 → 4.2 → 4.3 → 4.4 → 5 → 6).
 
@@ -294,5 +319,6 @@ Decimal phases (like 3.5, 4.1, 4.2, 4.3, 4.4) execute between their surrounding 
 | 4.2. User App Payment Workflow UX      | 1/1            | Complete    | 2026-01-20 |
 | 4.3. User Dashboard UX                 | 3/3            | Complete    | 2026-01-20 |
 | 4.4. Dashboard Visual Refactor         | 4/4            | Complete    | 2026-01-20 |
-| 5. Database Token Refactor             | 3/6            | In Progress | —          |
+| 5. Database Token Refactor             | 6/6            | Complete    | 2026-03-04 |
+| 5.5. Cryptographic QR Payment          | 0/4            | Pending     | —          |
 | 6. History + Offline                   | 0/5            | Pending     | —          |
